@@ -13,7 +13,10 @@ $nama = $_SESSION['nama_lengkap'];
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard Admin | IT-RSPI</title>
     <link rel="icon" href="../assets/img/icon.png">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Google Font: Source Sans Pro -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+	<!-- Ionicons -->
+	<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="stylesheet" href="../assets/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="../assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="../assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
@@ -49,7 +52,10 @@ $nama = $_SESSION['nama_lengkap'];
         <div class="sidebar">
             <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                 <div class="image">
-                    <img src="../assets/img/icon.png" class="img-circle elevation-2" alt="User Image">
+                    <?php
+                        $foto = isset($_SESSION['foto']) && $_SESSION['foto'] ? $_SESSION['foto'] : 'default-user.png';
+                    ?>
+                    <img src="../assets/img/<?= htmlspecialchars($foto) ?>" class="img-circle elevation-2" alt="User Image" style="width: 47px; height: 52px; object-fit: cover;">
                 </div>
                 <div class="info ml-2">
                     <a href="#" class="d-block"><?php echo htmlspecialchars($nama); ?></a>

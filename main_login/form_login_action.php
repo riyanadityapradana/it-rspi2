@@ -30,7 +30,7 @@ if ($row = $result->fetch_assoc()) {
         header('Location: ../admin/dashboard_admin.php');
         exit();
     } elseif ($row['role'] === 'Staff') {
-        header('Location: ../staff/dashboard_staff.php');
+        header('Location: ../staff/dashboard_staff.php?unit=beranda');
         exit();
     } else {
         header('Location: form_login.php?error=Role user tidak dikenali');

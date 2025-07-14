@@ -1,10 +1,16 @@
 <?php
 session_start();
+require_once("../config/koneksi.php");
 if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'Staff') {
     header('Location: ../main_login/form_login.php?error=Akses ditolak!');
     exit;
 }
-$nama = $_SESSION['nama_lengkap'];
+if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
+ob_start();
+$id 	= $_SESSION['id_user'];
+	$query 	= "SELECT * FROM tb_user WHERE id_user = '$id'";
+	$admin 	= mysqli_fetch_array(mysqli_query($config, $query));
+	$nama 	= $admin['nama_lengkap'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -13,7 +19,10 @@ $nama = $_SESSION['nama_lengkap'];
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard Staff | IT-RSPI</title>
     <link rel="icon" href="../assets/img/icon.png">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Google Font: Source Sans Pro -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+	<!-- Ionicons -->
+	<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="stylesheet" href="../assets/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="../assets/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
@@ -36,28 +45,99 @@ $nama = $_SESSION['nama_lengkap'];
             </li>
         </ul>
     </nav>
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="#" class="brand-link" style="background:#800000">
+    <aside class="main-sidebar sidebar-dark-primary elevation-4" style="background:rgb(217, 221, 224, 1)">
+        <a href="dashboard_staff.php?unit=beranda" class="brand-link" style="background:rgb(129, 2, 0, 1)">
             <img src="../assets/img/icon.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
             <span class="brand-text font-weight-light">IT - RSPI</span>
         </a>
         <div class="sidebar">
             <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                 <div class="image">
-                    <img src="../assets/img/icon.png" class="img-circle elevation-2" alt="User Image">
+                    <?php
+                        $foto = isset($_SESSION['foto']) && $_SESSION['foto'] ? $_SESSION['foto'] : 'default-user.png';
+                    ?>
+                    <img src="../assets/img/<?= htmlspecialchars($foto) ?>" class="img-circle elevation-2" alt="User Image" style="width: 47px; height: 52px; object-fit: cover;">
                 </div>
                 <div class="info ml-2">
-                    <a href="#" class="d-block"><?php echo htmlspecialchars($nama); ?></a>
-                    <span class="text-muted small">Staff</span>
+                    <a href="#" class="d-block" style="color: black;"><?php echo htmlspecialchars($nama); ?></a>
+                    <span class="text-muted small">STAFF IT</span>
                 </div>
             </div>
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                     <li class="nav-item menu-open">
-                        <a href="#" class="nav-link active">
+                        <a href="dashboard_staff.php?unit=beranda" class="nav-link active">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>Dashboard</p>
                         </a>
+                    </li>
+                    <?php if ($_SESSION['id_user'] == '5' || $_SESSION['id_user'] == '6'): ?> 
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fab fa-whatsapp" style="color: green;"></i><p style="color: black;">Grafik Pi-Care<i class="fas fa-angle-left right" style="color: black;"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="dashboard_staff.php?unit=daftar" class="nav-link">
+                                    <i class="nav-icon fas fa-caret-right" style="color: black;"></i><p style="color: black;">PENDAFTARAN</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="dashboard_staff.php?unit=batal" class="nav-link">
+                                    <i class="nav-icon fas fa-caret-right" style="color: black;"></i><p style="color: black;">PEMBATALAN</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="dashboard_staff.php?unit=alasan" class="nav-link">
+                                    <i class="nav-icon fas fa-caret-right" style="color: black;"></i><p style="color: black;">ALASAN PEMBATALAN</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-folder" style="color: black;"></i>
+                            <p style="color: black;">Master Data <i class="right fas fa-angle-left" style="color: black;"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="dashboard_staff.php?unit=logbook" class="nav-link">
+                                    <i class="nav-icon fas fa-book" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Logbook</p>
+                                </a>
+                                <a href="dashboard_staff.php?unit=lembur" class="nav-link">
+                                    <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Data Lembur</p>
+                                </a>
+                                <a href="dashboard_staff.php?unit=remote" class="nav-link">
+                                    <i class="nav-icon fas fa-laptop" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Remote Desktop</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-folder" style="color: black;"></i>
+                            <p style="color: black;">Master Barang <i class="right fas fa-angle-left" style="color: black;"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="dashboard_staff.php?unit=logbook" class="nav-link">
+                                    <i class="nav-icon fas fa-book" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Logbook</p>
+                                </a>
+                                <a href="dashboard_staff.php?unit=lembur" class="nav-link">
+                                    <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Data Lembur</p>
+                                </a>
+                                <a href="dashboard_staff.php?unit=remote" class="nav-link">
+                                    <i class="nav-icon fas fa-laptop" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Remote Desktop</p>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </nav>
@@ -66,10 +146,25 @@ $nama = $_SESSION['nama_lengkap'];
     <div class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
-              <?php require 'content.php'; ?>
+              <?php require_once ("content.php");?>
             </div>
         </div>
     </div>
+    <!--Modal logout -->
+    <div id="modallogout" class="modal fade" role="dialog">
+        <div class="modal-dialog" align="center">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form method="POST" action="logout.php">
+                        <strong>Anda yakin ingin Logout Dari Aplikasi ?&nbsp;&nbsp;</strong>
+                        <input type="submit" name="logout" class="btn btn-danger" style="width: 60px" value="Ya">
+                        <button type="button" class="btn btn-warning" data-dismiss="modal" style="width: 60px">Batal</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Akhir Modal logout -->
 </div>
 <script src="../assets/plugins/jquery/jquery.min.js"></script>
 <script src="../assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
