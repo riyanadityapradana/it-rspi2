@@ -1,3 +1,49 @@
+<?php
+// Aktifkan error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Koneksi database
+require_once '../config/koneksi.php';
+if (!$config) {
+    die('Koneksi gagal: ' . mysqli_connect_error());
+}
+
+// Proses register
+$error = $success = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nama_lengkap = trim($_POST['nama_lengkap'] ?? '');
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $no_hp = trim($_POST['no_hp'] ?? '');
+
+    if ($nama_lengkap === '' || $username === '' || $password === '' || $no_hp === '') {
+        $error = 'Semua field wajib diisi!';
+    } else {
+        $cek = mysqli_query($config, "SELECT id_calon FROM tb_calon WHERE username='$username'");
+        if (!$cek) {
+            $error = 'Query error: ' . mysqli_error($config);
+        } elseif (mysqli_num_rows($cek) > 0) {
+            $error = 'Username sudah terdaftar!';
+        } else {
+            $password_hash = password_hash($password, PASSWORD_DEFAULT);
+            $sql = "INSERT INTO tb_calon (nama_lengkap, username, password, no_hp, status, created_at, updated_at) VALUES (?,?,?,?, 'belum tes', NOW(), NOW())";
+            $stmt = mysqli_prepare($config, $sql);
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, 'ssss', $nama_lengkap, $username, $password_hash, $no_hp);
+                if (mysqli_stmt_execute($stmt)) {
+                    $success = 'Registrasi berhasil! Silakan login.';
+                } else {
+                    $error = 'Gagal menyimpan data: ' . mysqli_stmt_error($stmt);
+                }
+                mysqli_stmt_close($stmt);
+            } else {
+                $error = 'Gagal menyiapkan query: ' . mysqli_error($config);
+            }
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -163,177 +209,58 @@
 </head>
 <body class="hold-transition login-page">
 <div class="login-box">
-  <div class="card card-outline card-primary">
-    <div class="card-header text-center">
+  <div class="card card-outline card-primary" style="max-width:320px; margin:auto;">
+    <div class="card-header text-center position-relative">
       <a href="#" class="h1"><b>IT -</b> RSPI</a>
+      <a href="form_login.php" style="position:absolute; top:5px; right:18px; color:#000000; font-size:2rem; text-decoration:none; z-index:2;" title="Tutup"><span aria-hidden="true">&times;</span></a>
     </div>
     <div class="card-body">
       <?php if (!empty($error)): ?>
         <div class="alert alert-danger" style="font-size:1.1em;"><i class="fas fa-exclamation-triangle"></i> <?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
       <?php if (!empty($success)): ?>
-        <!-- Modal Success -->
-        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content" style="border-radius:18px;">
-              <div class="modal-header bg-success" style="border-top-left-radius:18px;border-top-right-radius:18px;">
-                <h5 class="modal-title text-white" id="successModalLabel"><i class="fas fa-check-circle"></i> Berhasil!</h5>
-              </div>
-              <div class="modal-body text-center" style="font-size:1.2em;">
-                <?= htmlspecialchars($success) ?><br><br>
-                <span style="font-size:0.9em;color:#888;">Anda akan diarahkan ke halaman login...</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="alert alert-success" style="font-size:1.1em;"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($success) ?></div>
       <?php endif; ?>
       <p class="login-box-msg">Register Calon Karyawan IT - Rumah Sakit Pelita Insani</p>
       <form action="#" method="post">
-        <!-- Data Pribadi -->
         <div class="form-section">
-          <div class="section-title"><i class="fas fa-user"></i> Data Pribadi</div>
+          <div class="section-title"><i class="fas fa-user"></i> Data Calon Karyawan</div>
           <div class="row">
-            <div class="col-md-6 col-12 pr-md-1">
-              <div class="input-group mb-3">
+            <div class="col-12 mb-2">
+              <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-id-card"></span>
-                  </div>
+                  <div class="input-group-text"><span class="fas fa-user"></span></div>
                 </div>
-                <input type="text" class="form-control" placeholder="NIK" name="nik" maxlength="20" required pattern="\d+" title="NIK harus berupa angka">
+                <input type="text" class="form-control" placeholder="Nama Lengkap" name="nama_lengkap" maxlength="100" required style="height:34px; font-size:1em;">
               </div>
             </div>
-            <div class="col-md-6 col-12 pl-md-1">
-              <div class="input-group mb-3">
+            <div class="col-12 mb-2">
+              <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-user"></span>
-                  </div>
+                  <div class="input-group-text"><span class="fas fa-user-circle"></span></div>
                 </div>
-                <input type="text" class="form-control" placeholder="Nama Lengkap" name="nama_lengkap" maxlength="100" required>
+                <input type="text" class="form-control" placeholder="Username" name="username" maxlength="50" required style="height:34px; font-size:1em;">
               </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6 col-12 pr-md-1">
-              <div class="input-group mb-3">
+            <div class="col-12 mb-2">
+              <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-envelope"></span>
-                  </div>
+                  <div class="input-group-text"><span class="fas fa-lock"></span></div>
                 </div>
-                <input type="email" class="form-control" placeholder="Email" name="email" maxlength="100" required>
+                <input type="password" class="form-control" placeholder="Password" name="password" maxlength="255" required style="height:34px; font-size:1em;">
               </div>
             </div>
-            <div class="col-md-6 col-12 pl-md-1">
-              <div class="input-group mb-3">
+            <div class="col-12 mb-3">
+              <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-phone"></span>
-                  </div>
+                  <div class="input-group-text"><span class="fas fa-phone"></span></div>
                 </div>
-                <input type="text" class="form-control" placeholder="No. HP" name="no_hp" maxlength="15" required>
+                <input type="text" class="form-control" placeholder="No. Telpon" name="no_hp" maxlength="20" required style="height:34px; font-size:1em;">
               </div>
             </div>
-          </div>
-          <div class="row">
             <div class="col-12">
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-map-marker-alt"></span>
-                  </div>
-                </div>
-                <textarea class="form-control" placeholder="Alamat Lengkap" name="alamat" rows="3"></textarea>
-              </div>
+              <button type="submit" class="btn btn-primary btn-block" style="height:36px; font-size:1em; border-radius:7px;">Daftar</button>
             </div>
-          </div>
-        </div>
-
-        <!-- Data Pendidikan -->
-        <div class="form-section">
-          <div class="section-title"><i class="fas fa-graduation-cap"></i> Data Pendidikan</div>
-          <div class="row">
-            <div class="col-md-6 col-12 pr-md-1">
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-university"></span>
-                  </div>
-                </div>
-                <select class="form-control" name="pendidikan_terakhir">
-                  <option value="">Pilih Pendidikan Terakhir</option>
-
-                </select>
-              </div>
-            </div>
-            <div class="col-md-6 col-12 pl-md-1">
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-book"></span>
-                  </div>
-                </div>
-                <input type="text" class="form-control" placeholder="Jurusan" name="jurusan" maxlength="100">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Data Pekerjaan -->
-        <div class="form-section">
-          <div class="section-title"><i class="fas fa-briefcase"></i> Data Pekerjaan</div>
-          <div class="row">
-            <div class="col-md-6 col-12 pr-md-1">
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-code"></span>
-                  </div>
-                </div>
-                <select class="form-control" name="id_kategori" required>
-                  <option value="">Pilih Kategori Posisi</option>
-                  <?php foreach ($kategori_posisi as $kat): ?>
-                    <option>
-    
-                    </option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-6 col-12 pl-md-1">
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-user-tie"></span>
-                  </div>
-                </div>
-                <input type="text" class="form-control" placeholder="Posisi yang Dilamar" name="posisi_dilamar" maxlength="100" required>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <span class="fas fa-history"></span>
-                  </div>
-                </div>
-                <textarea class="form-control" placeholder="Pengalaman Kerja (Opsional)" name="pengalaman_kerja" rows="3"></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary btn-block">Daftar Sebagai Calon Karyawan IT</button>
-          </div>
-        </div>
-        <div class="row mt-3">
-          <div class="col-12 text-center">
-            <a href="form_login.php">Kembali ke Login</a>
           </div>
         </div>
       </form>

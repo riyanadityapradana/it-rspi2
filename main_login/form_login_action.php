@@ -40,22 +40,26 @@ if ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 // Cek ke tb_calon (username/email dan password)
-$stmt2 = $config->prepare("SELECT * FROM tb_calon WHERE (username = ? OR email = ?) AND password = ? LIMIT 1");
-$stmt2->bind_param('sss', $username, $username, $password);
+$stmt2 = $config->prepare("SELECT * FROM tb_calon WHERE (username = ? OR email = ?) LIMIT 1");
+$stmt2->bind_param('ss', $username, $username);
 $stmt2->execute();
 $result2 = $stmt2->get_result();
 
 if ($row2 = $result2->fetch_assoc()) {
-    // Login calon karyawan
-    $_SESSION['id_calon'] = $row2['id_calon'];
-    $_SESSION['username'] = $row2['username'];
-    $_SESSION['nama_lengkap'] = $row2['nama_lengkap'];
-    $_SESSION['login_type'] = 'calon';
-    header('Location: ../calon-karyawan/dashboard_calon.php');
-    exit();
+    // Verifikasi password hash
+    if (password_verify($password, $row2['password'])) {
+        // Login calon karyawan
+        $_SESSION['id_calon'] = $row2['id_calon'];
+        $_SESSION['username'] = $row2['username'];
+        $_SESSION['nama_lengkap'] = $row2['nama_lengkap'];
+        $_SESSION['login_type'] = 'calon';
+        header('Location: ../calon-karyawan/dashboard_calon.php?unit=beranda');
+        exit();
+    }
 }
 $stmt2->close();
 
 // Jika tidak ditemukan di kedua tabel
 header('Location: form_login.php?error=Username/email atau password salah');
 exit();
+

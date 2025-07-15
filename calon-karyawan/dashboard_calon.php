@@ -1,10 +1,17 @@
 <?php
 session_start();
+require_once '../config/koneksi.php'; // Tambahkan baris ini!
+
 if (!isset($_SESSION['id_calon']) || !isset($_SESSION['login_type']) || $_SESSION['login_type'] !== 'calon') {
     header('Location: ../main_login/form_login.php?error=Akses ditolak!');
     exit;
 }
-$nama = $_SESSION['nama_lengkap'];
+if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
+ob_start();
+$id 	= $_SESSION['id_calon'];
+$query 	= "SELECT * FROM tb_calon WHERE id_calon = '$id'";
+$admin 	= mysqli_fetch_array(mysqli_query($config, $query));
+$nama 	= $admin['nama_lengkap'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -59,6 +66,12 @@ $nama = $_SESSION['nama_lengkap'];
                             <p>Dashboard</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="dashboard_calon.php?unit=cv_user" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Lengkapi Data</p>
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -66,10 +79,26 @@ $nama = $_SESSION['nama_lengkap'];
     <div class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
-              <?php require 'content.php'; ?>
+              <?php require_once ("content.php");?>
             </div>
         </div>
     </div>
+</div>
+<!-- Modal Lengkapi Data -->
+<div class="modal fade" id="modalLengkapiData" tabindex="-1" role="dialog" aria-labelledby="modalLengkapiDataLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLengkapiDataLabel">Lengkapi Data User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modalLengkapiDataBody">
+        <!-- Form akan dimuat di sini -->
+      </div>
+    </div>
+  </div>
 </div>
 <script src="../assets/plugins/jquery/jquery.min.js"></script>
 <script src="../assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -110,6 +139,18 @@ $(document).ready(function() {
             }
         }
     });
+});
+</script>
+<script>
+$(document).ready(function(){
+  $(document).on('click', 'a[href*="unit=cv_user"]', function(e){
+    e.preventDefault();
+    $('#modalLengkapiDataBody').html('<div class="text-center p-4"><i class="fa fa-spinner fa-spin fa-2x"></i> Loading...</div>');
+    $('#modalLengkapiData').modal('show');
+    $.get('unit/cv_user.php', function(data){
+      $('#modalLengkapiDataBody').html(data);
+    });
+  });
 });
 </script>
 </body>
