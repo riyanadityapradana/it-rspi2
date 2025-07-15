@@ -24,10 +24,15 @@ $id 	= $_SESSION['id_user'];
 	<!-- Ionicons -->
 	<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="stylesheet" href="../assets/plugins/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="../assets/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="../assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="../assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="../assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <link rel="stylesheet" href="../assets/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="../assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/plugins/toastr/toastr.css">
+    <link rel="stylesheet" href="../assets/dist/css/adminlte.min.css">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -104,7 +109,7 @@ $id 	= $_SESSION['id_user'];
                             <li class="nav-item">
                                 <a href="dashboard_staff.php?unit=logbook" class="nav-link">
                                     <i class="nav-icon fas fa-book" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Logbook</p>
+                                    <p style="font-size: 14px; color: black;">Data Logbook</p>
                                 </a>
                                 <a href="dashboard_staff.php?unit=lembur" class="nav-link">
                                     <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
@@ -124,17 +129,13 @@ $id 	= $_SESSION['id_user'];
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="dashboard_staff.php?unit=logbook" class="nav-link">
+                                <a href="dashboard_staff.php?unit=barang" class="nav-link">
                                     <i class="nav-icon fas fa-book" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Logbook</p>
+                                    <p style="font-size: 14px; color: black;">Data Barang</p>
                                 </a>
-                                <a href="dashboard_staff.php?unit=lembur" class="nav-link">
+                                <a href="dashboard_staff.php?unit=pengajuan" class="nav-link">
                                     <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Data Lembur</p>
-                                </a>
-                                <a href="dashboard_staff.php?unit=remote" class="nav-link">
-                                    <i class="nav-icon fas fa-laptop" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Remote Desktop</p>
+                                    <p style="font-size: 14px; color: black;">Pengajuan Barang</p>
                                 </a>
                             </li>
                         </ul>
@@ -166,15 +167,50 @@ $id 	= $_SESSION['id_user'];
     </div>
     <!-- Akhir Modal logout -->
 </div>
+<footer class="main-footer" style="position:fixed;bottom:0;width:100%;background:#222;color:#fff;z-index:9999;padding:0;">
+  <div style="overflow:hidden;white-space:nowrap;">
+    <marquee behavior="scroll" direction="left" scrollamount="6" style="font-size:16px;padding:8px 0;">
+      &copy; <?= date('Y') ?> IT-RSPI | Sistem Informasi Teknologi RSPI. Dikembangkan dengan ❤️ oleh Tim IT-RSPI. Seluruh hak cipta dilindungi undang-undang.
+    </marquee>
+  </div>
+</footer>
+<!-- Toastr Success Message -->
+<?php if (isset($_GET['msg'])): ?>
+  <script>
+    toastr.success("<?= addslashes($_GET['msg']) ?>", "Sukses", {positionClass: "toast-top-right"});
+  </script>
+<?php endif; ?>
 <script src="../assets/plugins/jquery/jquery.min.js"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="../assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+  $.widget.bridge('uibutton', $.ui.button)
+</script>
 <script src="../assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/dist/js/adminlte.min.js"></script>
+<!-- Select2 -->
+<script src="../assets/plugins/select2/js/select2.full.min.js"></script>
+<!-- Bootstrap4 Duallistbox -->
+<script src="../assets/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+<!-- InputMask -->
+<script src="../assets/plugins/moment/moment.min.js"></script>
+<script src="../assets/plugins/inputmask/jquery.inputmask.min.js"></script>
+
 <script src="../assets/plugins/datatables/jquery.dataTables.min.js"></script>
 <script src="../assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
 <script src="../assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
 <script src="../assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
 <script src="../assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
 <script src="../assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+<script src="../assets/plugins/toastr/toastr.min.js"></script>
+<script src="../assets/dist/js/adminlte.min.js"></script>
+
+<script>
+    $(function() {
+    $('.select2').select2();
+    $('.select2bs4').select2({ theme: 'bootstrap4' });
+    });
+</script>
 <script type="text/javascript">
 $(document).ready(function() {
     $('#example1').DataTable({
@@ -205,6 +241,15 @@ $(document).ready(function() {
             }
         }
     });
+    // Toastr notification
+    <?php if(isset($_GET['msg'])): ?>
+        toastr.options = {"positionClass": "toast-top-right", "timeOut": "3000"};
+        toastr.success("<?= htmlspecialchars($_GET['msg']) ?>");
+    <?php endif; ?>
+    <?php if(isset($_GET['err'])): ?>
+        toastr.options = {"positionClass": "toast-top-right", "timeOut": "3000"};
+        toastr.error("<?= htmlspecialchars($_GET['err']) ?>");
+    <?php endif; ?>
 });
 </script>
 </body>

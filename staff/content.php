@@ -3,6 +3,32 @@
 if ($_GET['unit'] == "beranda"){
   require_once("unit/beranda.php");
 }
+// Barang
+else if ($_GET['unit'] == "barang"){
+  require_once("unit/barang/barang.php");
+}
+else if ($_GET['unit'] == "create_barang"){
+  require_once("unit/barang/create.php");
+}
+else if ($_GET['unit'] == "update_barang"){
+  require_once("unit/barang/update.php");
+}
+else if ($_GET['unit'] == "delete_barang"){
+  require_once("unit/barang/delete.php");
+}
+// PengajuanBarang
+else if ($_GET['unit'] == "pengajuan"){
+  require_once("unit/pengajuan/pengajuan.php");
+}
+else if ($_GET['unit'] == "create_pengajuan"){
+  require_once("unit/pengajuan/create.php");
+}
+else if ($_GET['unit'] == "update_pengajuan"){
+  require_once("unit/pengajuan/update.php");
+}
+else if ($_GET['unit'] == "delete_pengajuan"){
+  require_once("unit/pengajuan/delete.php");
+}
 // Logbook kegiatan harian
 else if ($_GET['unit'] == "logbook"){
   require_once("unit/logbook/logbook.php");

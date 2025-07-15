@@ -58,7 +58,20 @@
 							<td><?= $data['nama_lengkap'] ?></td>
 							<td><?= $data['role'] ?></td>
 							<td><?= date('d-m-Y', strtotime($data['tanggal_lembur'])) ?></td>
-							<td><?= $data['status_lembur'] ?></td>
+							<td>
+<?php
+    $status = $data['status_lembur'];
+    if ($status == 'Menunggu') {
+        echo '<span class="badge badge-warning" style="font-size:1em;">' . $status . '</span>';
+    } elseif ($status == 'Diterima') {
+        echo '<span class="badge badge-success" style="font-size:1em;">' . $status . '</span>';
+    } elseif ($status == 'Ditolak') {
+        echo '<span class="badge badge-danger" style="font-size:1em;">' . $status . '</span>';
+    } else {
+        echo '<span class="badge badge-secondary" style="font-size:1em;">' . $status . '</span>';
+    }
+?>
+</td>
 							<td align="center">
 								<?php if ($data['status_lembur'] == 'Menunggu') : ?>
 									<a href="?unit=detail_lembur&id=<?= $data['id_lembur'] ?>" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Detail</a>

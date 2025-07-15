@@ -7,7 +7,7 @@
 	$id_lembur = $_GET['id'];
 
 	// Ambil data lembur
-	$queryLembur = mysqli_query($config, "SELECT l.*, s.nama_lengkap, level FROM tb_lembur l 
+	$queryLembur = mysqli_query($config, "SELECT l.*, s.nama_lengkap, s.nip, s.role FROM tb_lembur l 
 		LEFT JOIN tb_user s ON l.id_staff = s.id_user
 		WHERE l.id_lembur = '$id_lembur'");
 	$dataLembur = mysqli_fetch_assoc($queryLembur);
@@ -18,7 +18,7 @@
 	// Jika sudah dikonfirmasi, ambil info pimpinan
 	$dataPimpinan = null;
 	if (!empty($dataLembur['id_pimpinan'])) {
-		$queryPimpinan = mysqli_query($config, "SELECT nama_lengkap, level FROM tb_user WHERE id_user = '{$dataLembur['id_pimpinan']}'");
+		$queryPimpinan = mysqli_query($config, "SELECT nama_lengkap, role FROM tb_user WHERE id_user = '{$dataLembur['id_pimpinan']}'");
 		$dataPimpinan = mysqli_fetch_assoc($queryPimpinan);
 	}
 ?>
@@ -48,6 +48,11 @@
 									<td><?= $dataLembur['nama_lengkap']; ?></td>
 								</tr>
 								<tr>
+									<th>NIP</th>
+									<th>:</th>
+									<td><?= $dataLembur['nip']; ?></td>
+								</tr>
+								<tr>
 									<th>Jabatan</th>
 									<th>:</th>
 									<td><?= $dataLembur['role']; ?></td>
@@ -60,7 +65,20 @@
 								<tr>
 									<th>Status</th>
 									<th>:</th>
-									<td><?= $dataLembur['status_lembur']; ?></td>
+									<td>
+									<?php
+										$status = $dataLembur['status_lembur'];
+										if ($status == 'Menunggu') {
+											echo '<span class="badge badge-warning" style="font-size:1em;">' . $status . '</span>';
+										} elseif ($status == 'Diterima') {
+											echo '<span class="badge badge-success" style="font-size:1em;">' . $status . '</span>';
+										} elseif ($status == 'Ditolak') {
+											echo '<span class="badge badge-danger" style="font-size:1em;">' . $status . '</span>';
+										} else {
+											echo '<span class="badge badge-secondary" style="font-size:1em;">' . $status . '</span>';
+										}
+									?>
+									</td>
 								</tr>
 								<?php if ($dataPimpinan): ?>
 								<tr>

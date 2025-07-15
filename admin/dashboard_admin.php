@@ -71,6 +71,20 @@ $nama = $_SESSION['nama_lengkap'];
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-folder" style="color: black;"></i>
+                            <p style="color: black;">Master Barang <i class="right fas fa-angle-left" style="color: black;"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="dashboard_admin.php?unit=pengajuan" class="nav-link">
+                                    <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Pengajuan Barang</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
                         <a href="dashboard_admin.php?unit=user" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
                             <p>Data User</p>
@@ -83,7 +97,7 @@ $nama = $_SESSION['nama_lengkap'];
     <div class="content-wrapper">
         <div class="content-header">
             <div class="container-fluid">
-              <?php require 'content.php'; ?>
+              <?php require_once ("content.php");?>
             </div>
         </div>
     </div>
@@ -171,7 +185,6 @@ $nama = $_SESSION['nama_lengkap'];
             toastr.options = {"positionClass": "toast-top-right", "timeOut": "3000"};
             toastr.error("<?= htmlspecialchars($_GET['err']) ?>");
         <?php endif; ?>
-
     });
 </script>
 

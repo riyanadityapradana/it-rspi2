@@ -15,8 +15,8 @@ $id_staff    = $dataLembur['id_staff'];
 $id_pimpinan = $dataLembur['id_pimpinan'];
 
 // Ambil data user (staff & pimpinan)
-$staff    = mysqli_fetch_assoc(mysqli_query($config, "SELECT * FROM tb_user WHERE kode_user = '$id_staff'"));
-$pimpinan = mysqli_fetch_assoc(mysqli_query($config, "SELECT * FROM tb_user WHERE kode_user = '$id_pimpinan'"));
+$staff    = mysqli_fetch_assoc(mysqli_query($config, "SELECT * FROM tb_user WHERE id_user = '$id_staff'"));
+$pimpinan = mysqli_fetch_assoc(mysqli_query($config, "SELECT * FROM tb_user WHERE id_user = '$id_pimpinan'"));
 
 // Ambil kegiatan lembur
 $qKegiatan = mysqli_query($config, "SELECT * FROM tb_kegiatan_lembur WHERE id_lembur = '$id'");
@@ -78,14 +78,14 @@ $html = '<h3 style="text-align:center;">SURAT PERINTAH LEMBUR "ON CALL"</h3><br>
 // Info pemberi tugas
 $html .= '<p>Dengan ini Saya:</p>';
 $html .= '<table cellpadding="2">
-<tr><td width="120">Nama</td><td width="10">:</td><td>'.$pimpinan['nama_karyawan'].'</td></tr>
-<tr><td>Bagian / Jabatan</td><td>:</td><td>'.$pimpinan['level'].'</td></tr>
+<tr><td width="120">Nama</td><td width="10">:</td><td>'.$pimpinan['nama_lengkap'].'</td></tr>
+<tr><td>Bagian / Jabatan</td><td>:</td><td>'.$pimpinan['role'].'</td></tr>
 </table>';
 
 $html .= '<p>Memberikan Perintah Lembur "On Call" Kepada:</p>';
 $html .= '<table cellpadding="2">
-<tr><td width="120">Nama</td><td width="10">:</td><td>'.$staff['nama_karyawan'].'</td></tr>
-<tr><td>Jabatan</td><td>:</td><td>'.$staff['level'].'</td></tr>
+<tr><td width="120">Nama</td><td width="10">:</td><td>'.$staff['nama_lengkap'].'</td></tr>
+<tr><td>Jabatan</td><td>:</td><td>'.$staff['role'].'</td></tr>
 <tr><td>Hari / Tanggal</td><td>:</td><td>' . tgl_indo_hari($dataLembur['tanggal_lembur']) . '</td></tr>
 </table>';
 
@@ -104,8 +104,8 @@ $html .= '<p style="text-align:center;">Martapura, '.$tglCetak.'</p><br>';
 $html .= '
 <table width="100%" cellpadding="10">
 <tr>
-    <td align="center">Penerima Tugas,<br><br><br><br><u>('.$staff['nama_karyawan'].')</u></td>
-    <td align="center">Pemberi Tugas,<br><br><br><br><u>('.$pimpinan['nama_karyawan'].')</u></td>
+    <td align="center">Penerima Tugas,<br><br><br><br><u>('.$staff['nama_lengkap'].')</u></td>
+    <td align="center">Pemberi Tugas,<br><br><br><br><u>('.$pimpinan['nama_lengkap'].')</u></td>
 </tr>
 <tr>
     <td colspan="2" align="center"><br><br>Mengetahui,<br><br><br><br><br><u>.......................................</u></td>
@@ -115,5 +115,5 @@ $html .= '
 
 $pdf->writeHTML($html, true, false, true, false, '');
 if (ob_get_length()) ob_end_clean();
-$pdf->Output('surat_lembur_'.$staff['nama_karyawan'].'.pdf', 'I');
+$pdf->Output('surat_lembur_'.$staff['nama_lengkap'].'.pdf', 'I');
 ?>
