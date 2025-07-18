@@ -8,6 +8,8 @@ if (isset($_GET['unit']) && $_GET['unit'] == "user") {
     // Data Pengajuan Barang
 } else if (isset($_GET['unit']) && $_GET['unit'] == "pengajuan") {
     require_once("unit/pengajuan/pengajuan.php");
+} else if (isset($_GET['unit']) && $_GET['unit'] == "cetak_pengajuan") {
+    require_once("unit/pengajuan/lap_pemintaan_brg.php");
     // Beranda
 } else if (!isset($_GET['unit']) || $_GET['unit'] == "beranda") {
     require_once("unit/beranda.php");

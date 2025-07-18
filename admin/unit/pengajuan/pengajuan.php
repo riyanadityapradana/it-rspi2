@@ -1,6 +1,6 @@
 <?php
 require_once("../config/koneksi.php");
-
+$today = date('Y-m-d');
 // Proses ACC/Tolak
 if (isset($_GET['aksi']) && isset($_GET['id'])) {
     $id_pengajuan = intval($_GET['id']);
@@ -32,22 +32,37 @@ $q = mysqli_query($config, "SELECT p.*, b.nama_barang, u.nama_lengkap FROM tb_pe
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1>APPROVAL PENGAJUAN BARANG</h1>
+        <h1>DATA PENGAJUAN BARANG</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="dashboard_admin.php?unit=beranda">Home</a></li>
-          <li class="breadcrumb-item active">Approval Pengajuan Barang</li>
+          <li class="breadcrumb-item"><a href="main_staff.php?unit=beranda">Home</a></li>
+          <li class="breadcrumb-item active">Barang</li>
         </ol>
       </div>
     </div>
-  </div>
+  </div><!-- /.container-fluid -->
 </section>
+<!-- Main content -->
 <section class="content">
   <div class="container-fluid">
     <div class="row">
       <div class="col-12">
         <div class="card">
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <form method="get" class="form-inline" style="display:inline-block; margin-right:10px;">
+                  <a href="unit/pengajuan/lap_pemintaan_brg.php?dari=<?= $today ?>&sampai=<?= $today ?>" target="_blank" class="btn btn-sm btn-info mx-1"><i class="fa fa-print"></i> Print Hari Ini</a>
+                </form>
+              </div>
+              <div>
+                <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">
+                  <i class="fas fa-bars"></i>
+                </a>
+              </div>
+            </div>
+          </div>
           <div class="card-body">
             <table id="example1" class="table table-bordered table-striped">
               <thead style="background:rgb(129, 2, 0, 1); color:white;">
@@ -90,7 +105,7 @@ $q = mysqli_query($config, "SELECT p.*, b.nama_barang, u.nama_lengkap FROM tb_pe
                       <a href="dashboard_admin.php?unit=pengajuan&aksi=acc&id=<?= $row['id_pengajuan'] ?>" class="btn btn-success btn-sm">ACC</a>
                       <a href="dashboard_admin.php?unit=pengajuan&aksi=tolak&id=<?= $row['id_pengajuan'] ?>" class="btn btn-danger btn-sm">Tolak</a>
                     <?php elseif ($row['status'] == 'Disetujui'): ?>
-                      <a href="dashboard_admin.php?unit=cetak_pengajuan&id=<?= $row['id_pengajuan'] ?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-print"></i> Cetak</a>
+                      <a href="unit/pengajuan/lap_pemintaan_brg.php?id=<?= $row['id_pengajuan'] ?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-print"></i> Cetak</a>
                     <?php else: ?>
                       <span class="text-muted">-</span>
                     <?php endif; ?>

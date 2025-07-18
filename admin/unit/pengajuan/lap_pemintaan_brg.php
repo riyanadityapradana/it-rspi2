@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once('../../../config/koneksi.php');
 require_once('../../../library/tcpdf/tcpdf.php');
 
@@ -10,15 +11,21 @@ $tanggal = '....................................................';
 if (isset($_GET['dari']) && isset($_GET['sampai'])) {
     $dari = $_GET['dari'];
     $sampai = $_GET['sampai'];
-    $q = mysqli_query($config, "SELECT * FROM tb_barang WHERE tanggal_pengajuan BETWEEN '$dari' AND '$sampai' ORDER BY tanggal_pengajuan, kode_barang");
+    $q = mysqli_query($config, "
+        SELECT pb.*, b.nama_barang, b.spesifikasi 
+        FROM tb_pengajuan_barang pb
+        JOIN tb_barang b ON pb.kode_barang = b.kode_barang
+        WHERE DATE(pb.tgl_pengajuan) BETWEEN '$dari' AND '$sampai'
+        ORDER BY pb.tgl_pengajuan, pb.kode_barang
+    ");
     while ($row = mysqli_fetch_assoc($q)) {
         $dataBarang[] = [
             'nama' => $row['nama_barang'],
             'satuan' => $row['satuan'],
             'jumlah' => $row['jumlah'],
-            'keterangan' => $row['keterangan_barang'],
+            'keterangan' => $row['keterangan'],
             'unit' => $row['bidang_pengajuan'],
-            'tanggal' => $row['tanggal_pengajuan']
+            'tanggal' => $row['tgl_pengajuan']
         ];
     }
     // Untuk header, ambil unit dan tanggal dari data pertama jika ada
@@ -28,16 +35,21 @@ if (isset($_GET['dari']) && isset($_GET['sampai'])) {
     }
 } elseif (isset($_GET['id'])) {
     $id = intval($_GET['id']);
-    $q = mysqli_query($config, "SELECT * FROM tb_barang WHERE id_barang='$id'");
+    $q = mysqli_query($config, "
+        SELECT pb.*, b.nama_barang, b.spesifikasi 
+        FROM tb_pengajuan_barang pb
+        JOIN tb_barang b ON pb.kode_barang = b.kode_barang
+        WHERE pb.id_pengajuan = '$id'
+    ");
     if ($row = mysqli_fetch_assoc($q)) {
         $dataBarang[] = [
             'nama' => $row['nama_barang'],
             'satuan' => $row['satuan'],
             'jumlah' => $row['jumlah'],
-            'keterangan' => $row['keterangan_barang']
+            'keterangan' => $row['keterangan']
         ];
         $unit = $row['bidang_pengajuan'];
-        $tanggal = $row['tanggal_pengajuan'] != '0000-00-00' ? date('d-m-Y', strtotime($row['tanggal_pengajuan'])) : '....................................................';
+        $tanggal = $row['tgl_pengajuan'] != '0000-00-00' ? date('d-m-Y', strtotime($row['tgl_pengajuan'])) : '....................................................';
     }
 }
 // Tetap 10 baris minimal

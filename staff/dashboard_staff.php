@@ -1,12 +1,13 @@
 <?php
 session_start();
+ob_start();
 require_once("../config/koneksi.php");
 if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'Staff') {
     header('Location: ../main_login/form_login.php?error=Akses ditolak!');
     exit;
 }
 if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
-ob_start();
+
 $id 	= $_SESSION['id_user'];
 	$query 	= "SELECT * FROM tb_user WHERE id_user = '$id'";
 	$admin 	= mysqli_fetch_array(mysqli_query($config, $query));
