@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 18, 2025 at 09:55 AM
+-- Generation Time: Jul 19, 2025 at 06:02 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,15 +45,21 @@ CREATE TABLE `tb_barang` (
   `nama_barang` varchar(100) NOT NULL,
   `spesifikasi` text DEFAULT NULL,
   `jenis_barang` enum('Komputer & Laptop','Komponen Komputer & Laptop','Printer & Scanner','Komponen Printer & Scanner','Komponen Network') DEFAULT NULL,
-  `stok` int(11) DEFAULT 0
+  `stok` int(11) DEFAULT 0,
+  `penyerahan` varchar(100) NOT NULL,
+  `stts_brg` enum('Baik','Rusak') DEFAULT NULL,
+  `status_perbaikan` enum('Belum Ada Perbaikan','Dapat Diperbaiki','Tidak Dapat Diperbaiki') DEFAULT NULL,
+  `keterangan_rusak` varchar(100) NOT NULL,
+  `keterangan_perbaikan` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tb_barang`
 --
 
-INSERT INTO `tb_barang` (`kode_barang`, `nama_barang`, `spesifikasi`, `jenis_barang`, `stok`) VALUES
-('BRG/RSPI-001', 'Webcame Logitech C270 HD 720p', '-', 'Komponen Komputer & Laptop', 1);
+INSERT INTO `tb_barang` (`kode_barang`, `nama_barang`, `spesifikasi`, `jenis_barang`, `stok`, `penyerahan`, `stts_brg`, `status_perbaikan`, `keterangan_rusak`, `keterangan_perbaikan`) VALUES
+('BRG/RSPI-001', 'Webcame Logitech C270 HD 720p', '-', 'Komponen Komputer & Laptop', 1, 'Yakult C', 'Baik', 'Dapat Diperbaiki', 'rrr', 'ddd'),
+('BRG/RSPI-002', 'RAM 16 GB DDR 4 Merek KingSton', 'ww', 'Komponen Komputer & Laptop', 1, 'Manajemen', 'Rusak', 'Tidak Dapat Diperbaiki', 'sss', '');
 
 -- --------------------------------------------------------
 
@@ -219,7 +225,8 @@ CREATE TABLE `tb_pengajuan_barang` (
 --
 
 INSERT INTO `tb_pengajuan_barang` (`id_pengajuan`, `id_staff`, `kode_barang`, `satuan`, `jumlah`, `keterangan`, `bidang_pengajuan`, `status`, `id_kepala`, `tgl_pengajuan`, `waktu_acc`, `keterangan_acc`) VALUES
-(5, 5, 'BRG/RSPI-001', '1', '1', 'ww', 'Divis Unit IT', 'Disetujui', 1, '2025-07-18 17:55:13', '2025-07-15 04:55:29', NULL);
+(6, 5, 'BRG/RSPI-001', '1', '1', 'sss', 'Divis Unit IT', 'Disetujui', 1, '2025-07-19 11:44:18', '2025-07-19 03:44:50', NULL),
+(7, 5, 'BRG/RSPI-002', '1', '1', 'eee', 'Divis Unit IT', '', 1, '2025-07-19 11:48:33', '2025-07-19 03:49:05', NULL);
 
 -- --------------------------------------------------------
 
@@ -457,7 +464,7 @@ ALTER TABLE `tb_pendidikan`
 -- AUTO_INCREMENT for table `tb_pengajuan_barang`
 --
 ALTER TABLE `tb_pengajuan_barang`
-  MODIFY `id_pengajuan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_pengajuan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `tb_pengalaman`
