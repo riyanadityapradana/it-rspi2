@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: dashboard_staff.php?unit=barang&err=Kode barang sudah terdaftar!');
         exit;
     } else {
-        $q = mysqli_query($config, "INSERT INTO tb_barang (kode_barang, nama_barang, spesifikasi, jenis_barang, stok) VALUES ('$kode_barang', '$nama_barang', '$spesifikasi', '$jenis_barang', $stok)");
+        $q = mysqli_query($config, "INSERT INTO tb_barang (kode_barang, nama_barang, spesifikasi, jenis_barang, stok, stts_brg, status_perbaikan) VALUES ('$kode_barang', '$nama_barang', '$spesifikasi', '$jenis_barang', $stok, NULL, NULL)");
         if ($q) {
             header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
             exit;

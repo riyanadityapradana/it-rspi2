@@ -16,6 +16,15 @@ else if ($_GET['unit'] == "update_barang"){
 else if ($_GET['unit'] == "delete_barang"){
   require_once("unit/barang/delete.php");
 }
+else if ($_GET['unit'] == "proses_penyerahan"){
+  require_once("unit/barang/proses_penyerahan.php");
+}
+else if ($_GET['unit'] == "proses_rusak"){
+  require_once("unit/barang/proses_rusak.php");
+}
+else if ($_GET['unit'] == "proses_baik"){
+  require_once("unit/barang/proses_baik.php");
+}
 // PengajuanBarang
 else if ($_GET['unit'] == "pengajuan"){
   require_once("unit/pengajuan/pengajuan.php");
