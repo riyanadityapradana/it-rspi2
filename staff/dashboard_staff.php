@@ -104,6 +104,28 @@ $id 	= $_SESSION['id_user'];
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-folder" style="color: black;"></i>
+                            <p style="color: black;">Rekap Kunjungan<i class="right fas fa-angle-left" style="color: black;"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="dashboard_staff.php?unit=rekap_pasien_poli" class="nav-link">
+                                    <i class="nav-icon fas fa-book" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Rekap Pasien Perpoliklinik</p>
+                                </a>
+                                <a href="dashboard_staff.php?unit=lembur" class="nav-link">
+                                    <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Data Lembur</p>
+                                </a>
+                                <a href="dashboard_staff.php?unit=remote" class="nav-link">
+                                    <i class="nav-icon fas fa-laptop" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Remote Desktop</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-folder" style="color: black;"></i>
                             <p style="color: black;">Master Data <i class="right fas fa-angle-left" style="color: black;"></i></p>
                         </a>
                         <ul class="nav nav-treeview">

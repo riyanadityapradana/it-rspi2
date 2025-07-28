@@ -187,6 +187,7 @@ echo "<script>console.log('Data:', " . json_encode($jumlahPasien) . ");</script>
 <!-- Bagian modal -->
 
 <!-- Script Chart -->
+<script src="../assets/plugins/chart.js/Chart.min.js"></script>
 <script>
     // Tunggu sampai DOM selesai loading
     document.addEventListener('DOMContentLoaded', function() {

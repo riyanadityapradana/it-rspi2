@@ -77,20 +77,21 @@ else if ($_GET['unit'] == "delete_lembur"){
   require_once("unit/lembur/delete.php");
 }
 // Remote Desktop
-else if ($_GET['unit'] == "remote_desktop"){
-  require_once("unit/remote_destop/remote_desktop.php");
-}
-else if ($_GET['unit'] == "create_remote_desktop"){
-  require_once("unit/remote_destop/create_desktop.php");
-}
-else if ($_GET['unit'] == "update_remote_desktop"){
-  require_once("unit/remote_destop/update_desktop.php");
-}
-else if ($_GET['unit'] == "delete_remote_desktop"){
-  require_once("unit/remote_destop/delete_desktop.php");
-}
 else if ($_GET['unit'] == "remote"){
   require_once("unit/remote_destop/remote.php");
+}
+else if ($_GET['unit'] == "create_remote"){
+  require_once("unit/remote_destop/create.php");
+}
+else if ($_GET['unit'] == "update_remote"){
+  require_once("unit/remote_destop/update.php");
+}
+else if ($_GET['unit'] == "delete_remote"){
+  require_once("unit/remote_destop/delete.php");
+}
+// Rekap kunjungan
+else if ($_GET['unit'] == "rekap_pasien_poli"){
+  require_once("unit/rekap-kunjungan-pasien/rawat-jalan/rekap_pasien_poli.php");
 }
 else if ($_GET['unit'] == "create_remote"){
   require_once("unit/remote_destop/create.php");

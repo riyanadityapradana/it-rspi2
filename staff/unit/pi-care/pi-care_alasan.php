@@ -76,7 +76,7 @@ foreach ($data as $val) {
 <html>
 <head>
     <title>Data Pembatalan <?= ucfirst($nama_bulan_id) ?></title>
-    <script src="../../../assets/plugins/chart.js/Chart.min.js"></script>
+    <script src="../assets/plugins/chart.js/Chart.min.js"></script>
     <style>
         .table-bordered th, .table-bordered td { border: 1px solid #dee2e6; }
         .table th, .table td { vertical-align: middle; }
@@ -97,7 +97,7 @@ foreach ($data as $val) {
     <div class="row">
       <div class="col-md-6">
         <div class="card">
-          <div class="card-header" style="background:rgb(0, 123, 255, 1)">
+          <div class="card-header" style="background:rgb(245, 3, 3)">
             <h3 class="card-title" style="color: white;">Alasan Pembatalan</h3>
           </div>
           <div class="card-body" style="background:rgb(250, 255, 255)">
@@ -115,11 +115,13 @@ foreach ($data as $val) {
                   <td align="center"><?= $row['jumlah'] ?></td>
                 </tr>
                 <?php endforeach; ?>
+              </tbody>
+              <tfoot>
                 <tr style="font-weight:bold; background:#e9ecef;">
                   <td align="right">Total</td>
                   <td align="center"><?= $total ?></td>
                 </tr>
-              </tbody>
+              </tfoot>
             </table>
           </div>
         </div>
