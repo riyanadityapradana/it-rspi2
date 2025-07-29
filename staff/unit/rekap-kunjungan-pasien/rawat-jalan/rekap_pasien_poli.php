@@ -123,10 +123,21 @@ foreach ($minggu as $i => $range) {
         .jumlah { background: #ffe082; color: #111; font-weight: bold; }
         .total { background: #ff5722; color: #fff; font-weight: bold; }
         .poli { text-align: left; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .btn-grafik { background: #1976d2; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-grafik:hover { background: #1565c0; }
+        /* Modal */
+        .modal-bg { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
+        .modal-content { background: #fff; padding: 24px; border-radius: 8px; min-width: 400px; max-width: 90vw; max-height: 90vh; overflow: auto; position: relative; }
+        .modal-close { position: absolute; right: 12px; top: 8px; font-size: 20px; color: #888; cursor: pointer; }
     </style>
+    <script src="../assets/plugins/chart.js/Chart.min.js"></script>
 </head>
 <body>
-<h2>REKAP KUNJUNGAN PASIEN HARIAN RAWAT JALAN</h2>
+<div class="top-bar">
+    <h2>REKAP KUNJUNGAN PASIEN HARIAN RAWAT JALAN</h2>
+    <button class="btn-grafik" onclick="showModal()">Lihat Grafik Bulanan</button>
+</div>
 <table>
     <tr>
         <th rowspan="2">POLIKLINIK</th>
@@ -171,5 +182,66 @@ foreach ($minggu as $i => $range) {
         <?php endforeach; ?>
     </tr>
 </table>
+<!-- Modal Grafik Bulanan -->
+<div class="modal-bg" id="modalGrafik">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <h3>Grafik Kunjungan Pasien per Bulan</h3>
+    <canvas id="chartBulanan" style="min-width:350px; min-height:300px;"></canvas>
+  </div>
+</div>
+<script>
+function showModal() {
+  document.getElementById('modalGrafik').style.display = 'flex';
+  if (!window.chartBulananInit) {
+    renderChartBulanan();
+    window.chartBulananInit = true;
+  }
+}
+function closeModal() {
+  document.getElementById('modalGrafik').style.display = 'none';
+}
+// Data grafik bulanan dari PHP
+<?php
+// Ambil data bulan sekarang saja
+$now = new DateTime();
+$start = $now->format('Y-m-01');
+$end = $now->format('Y-m-t');
+$label_bulan = [date('M Y', strtotime($start))];
+// Rekap total per poli utama untuk bulan ini
+$data_bulanan = [];
+foreach ($mapping_poli as $nama_poli => $list_kd_poli) {
+    if (count($list_kd_poli) === 0) { $data_bulanan[$nama_poli] = [0]; continue; }
+    $sql = "SELECT COUNT(*) as jml FROM reg_periksa WHERE tgl_registrasi BETWEEN '$start' AND '$end' AND kd_poli IN ('" . implode("','", $list_kd_poli) . "') AND kd_pj IN ('A09','BPJ','A92') AND no_rkm_medis NOT IN (SELECT no_rkm_medis FROM pasien WHERE LOWER(nm_pasien) LIKE '%test%')";
+    $res = $conn->query($sql);
+    $row = $res->fetch_assoc();
+    $data_bulanan[$nama_poli] = [(int)$row['jml']];
+}
+?>
+const labelBulan = <?php echo json_encode($label_bulan); ?>;
+const dataBulanan = <?php echo json_encode($data_bulanan); ?>;
+function renderChartBulanan() {
+  const ctx = document.getElementById('chartBulanan').getContext('2d');
+  const datasets = Object.keys(dataBulanan).map((nama, idx) => ({
+    label: nama,
+    data: dataBulanan[nama],
+    backgroundColor: `hsl(${idx*30},70%,60%)`,
+    borderColor: `hsl(${idx*30},70%,40%)`,
+    borderWidth: 1
+  }));
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labelBulan,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: { x: { stacked: true }, y: { beginAtZero: true, stacked: true } }
+    }
+  });
+}
+</script>
 </body>
 </html>

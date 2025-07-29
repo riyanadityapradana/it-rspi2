@@ -93,14 +93,8 @@ else if ($_GET['unit'] == "delete_remote"){
 else if ($_GET['unit'] == "rekap_pasien_poli"){
   require_once("unit/rekap-kunjungan-pasien/rawat-jalan/rekap_pasien_poli.php");
 }
-else if ($_GET['unit'] == "create_remote"){
-  require_once("unit/remote_destop/create.php");
-}
-else if ($_GET['unit'] == "update_remote"){
-  require_once("unit/remote_destop/update.php");
-}
-else if ($_GET['unit'] == "delete_remote"){
-  require_once("unit/remote_destop/delete.php");
+else if ($_GET['unit'] == "rekap_pasien_ranap"){
+  require_once("unit/rekap-kunjungan-pasien/rawat-inap/rekap_pasien_ranap.php");
 }
 // Picare
 else if ($_GET['unit'] == "daftar"){

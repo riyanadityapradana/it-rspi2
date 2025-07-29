@@ -103,22 +103,18 @@ $id 	= $_SESSION['id_user'];
                     <?php endif; ?>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-folder" style="color: black;"></i>
+                            <i class="nav-icon fas fa-chart-bar" style="color: black;"></i>
                             <p style="color: black;">Rekap Kunjungan<i class="right fas fa-angle-left" style="color: black;"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="dashboard_staff.php?unit=rekap_pasien_poli" class="nav-link">
-                                    <i class="nav-icon fas fa-book" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Rekap Pasien Perpoliklinik</p>
+                                    <i class="nav-icon fas fa-user-injured" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Rekap Pasien Rawat Jalan</p>
                                 </a>
-                                <a href="dashboard_staff.php?unit=lembur" class="nav-link">
-                                    <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Data Lembur</p>
-                                </a>
-                                <a href="dashboard_staff.php?unit=remote" class="nav-link">
-                                    <i class="nav-icon fas fa-laptop" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Remote Desktop</p>
+                                <a href="dashboard_staff.php?unit=rekap_pasien_ranap" class="nav-link">
+                                    <i class="nav-icon fas fa-procedures" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Rekap Pasien Rawat Inap</p>
                                 </a>
                             </li>
                         </ul>
