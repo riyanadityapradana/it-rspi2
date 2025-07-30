@@ -77,7 +77,7 @@ $id 	= $_SESSION['id_user'];
                             <p>Dashboard</p>
                         </a>
                     </li>
-                    <?php if ($_SESSION['id_user'] == '5' || $_SESSION['id_user'] == '6'): ?> 
+                    <?php if ($_SESSION['nip'] == '635.090125' || $_SESSION['nip'] == '12333'): ?> 
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fab fa-whatsapp" style="color: green;"></i><p style="color: black;">Grafik Pi-Care<i class="fas fa-angle-left right" style="color: black;"></i></p>
@@ -126,6 +126,10 @@ $id 	= $_SESSION['id_user'];
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
+                                <a href="dashboard_staff.php?unit=user" class="nav-link">
+                                    <i class="nav-icon fas fa-user" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Data User</p>
+                                </a>
                                 <a href="dashboard_staff.php?unit=logbook" class="nav-link">
                                     <i class="nav-icon fas fa-book" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Data Logbook</p>
@@ -143,18 +147,22 @@ $id 	= $_SESSION['id_user'];
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-folder" style="color: black;"></i>
+                            <i class="nav-icon fas fa-boxes" style="color: black;"></i>
                             <p style="color: black;">Master Barang <i class="right fas fa-angle-left" style="color: black;"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="dashboard_staff.php?unit=barang" class="nav-link">
-                                    <i class="nav-icon fas fa-book" style="color: black;"></i>
+                                    <i class="nav-icon fas fa-box" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Data Barang</p>
                                 </a>
                                 <a href="dashboard_staff.php?unit=pengajuan" class="nav-link">
-                                    <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
+                                    <i class="nav-icon fas fa-file-alt" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Pengajuan Barang</p>
+                                </a>
+                                <a href="dashboard_staff.php?unit=pemindahan" class="nav-link">
+                                    <i class="nav-icon fas fa-exchange-alt" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Pemindahan Barang</p>
                                 </a>
                             </li>
                         </ul>

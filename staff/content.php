@@ -25,6 +25,19 @@ else if ($_GET['unit'] == "proses_rusak"){
 else if ($_GET['unit'] == "proses_baik"){
   require_once("unit/barang/proses_baik.php");
 }
+// Pemindahan Barang
+else if ($_GET['unit'] == "pemindahan"){
+  require_once("unit/pemindahan/pemindahan.php");
+}
+else if ($_GET['unit'] == "create_pemindahan"){
+  require_once("unit/pemindahan/create.php");
+}
+else if ($_GET['unit'] == "update_pemindahan"){
+  require_once("unit/pemindahan/update.php");
+}
+else if ($_GET['unit'] == "delete_pemindahan"){
+  require_once("unit/pemindahan/delete.php");
+}
 // PengajuanBarang
 else if ($_GET['unit'] == "pengajuan"){
   require_once("unit/pengajuan/pengajuan.php");
@@ -37,6 +50,13 @@ else if ($_GET['unit'] == "update_pengajuan"){
 }
 else if ($_GET['unit'] == "delete_pengajuan"){
   require_once("unit/pengajuan/delete.php");
+}
+// User
+else if ($_GET['unit'] == "user"){
+  require_once("unit/user/user.php");
+}
+else if ($_GET['unit'] == "update_user"){
+  require_once("unit/user/update.php");
 }
 // Logbook kegiatan harian
 else if ($_GET['unit'] == "logbook"){
@@ -52,18 +72,6 @@ else if ($_GET['unit'] == "delete_logbook"){
   require_once("unit/logbook/delete.php");
 }
 // Lembur
-else if ($_GET['unit'] == "lembur_staff"){
-  require_once("unit/lembur/lembur_staff.php");
-}
-else if ($_GET['unit'] == "create_lembur_staff"){
-  require_once("unit/lembur/create_staff.php");
-}
-else if ($_GET['unit'] == "update_lembur_staff"){
-  require_once("unit/lembur/update_staff.php");
-}
-else if ($_GET['unit'] == "delete_lembur_staff"){
-  require_once("unit/lembur/delete_staff.php");
-}
 else if ($_GET['unit'] == "lembur"){
   require_once("unit/lembur/lembur.php");
 }
