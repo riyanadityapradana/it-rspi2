@@ -1,10 +1,17 @@
 <?php
 session_start();
+ob_start();
+require_once("../config/koneksi.php");
 if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'Kepala Ruangan') {
     header('Location: ../main_login/form_login.php?error=Akses ditolak!');
     exit;
 }
-$nama = $_SESSION['nama_lengkap'];
+if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
+
+    $id 	= $_SESSION['id_user'];
+	$query 	= "SELECT * FROM tb_user WHERE id_user = '$id'";
+	$admin 	= mysqli_fetch_array(mysqli_query($config, $query));
+	$nama 	= $admin['nama_lengkap'];
 ?>
 <!DOCTYPE html>
 <html>

@@ -23,11 +23,12 @@ if ($row = $result->fetch_assoc()) {
     $_SESSION['nip'] = $row['nip'];
     $_SESSION['username'] = $row['username'];
     $_SESSION['nama_lengkap'] = $row['nama_lengkap'];
+    $_SESSION['foto'] = $row['foto'];
     $_SESSION['role'] = $row['role'];
     $_SESSION['login_type'] = 'user';
 
     if ($row['role'] === 'Kepala Ruangan') {
-        header('Location: ../admin/dashboard_admin.php');
+        header('Location: ../admin/dashboard_admin.php?unit=beranda');
         exit();
     } elseif ($row['role'] === 'Staff') {
         header('Location: ../staff/dashboard_staff.php?unit=beranda');

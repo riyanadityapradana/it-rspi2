@@ -63,10 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $success = $stmt->execute();
     $stmt->close();
     if ($success) {
-        header('Location: dashboard_admin.php?unit=user&msg=User berhasil diupdate');
+        header('Location:dashboard_admin.php?unit=user&msg=User berhasil diupdate');
         exit;
     } else {
-        echo '<script>toastr.error("Gagal update user", "Error", {positionClass: "toast-top-right"});</script>';
+        header('Location:dashboard_admin.php?unit=user&error=Gagal update user');
+        exit;
     }
 }
 ?>

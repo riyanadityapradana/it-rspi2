@@ -75,7 +75,7 @@ foreach ($data as $val) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Data Pembatalan <?= ucfirst($nama_bulan_id) ?></title>
+    <title>Data Alasan Pembatalan <?= ucfirst($nama_bulan_id) ?></title>
     <script src="../assets/plugins/chart.js/Chart.min.js"></script>
     <style>
         .table-bordered th, .table-bordered td { border: 1px solid #dee2e6; }
@@ -87,7 +87,7 @@ foreach ($data as $val) {
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1>Data Pembatalan <?= ucfirst($nama_bulan_id) ?></h1>
+        <h1>Data Alasan Pembatalan <?= ucfirst($nama_bulan_id) ?></h1>
       </div>
     </div>
   </div>
@@ -101,7 +101,7 @@ foreach ($data as $val) {
             <h3 class="card-title" style="color: white;">Alasan Pembatalan</h3>
           </div>
           <div class="card-body" style="background:rgb(250, 255, 255)">
-            <table class="table table-bordered table-striped">
+            <table id="example1" class="table table-bordered table-striped">
               <thead style="background:rgb(0, 123, 255, 1)">
                 <tr>
                   <th style="text-align:center; color:white;">Alasan Pembatalan</th>
@@ -131,8 +131,8 @@ foreach ($data as $val) {
           <div class="card-header">
             <h3 class="card-title">Grafik Alasan Pembatalan PiCare Bulan <?= ucfirst($nama_bulan_id) ?></h3>
           </div>
-          <div class="card-body">
-            <canvas id="pieChart" style="min-height:400px; height:400px; max-height:400px; max-width:100%;"></canvas>
+          <div class="card-body" style="background:rgb(189, 189, 189)">
+            <canvas id="pieChart" style="min-height:300px; height:300px; max-height:300px; max-width:100%;"></canvas>
           </div>
         </div>
       </div>

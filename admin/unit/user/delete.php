@@ -1,5 +1,5 @@
 <?php
-require_once '../../../config/koneksi.php';
+require_once '../config/koneksi.php';
 
 if (isset($_GET['id'])) {
     $id_user = intval($_GET['id']);
@@ -21,14 +21,14 @@ if (isset($_GET['id'])) {
     $stmt = $config->prepare('DELETE FROM tb_user WHERE id_user = ?');
     $stmt->bind_param('i', $id_user);
     if ($stmt->execute()) {
-        header('Location: ../../dashboard_admin.php?unit=user&msg=User berhasil dihapus!');
+        header('Location: dashboard_admin.php?unit=user&msg=User berhasil dihapus!');
         exit;
     } else {
-        header('Location: ../../dashboard_admin.php?unit=user&err=Gagal menghapus user!');
+        header('Location: dashboard_admin.php?unit=user&err=Gagal menghapus user!');
         exit;
     }
     $stmt->close();
 } else {
-    header('Location: ../../dashboard_admin.php?unit=user&err=Permintaan tidak valid!');
+    header('Location: dashboard_admin.php?unit=user&err=Permintaan tidak valid!');
     exit;
 }

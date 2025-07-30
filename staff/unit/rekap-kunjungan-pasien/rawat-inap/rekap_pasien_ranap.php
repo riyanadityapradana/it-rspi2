@@ -16,7 +16,15 @@ $daftar_kamar = [
     'KECUBUNG A', 'KECUBUNG B1', 'KECUBUNG B2', 'KECUBUNG B3', 'KECUBUNG B4',
     'YAKUT A', 'YAKUT B', 'YAKUT C'
 ];
-
+$mapping_kamar = [
+    'RUBY' => ['RUBY A', 'RUBY B'],
+    'ZAMRUD' => ['ZAMRUD A', 'ZAMRUD B', 'ZAMRUD C'],
+    'YAKUT' => ['YAKUT A', 'YAKUT B', 'YAKUT C'],
+    'KECUBUNG' => ['KECUBUNG A', 'KECUBUNG B1', 'KECUBUNG B2', 'KECUBUNG B3', 'KECUBUNG B4'],
+    'BERLIAN' => ['BERLIAN'],
+    'SAFIR' => ['SAFIR'],
+    'ISOLASI' => ['ISOLASI']
+];
 // Mapping jenis bayar
 $jenis_bayar = [
     'A09' => 'UMUM',
@@ -45,24 +53,38 @@ foreach ($daftar_kamar as $kamar) {
 }
 
 // Query data per minggu, per kamar, per jenis bayar
-foreach ($daftar_kamar as $kamar) {
+foreach ($mapping_kamar as $group => $sub_kamar_list) {
+    foreach ($minggu as $i => $range) {
+        foreach ($jenis_bayar as $kd_pj => $label) {
+            $rekap[$group][$i][$kd_pj] = 0;
+        }
+        $rekap[$group][$i]['JUMLAH'] = 0;
+    }
+
     foreach ($minggu as $i => $range) {
         $start = $range[0];
-        $end   = $range[1];
+        $end = $range[1];
         foreach ($jenis_bayar as $kd_pj => $label) {
-            $sql = "SELECT COUNT(*) as jml
-                    FROM kamar_inap ki
-                    JOIN reg_periksa rp ON ki.no_rawat = rp.no_rawat
-                    WHERE ki.kd_kamar = '$kamar'
-                    AND rp.kd_pj = '$kd_pj'
-                    AND ki.tgl_masuk BETWEEN '$start' AND '$end'";
-            $res = $conn->query($sql);
-            $row = $res->fetch_assoc();
-            $rekap[$kamar][$i][$kd_pj] = (int)$row['jml'];
-            $rekap[$kamar][$i]['JUMLAH'] += (int)$row['jml'];
+            $total = 0;
+            foreach ($sub_kamar_list as $sub_kamar) {
+                $sql = "SELECT COUNT(*) as jml
+                        FROM kamar_inap ki
+                        JOIN reg_periksa rp ON ki.no_rawat = rp.no_rawat
+                        JOIN kamar k ON ki.kd_kamar = k.kd_kamar
+                        JOIN bangsal b ON k.kd_bangsal = b.kd_bangsal
+                        WHERE b.nm_bangsal = '$sub_kamar'
+                        AND rp.kd_pj = '$kd_pj'
+                        AND ki.tgl_masuk BETWEEN '$start' AND '$end'";
+                $res = $conn->query($sql);
+                $row = $res->fetch_assoc();
+                $total += (int)$row['jml'];
+            }
+            $rekap[$group][$i][$kd_pj] = $total;
+            $rekap[$group][$i]['JUMLAH'] += $total;
         }
     }
 }
+
 
 // Hitung total per jenis bayar dan total per minggu
 $total_per_jenis = [];
@@ -72,13 +94,14 @@ foreach ($minggu as $i => $range) {
         $total_per_jenis[$i][$kd_pj] = 0;
     }
     $total_per_minggu[$i] = 0;
-    foreach ($daftar_kamar as $kamar) {
+    foreach (array_keys($mapping_kamar) as $group) {
         foreach ($jenis_bayar as $kd_pj => $label) {
-            $total_per_jenis[$i][$kd_pj] += $rekap[$kamar][$i][$kd_pj];
+            $total_per_jenis[$i][$kd_pj] += $rekap[$group][$i][$kd_pj];
         }
-        $total_per_minggu[$i] += $rekap[$kamar][$i]['JUMLAH'];
+        $total_per_minggu[$i] += $rekap[$group][$i]['JUMLAH'];
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -98,49 +121,54 @@ foreach ($minggu as $i => $range) {
 </head>
 <body>
 <h2>REKAP KUNJUNGAN PASIEN RAWAT INAP</h2>
-<table>
-    <tr>
-        <th rowspan="2">KAMAR RAWAT</th>
-        <?php foreach ($minggu as $i => $range): ?>
-            <th colspan="4" class="header-minggu">
-                <?= date('j', strtotime($range[0])) . ' - ' . date('j F Y', strtotime($range[1])) ?>
-            </th>
-        <?php endforeach; ?>
-    </tr>
-    <tr>
-        <?php foreach ($minggu as $i => $range): ?>
-            <th class="header-jenis">UMUM</th>
-            <th class="header-jenis">BPJS</th>
-            <th class="header-jenis">ASURANSI</th>
-            <th class="jumlah">JLH</th>
-        <?php endforeach; ?>
-    </tr>
-    <?php foreach ($daftar_kamar as $kamar): ?>
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
         <tr>
-            <td class="kamar"><?= htmlspecialchars($kamar) ?></td>
+            <th rowspan="2">KAMAR RAWAT</th>
             <?php foreach ($minggu as $i => $range): ?>
-                <td><?= $rekap[$kamar][$i]['A09'] ?></td>
-                <td><?= $rekap[$kamar][$i]['BPJ'] ?></td>
-                <td><?= $rekap[$kamar][$i]['A92'] ?></td>
-                <td class="jumlah"><?= $rekap[$kamar][$i]['JUMLAH'] ?></td>
+                <th colspan="4"><?= date('j', strtotime($range[0])) . ' - ' . date('j F Y', strtotime($range[1])) ?></th>
             <?php endforeach; ?>
         </tr>
-    <?php endforeach; ?>
-    <tr class="total">
-        <td>JUMLAH PER JENIS BAYAR</td>
-        <?php foreach ($minggu as $i => $range): ?>
-            <td><?= $total_per_jenis[$i]['A09'] ?></td>
-            <td><?= $total_per_jenis[$i]['BPJ'] ?></td>
-            <td><?= $total_per_jenis[$i]['A92'] ?></td>
-            <td></td>
+        <tr>
+            <?php foreach ($minggu as $i => $range): ?>
+                <th>UMUM</th>
+                <th>BPJS</th>
+                <th>ASURANSI</th>
+                <th>JML</th>
+            <?php endforeach; ?>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($daftar_kamar as $kamar): ?>
+            <tr>
+                <td><?= $kamar ?></td>
+                <?php foreach ($minggu as $i => $range): ?>
+                    <td align="center"><?= $rekap[$kamar][$i]['A09'] ?></td>
+                    <td align="center"><?= $rekap[$kamar][$i]['BPJ'] ?? 0 ?></td>
+                    <td align="center"><?= $rekap[$kamar][$i]['A92'] ?></td>
+                    <td align="center"><strong><?= $rekap[$kamar][$i]['JUMLAH'] ?></strong></td>
+                <?php endforeach; ?>
+            </tr>
         <?php endforeach; ?>
-    </tr>
-    <tr class="total">
-        <td>JUMLAH PX PER MINGGU</td>
-        <?php foreach ($minggu as $i => $range): ?>
-            <td colspan="4"><?= $total_per_minggu[$i] ?></td>
-        <?php endforeach; ?>
-    </tr>
+    </tbody>
+    <tfoot>
+        <tr style="background-color: orange; font-weight: bold;">
+            <td>JUMLAH PER JENIS BAYAR</td>
+            <?php foreach ($minggu as $i => $range): ?>
+                <td align="center"><?= $total_per_jenis[$i]['A09'] ?></td>
+                <td align="center"><?= $total_per_jenis[$i]['BPJ'] ?? 0 ?></td>
+                <td align="center"><?= $total_per_jenis[$i]['A92'] ?></td>
+                <td align="center"><?= $total_per_minggu[$i] ?></td>
+            <?php endforeach; ?>
+        </tr>
+        <tr style="background-color: orangered; font-weight: bold;">
+            <td>JUMLAH PX PER MINGGU</td>
+            <?php foreach ($minggu as $i => $range): ?>
+                <td colspan="4" align="center"><?= $total_per_minggu[$i] ?></td>
+            <?php endforeach; ?>
+        </tr>
+    </tfoot>
 </table>
+
 </body>
 </html>

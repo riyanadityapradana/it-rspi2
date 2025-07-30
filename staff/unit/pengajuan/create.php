@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" name="bidang_pengajuan" class="form-control" value="Divis Unit IT" readonly required>
           </div>
           <button type="submit" class="btn btn-primary">Simpan</button>
-          <a href="dashboard_staff.php?unit=penganjuan" class="btn btn-secondary">Kembali</a>
+          <a href="dashboard_staff.php?unit=pengajuan" class="btn btn-secondary">Kembali</a>
         </form>
       </div>
     </div>

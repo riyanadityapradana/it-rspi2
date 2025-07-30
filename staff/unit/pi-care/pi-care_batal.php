@@ -125,7 +125,7 @@ echo "<script>console.log('Data:', " . json_encode($jumlahPasien) . ");</script>
                          </div>
                     </div>
                     <div class="card-body" style="background:rgb(250, 255, 255)">
-                         <table id="example-picare" class="table table-bordered table-striped">
+                         <table id="example1" class="table table-bordered table-striped">
                               <thead style="background:rgb(0, 123, 255, 1)">
                                    <tr>
                                         <th style="text-align: center; color: white;">Tanggal Layanan</th>
