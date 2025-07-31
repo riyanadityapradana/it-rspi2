@@ -20,13 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_barang   = trim($_POST['nama_barang']);
     $spesifikasi   = trim($_POST['spesifikasi']);
     $jenis_barang  = trim($_POST['jenis_barang']);
-    $stok          = intval($_POST['stok']);
     $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE kode_barang='$kode_barang'");
     if (mysqli_num_rows($cek) > 0) {
         header('Location: dashboard_staff.php?unit=barang&err=Kode barang sudah terdaftar!');
         exit;
     } else {
-        $q = mysqli_query($config, "INSERT INTO tb_barang (kode_barang, nama_barang, spesifikasi, jenis_barang, stok, stts_brg, status_perbaikan) VALUES ('$kode_barang', '$nama_barang', '$spesifikasi', '$jenis_barang', $stok, NULL, NULL)");
+        $q = mysqli_query($config, "INSERT INTO tb_barang (kode_barang, nama_barang, spesifikasi, jenis_barang, stts_brg, status_perbaikan) VALUES ('$kode_barang', '$nama_barang', '$spesifikasi', '$jenis_barang', NULL, NULL)");
         if ($q) {
             header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
             exit;
@@ -79,10 +78,6 @@ $jenis_list = [
           <div class="form-group">
             <label>Spesifikasi</label>
             <textarea name="spesifikasi" class="form-control" rows="2"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Stok</label>
-            <input type="number" name="stok" class="form-control" min="0" required>
           </div>
           <button type="submit" class="btn btn-primary">Simpan</button>
           <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>

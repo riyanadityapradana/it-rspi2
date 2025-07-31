@@ -5,6 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $kode_barang = $_POST['kode_barang'];
     $penyerahan = $_POST['penyerahan'];
     $id_pengajuan = $_POST['id_pengajuan'];
+    $tgl_penyerahan = $_POST['tgl_penyerahan'];
     
     // Validasi input
     if (empty($kode_barang) || empty($penyerahan)) {
@@ -19,12 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Update tabel tb_barang dengan penyerahan, status barang, dan status_perbaikan
         $query_update_barang = "UPDATE tb_barang SET 
                                 penyerahan = ?, 
+                                tgl_penyerahan = ?,
                                 stts_brg = 'Baik',
                                 status_perbaikan = 'Belum Ada Perbaikan'
                                 WHERE kode_barang = ?";
         
         $stmt_barang = mysqli_prepare($config, $query_update_barang);
-        mysqli_stmt_bind_param($stmt_barang, "ss", $penyerahan, $kode_barang);
+        mysqli_stmt_bind_param($stmt_barang, "sss", $penyerahan, $tgl_penyerahan, $kode_barang);
         
         if (!mysqli_stmt_execute($stmt_barang)) {
             throw new Exception("Gagal mengupdate data barang");

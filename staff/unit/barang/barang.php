@@ -24,15 +24,31 @@ require_once("../config/koneksi.php");
 		<div class="card">
 		    <div class="card-header">
 		    	<div class="card-tools" style="float: left; text-align: left;">
-                  <a href="?unit=create_barang" class="btn btn-tool btn-sm" style="background:rgba(0, 123, 255, 1)">
-                    <i class="fas fa-plus-square" style="color: white;"> Tambah Data</i>
-                  </a>
-              	</div>
+            <a href="?unit=create_barang" class="btn btn-tool btn-sm" style="background:rgba(0, 123, 255, 1)">
+              <i class="fas fa-plus-square" style="color: white;"> Tambah Data</i>
+            </a>
+          </div>
 			    <div class="card-tools" style="float: right; text-align: right;">
-                  <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">
-                        <i class="fas fa-bars"></i>
-                  </a>
-              	</div>
+            <select id="filterJenisBarang" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;">
+              <option value="">Semua Jenis Barang</option>
+              <option value="Komputer & Laptop">Komputer & Laptop</option>
+              <option value="Komponen Komputer & Laptop">Komponen Komputer & Laptop</option>
+              <option value="Printer & Scanner">Printer & Scanner</option>
+              <option value="Komponen Printer & Scanner">Komponen Printer & Scanner</option>
+              <option value="Komponen Network">Komponen Network</option>
+            </select>
+            <select id="filterStatusBarang" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;">
+              <option value="">Semua Status</option>
+              <option value="Baik">Baik</option>
+              <option value="Rusak">Rusak</option>
+            </select>
+            <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">
+              <i class="fas fa-bars"></i>
+            </a>
+            <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
+              <i class="fas fa-print" style="color: white;"> Print</i>
+            </button>
+          </div>
 			</div>
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
@@ -156,6 +172,10 @@ require_once("../config/koneksi.php");
             <label>Penyerahan ke Unit:</label>
             <input type="text" class="form-control" name="penyerahan" placeholder="Contoh: Manajemen, Keuangan, SDM, dll." required>
           </div>
+          <div class="form-group">
+            <label>Tanggal Penyerahan:</label>
+            <input type="date" class="form-control" id="tglPenyerahan" name="tgl_penyerahan" readonly>
+          </div>
           <input type="hidden" name="id_pengajuan" id="idPengajuan">
         </div>
         <div class="modal-footer">
@@ -243,11 +263,78 @@ require_once("../config/koneksi.php");
   </div>
 </div>
 
+<!-- Modal Print -->
+<div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+         <form id="formPrint" method="get" target="_blank" action="unit/barang/print_barang.php">
+      <div class="modal-content">
+        <div class="modal-header">
+                     <h5 class="modal-title" id="modalPrintLabel">Cetak Laporan Data Barang</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+                     <div class="form-group">
+             <label>Pilihan Cetak</label>
+             <select class="form-control" id="printType" name="printType" required>
+               <option value="all">Cetak Semua</option>
+               <option value="jenis">Cetak Berdasarkan Jenis Barang</option>
+               <option value="status">Cetak Berdasarkan Status Barang</option>
+               <option value="jenis_status">Cetak Berdasarkan Jenis & Status Barang</option>
+             </select>
+           </div>
+                     <div class="form-group" id="jenisBarangGroup" style="display:none;">
+             <label>Jenis Barang</label>
+             <select class="form-control" name="jenis_barang" id="jenis_barang">
+               <option value="">-- Pilih Jenis Barang --</option>
+               <!-- Isi dengan data dari database -->
+               <option value="Komputer & Laptop">Komputer & Laptop</option>
+               <option value="Komponen Komputer & Laptop">Komponen Komputer & Laptop</option>
+               <option value="Printer & Scanner">Printer & Scanner</option>
+               <option value="Komponen Printer & Scanner">Komponen Printer & Scanner</option>
+               <option value="Komponen Network">Komponen Network</option>
+             </select>
+           </div>
+           <div class="form-group" id="statusBarangGroup" style="display:none;">
+             <label>Status Barang</label>
+             <select class="form-control" name="status_barang" id="status_barang">
+               <option value="">-- Pilih Status Barang --</option>
+               <option value="Baik">Baik</option>
+               <option value="Rusak">Rusak</option>
+             </select>
+           </div>
+          <div class="form-group">
+            <label>Bulan</label>
+            <select class="form-control" name="bulan" required>
+              <?php for($i=1;$i<=12;$i++): ?>
+                <option value="<?= $i ?>"><?= date('F', mktime(0,0,0,$i,10)) ?></option>
+              <?php endfor; ?>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tahun</label>
+            <select class="form-control" name="tahun" required>
+              <?php for($y=date('Y')-5;$y<=date('Y');$y++): ?>
+                <option value="<?= $y ?>"><?= $y ?></option>
+              <?php endfor; ?>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success"><i class="fas fa-print"></i> Cetak</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 function setPenyerahanData(kodeBarang, namaBarang, idPengajuan) {
     document.getElementById('kodeBarang').value = kodeBarang;
     document.getElementById('namaBarang').value = namaBarang;
     document.getElementById('idPengajuan').value = idPengajuan;
+    document.getElementById('tglPenyerahan').value = new Date().toISOString().slice(0, 10); // Set tanggal hari ini
 }
 
 function setRusakData(kodeBarang, namaBarang) {
@@ -259,4 +346,64 @@ function setBaikData(kodeBarang, namaBarang) {
     document.getElementById('kodeBarangBaik').value = kodeBarang;
     document.getElementById('namaBarangBaik').value = namaBarang;
 }
+
+document.getElementById('printType').addEventListener('change', function() {
+  const jenisGroup = document.getElementById('jenisBarangGroup');
+  const statusGroup = document.getElementById('statusBarangGroup');
+  
+  // Sembunyikan semua group terlebih dahulu
+  jenisGroup.style.display = 'none';
+  statusGroup.style.display = 'none';
+  
+  // Tampilkan group sesuai pilihan
+  if (this.value === 'jenis' || this.value === 'jenis_status') {
+    jenisGroup.style.display = '';
+  }
+  if (this.value === 'status' || this.value === 'jenis_status') {
+    statusGroup.style.display = '';
+  }
+});
+
+// Filter berdasarkan jenis barang dan status barang
+document.addEventListener('DOMContentLoaded', function() {
+    const filterJenisSelect = document.getElementById('filterJenisBarang');
+    const filterStatusSelect = document.getElementById('filterStatusBarang');
+    const table = document.getElementById('example1');
+    const tbody = table.querySelector('tbody');
+    const rows = tbody.querySelectorAll('tr');
+
+    function filterTable() {
+        const selectedJenis = filterJenisSelect.value;
+        const selectedStatus = filterStatusSelect.value;
+        
+        rows.forEach(function(row) {
+            const jenisBarangCell = row.querySelector('td:nth-child(3)'); // Kolom ke-3 adalah Jenis Barang
+            const statusBarangCell = row.querySelector('td:nth-child(5)'); // Kolom ke-5 adalah Status Barang
+            
+            if (jenisBarangCell && statusBarangCell) {
+                const jenisBarang = jenisBarangCell.textContent.trim();
+                const statusBarang = statusBarangCell.textContent.trim();
+                
+                // Filter berdasarkan jenis barang
+                const jenisMatch = selectedJenis === '' || jenisBarang === selectedJenis;
+                
+                // Filter berdasarkan status barang
+                const statusMatch = selectedStatus === '' || statusBarang === selectedStatus;
+                
+                // Tampilkan baris jika kedua filter cocok
+                if (jenisMatch && statusMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Event listener untuk filter jenis barang
+    filterJenisSelect.addEventListener('change', filterTable);
+    
+    // Event listener untuk filter status barang
+    filterStatusSelect.addEventListener('change', filterTable);
+});
 </script>

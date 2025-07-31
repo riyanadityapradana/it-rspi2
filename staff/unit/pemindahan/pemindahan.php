@@ -24,13 +24,13 @@ require_once("../config/koneksi.php");
       <div class="card">
           <div class="card-header">
           <div class="card-tools" style="float: left; text-align: left;">
-  <a href="?unit=create_pemindahan" class="btn btn-tool btn-sm" style="background:rgba(0, 123, 255, 1)">
-    <i class="fas fa-plus-square" style="color: white;"> Tambah Pemindahan</i>
-  </a>
-  <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
-  <i class="fas fa-print" style="color: white;"> Print</i>
-</button>
-</div>
+            <a href="?unit=create_pemindahan" class="btn btn-tool btn-sm" style="background:rgba(0, 123, 255, 1)">
+              <i class="fas fa-plus-square" style="color: white;"> Tambah Pemindahan</i>
+            </a>
+            <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
+              <i class="fas fa-print" style="color: white;"> Print</i>
+            </button>
+          </div>
             <div class="card-tools" style="float: right; text-align: right;">
               <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">
                     <i class="fas fa-bars"></i>
@@ -137,10 +137,6 @@ require_once("../config/koneksi.php");
   </div>
 </div>
 
-<!-- FontAwesome for print icon -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
-<!-- jQuery CDN agar $ terdefinisi -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 document.getElementById('printType').addEventListener('change', function() {
   document.getElementById('jenisBarangGroup').style.display = (this.value === 'jenis') ? '' : 'none';

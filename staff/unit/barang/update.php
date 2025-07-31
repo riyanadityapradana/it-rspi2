@@ -25,8 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_barang   = trim($_POST['nama_barang']);
     $spesifikasi   = trim($_POST['spesifikasi']);
     $jenis_barang  = trim($_POST['jenis_barang']);
-    $stok          = intval($_POST['stok']);
-    $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', spesifikasi='$spesifikasi', jenis_barang='$jenis_barang', stok=$stok WHERE kode_barang='$kode_barang'");
+    $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', spesifikasi='$spesifikasi', jenis_barang='$jenis_barang' WHERE kode_barang='$kode_barang'");
     if ($q) {
         header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
         exit;
@@ -70,10 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="form-group">
             <label>Spesifikasi</label>
             <textarea name="spesifikasi" class="form-control" rows="2"><?= htmlspecialchars($data['spesifikasi']) ?></textarea>
-          </div>
-          <div class="form-group">
-            <label>Stok</label>
-            <input type="number" name="stok" class="form-control" min="0" value="<?= htmlspecialchars($data['stok']) ?>" required>
           </div>
           <button type="submit" class="btn btn-primary">Update</button>
           <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>
