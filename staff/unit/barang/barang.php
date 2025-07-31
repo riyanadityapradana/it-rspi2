@@ -73,7 +73,7 @@ require_once("../config/koneksi.php");
                         <td><?= $no++; ?></td>
                         <td><?= htmlspecialchars($row['nama_barang']); ?></td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
-                        <td><?= htmlspecialchars($row['penyerahan'] ?? '-'); ?></td>
+                        <td><?= htmlspecialchars($row['penyerahan']); ?></td>
                         <td class="text-center">
                             <?php if (!empty($row['stts_brg'])): ?>
                                 <span class="badge badge-<?= $row['stts_brg'] == 'Baik' ? 'success' : 'danger' ?>">

@@ -1,36 +1,33 @@
 <?php
-include '../config/koneksi.php';
+include '../../../config/koneksi.php';
 
 // Ambil filter dari GET
-$printType   = $_GET['printType'] ?? 'all';
-$jenisBarang = $_GET['jenis_barang'] ?? '';
-$bulan       = $_GET['bulan'] ?? date('n');
-$tahun       = $_GET['tahun'] ?? date('Y');
+$printType   = isset($_GET['printType']) ? $_GET['printType'] : 'all';
+$jenisBarang = isset($_GET['jenis_barang']) ? $_GET['jenis_barang'] : '';
+$bulan       = isset($_GET['bulan']) ? $_GET['bulan'] : date('n');
+$tahun       = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
 
 // Query dasar
-$where = "WHERE MONTH(tanggal_pemindahan) = ? AND YEAR(tanggal_pemindahan) = ?";
-$params = [$bulan, $tahun];
-
+$where = "WHERE MONTH(pm.tanggal_pemindahan) = '" . mysqli_real_escape_string($config, $bulan) . "' AND YEAR(pm.tanggal_pemindahan) = '" . mysqli_real_escape_string($config, $tahun) . "'";
 if ($printType === 'jenis' && $jenisBarang) {
-    $where .= " AND b.jenis_barang = ?";
-    $params[] = $jenisBarang;
+    $where .= " AND b.jenis_barang = '" . mysqli_real_escape_string($config, $jenisBarang) . "'";
 }
 
 $query = "
-SELECT pb.*, b.nama_barang, b.jenis_barang, b.spesifikasi, u1.nama_lengkap as pengaju, u2.nama_lengkap as approver
-FROM tb_pemindahan_barang pb
-JOIN tb_barang b ON pb.kode_barang = b.kode_barang
-JOIN tb_user u1 ON pb.created_by = u1.id_user
-LEFT JOIN tb_user u2 ON pb.disetujui_oleh = u2.id_user
+SELECT pm.*, b.nama_barang, b.jenis_barang, u.nama_lengkap as nama_staff
+FROM tb_pemindahan_barang pm
+LEFT JOIN tb_barang b ON pm.kode_barang = b.kode_barang
+LEFT JOIN tb_user u ON pm.id_user = u.id_user
 $where
-ORDER BY pb.tanggal_pemindahan ASC
+ORDER BY pm.tanggal_pemindahan DESC
 ";
 
-$stmt = $pdo->prepare($query);
-$stmt->execute($params);
-$data = $stmt->fetchAll();
+$q = mysqli_query($config, $query);
+$data = array();
+while ($row = mysqli_fetch_assoc($q)) {
+    $data[] = $row;
+}
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -42,12 +39,29 @@ $data = $stmt->fetchAll();
             .no-print { display: none; }
         }
         th, td { font-size: 12px; }
+        .kop-surat img { height: 100px; }
+        .kop-surat .kanan { float: right; height: 40px; margin-left: 10px; }
+        .kop-surat .kiri { float: left; height: 80px; margin-right: 10px; }
+        .kop-surat { text-align: center; position: relative; }
     </style>
 </head>
 <body>
 <div class="container mt-4">
+    <div class="kop-surat mb-2">
+        <img src="../../../assets/img/logo.jpg" alt="Logo" class="kiri">
+        <img src="../../../assets/img/bintang.png" alt="Bintang" class="kanan">
+        <span style="font-size:20px; font-weight:bold;">PT. PELITA INSANI MULIA</span><br>
+        <span style="font-size:16px;">RUMAH SAKIT PELITA INSANI MARTAPURA</span><br>
+        <span style="font-size:14px;">Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya</span><br>
+        <span style="font-size:12px;">Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan</span><br>
+        <span style="font-size:12px; color:red;">Emergency Call (0511) 4722222</span> |
+        <span style="font-size:12px;">Fax. (0511) 4722230 | Email: <span style="color:blue;">rs.pelitainsani@gmail.com</span></span><br>
+        <span style="font-size:12px;">Website: www.pelitainsani.com</span>
+        <div style="clear:both;"></div>
+    </div>
+    <hr style="border:1px solid #000; margin-top:10px; margin-bottom:20px;">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Laporan Pemindahan Barang</h4>
+        <h4 class="mb-0">Laporan Pemindahan Barang</h4>
         <button class="btn btn-success no-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
     <div class="mb-2">
@@ -62,32 +76,26 @@ $data = $stmt->fetchAll();
         <thead>
             <tr>
                 <th>No</th>
-                <th>Tanggal</th>
-                <th>Barang</th>
-                <th>Jenis</th>
-                <th>Unit Asal</th>
-                <th>Unit Tujuan</th>
-                <th>PIC</th>
-                <th>Status</th>
-                <th>Pengaju</th>
-                <th>Approver</th>
+                <th>Kode Barang</th>
+                <th>Nama Barang</th>
+                <th>Tanggal Pemindahan</th>
+                <th>Ke Unit</th>
+                <th>Alasan Pemindahan</th>
+                <th>Staff</th>
             </tr>
         </thead>
         <tbody>
         <?php if(empty($data)): ?>
-            <tr><td colspan="10" class="text-center text-muted">Tidak ada data</td></tr>
+            <tr><td colspan="7" class="text-center text-muted">Tidak ada data</td></tr>
         <?php else: foreach($data as $i => $row): ?>
             <tr>
                 <td><?= $i+1 ?></td>
-                <td><?= date('d/m/Y H:i', strtotime($row['tanggal_pemindahan'])) ?></td>
+                <td><?= htmlspecialchars($row['kode_barang']) ?></td>
                 <td><?= htmlspecialchars($row['nama_barang']) ?></td>
-                <td><?= htmlspecialchars($row['jenis_barang']) ?></td>
-                <td><?= htmlspecialchars($row['unit_asal']) ?></td>
-                <td><?= htmlspecialchars($row['unit_tujuan']) ?></td>
-                <td><?= htmlspecialchars($row['pic_pemindahan']) ?></td>
-                <td><?= htmlspecialchars($row['status_pemindahan']) ?></td>
-                <td><?= htmlspecialchars($row['pengaju']) ?></td>
-                <td><?= htmlspecialchars($row['approver'] ?? '-') ?></td>
+                <td><?= date('d/m/Y', strtotime($row['tanggal_pemindahan'])) ?></td>
+                <td><?= htmlspecialchars($row['ke_unit']) ?></td>
+                <td><?= htmlspecialchars($row['alasan_pemindahan']) ?></td>
+                <td><?= htmlspecialchars($row['nama_staff']) ?></td>
             </tr>
         <?php endforeach; endif; ?>
         </tbody>

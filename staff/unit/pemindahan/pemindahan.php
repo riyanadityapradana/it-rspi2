@@ -54,7 +54,7 @@ require_once("../config/koneksi.php");
                 <tbody>
                     <?php
                     $no = 1;
-                    $q = mysqli_query($config, "SELECT pm.*, b.nama_barang, u.nama_lengkap as nama_staff 
+                    $q = mysqli_query($config, "SELECT pm.*, b.nama_barang, b.jenis_barang, b.penyerahan, u.nama_lengkap as nama_staff 
                         FROM tb_pemindahan_barang pm 
                         LEFT JOIN tb_barang b ON pm.kode_barang = b.kode_barang 
                         LEFT JOIN tb_user u ON pm.id_user = u.id_user 
@@ -71,6 +71,7 @@ require_once("../config/koneksi.php");
                         <td>
                         <a href="dashboard_staff.php?unit=update_pemindahan&id=<?= urlencode($row['id_pemindahan']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
                         <a href="dashboard_staff.php?unit=delete_pemindahan&id=<?= urlencode($row['id_pemindahan']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus data pemindahan ini?')"><i class="fa fa-trash"></i> Hapus</a>
+                        <a href="?unit=detail_pemindahan&id=<?= $row['id_pemindahan'] ?>" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Detail</a>
                         </td>
                     </tr>
                     <?php endwhile; ?>
@@ -83,7 +84,7 @@ require_once("../config/koneksi.php");
 <!-- Modal Print -->
 <div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
-    <form id="formPrint" method="get" target="_blank" action="print_pemindahan.php">
+    <form id="formPrint" method="get" target="_blank" action="unit/pemindahan/print_pemindahan.php">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modalPrintLabel">Cetak Laporan Pemindahan</h5>
@@ -136,6 +137,10 @@ require_once("../config/koneksi.php");
   </div>
 </div>
 
+<!-- FontAwesome for print icon -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<!-- jQuery CDN agar $ terdefinisi -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 document.getElementById('printType').addEventListener('change', function() {
   document.getElementById('jenisBarangGroup').style.display = (this.value === 'jenis') ? '' : 'none';

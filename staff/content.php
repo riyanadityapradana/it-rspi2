@@ -38,6 +38,9 @@ else if ($_GET['unit'] == "update_pemindahan"){
 else if ($_GET['unit'] == "delete_pemindahan"){
   require_once("unit/pemindahan/delete.php");
 }
+else if ($_GET['unit'] == "detail_pemindahan"){
+  require_once("unit/pemindahan/detail_pemindahan.php");
+}
 // PengajuanBarang
 else if ($_GET['unit'] == "pengajuan"){
   require_once("unit/pengajuan/pengajuan.php");

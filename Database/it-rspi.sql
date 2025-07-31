@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 19, 2025 at 06:02 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Waktu pembuatan: 31 Jul 2025 pada 11.49
+-- Versi server: 10.4.28-MariaDB
+-- Versi PHP: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_bahasa`
+-- Struktur dari tabel `tb_bahasa`
 --
 
 CREATE TABLE `tb_bahasa` (
@@ -37,7 +37,7 @@ CREATE TABLE `tb_bahasa` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_barang`
+-- Struktur dari tabel `tb_barang`
 --
 
 CREATE TABLE `tb_barang` (
@@ -45,8 +45,8 @@ CREATE TABLE `tb_barang` (
   `nama_barang` varchar(100) NOT NULL,
   `spesifikasi` text DEFAULT NULL,
   `jenis_barang` enum('Komputer & Laptop','Komponen Komputer & Laptop','Printer & Scanner','Komponen Printer & Scanner','Komponen Network') DEFAULT NULL,
+  `penyerahan` varchar(50) NOT NULL,
   `stok` int(11) DEFAULT 0,
-  `penyerahan` varchar(100) NOT NULL,
   `stts_brg` enum('Baik','Rusak') DEFAULT NULL,
   `status_perbaikan` enum('Belum Ada Perbaikan','Dapat Diperbaiki','Tidak Dapat Diperbaiki') DEFAULT NULL,
   `keterangan_rusak` varchar(100) NOT NULL,
@@ -54,17 +54,17 @@ CREATE TABLE `tb_barang` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_barang`
+-- Dumping data untuk tabel `tb_barang`
 --
 
-INSERT INTO `tb_barang` (`kode_barang`, `nama_barang`, `spesifikasi`, `jenis_barang`, `stok`, `penyerahan`, `stts_brg`, `status_perbaikan`, `keterangan_rusak`, `keterangan_perbaikan`) VALUES
-('BRG/RSPI-001', 'Webcame Logitech C270 HD 720p', '-', 'Komponen Komputer & Laptop', 1, 'Yakult C', 'Baik', 'Dapat Diperbaiki', 'rrr', 'ddd'),
-('BRG/RSPI-002', 'RAM 16 GB DDR 4 Merek KingSton', 'ww', 'Komponen Komputer & Laptop', 1, 'Manajemen', 'Rusak', 'Tidak Dapat Diperbaiki', 'sss', '');
+INSERT INTO `tb_barang` (`kode_barang`, `nama_barang`, `spesifikasi`, `jenis_barang`, `penyerahan`, `stok`, `stts_brg`, `status_perbaikan`, `keterangan_rusak`, `keterangan_perbaikan`) VALUES
+('BRG/RSPI-001', 'Webcame Logitech C270 HD 720p', '-', 'Komponen Komputer & Laptop', 'Yakult C', 1, 'Baik', 'Dapat Diperbaiki', 'rrr', 'ddd'),
+('BRG/RSPI-002', 'RAM 16 GB DDR 4 Merek KingSton', 'ww', 'Komponen Komputer & Laptop', 'Kecubung', 1, 'Rusak', 'Tidak Dapat Diperbaiki', 'sss', '');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_calon`
+-- Struktur dari tabel `tb_calon`
 --
 
 CREATE TABLE `tb_calon` (
@@ -85,7 +85,7 @@ CREATE TABLE `tb_calon` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
--- Dumping data for table `tb_calon`
+-- Dumping data untuk tabel `tb_calon`
 --
 
 INSERT INTO `tb_calon` (`id_calon`, `username`, `password`, `nama_lengkap`, `email`, `no_hp`, `jenis_kelamin`, `tanggal_lahir`, `alamat`, `divisi_lamaran`, `foto`, `status`, `created_at`, `updated_at`) VALUES
@@ -94,7 +94,7 @@ INSERT INTO `tb_calon` (`id_calon`, `username`, `password`, `nama_lengkap`, `ema
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_keahlian`
+-- Struktur dari tabel `tb_keahlian`
 --
 
 CREATE TABLE `tb_keahlian` (
@@ -106,7 +106,7 @@ CREATE TABLE `tb_keahlian` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_kegiatan_lembur`
+-- Struktur dari tabel `tb_kegiatan_lembur`
 --
 
 CREATE TABLE `tb_kegiatan_lembur` (
@@ -116,7 +116,7 @@ CREATE TABLE `tb_kegiatan_lembur` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_kegiatan_lembur`
+-- Dumping data untuk tabel `tb_kegiatan_lembur`
 --
 
 INSERT INTO `tb_kegiatan_lembur` (`id_kegiatan`, `id_lembur`, `kegiatan`) VALUES
@@ -131,7 +131,7 @@ INSERT INTO `tb_kegiatan_lembur` (`id_kegiatan`, `id_lembur`, `kegiatan`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_lembur`
+-- Struktur dari tabel `tb_lembur`
 --
 
 CREATE TABLE `tb_lembur` (
@@ -144,7 +144,7 @@ CREATE TABLE `tb_lembur` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_lembur`
+-- Dumping data untuk tabel `tb_lembur`
 --
 
 INSERT INTO `tb_lembur` (`id_lembur`, `id_staff`, `tanggal_lembur`, `status_lembur`, `id_pimpinan`, `waktu_input`) VALUES
@@ -156,7 +156,7 @@ INSERT INTO `tb_lembur` (`id_lembur`, `id_staff`, `tanggal_lembur`, `status_lemb
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_logbook`
+-- Struktur dari tabel `tb_logbook`
 --
 
 CREATE TABLE `tb_logbook` (
@@ -171,7 +171,7 @@ CREATE TABLE `tb_logbook` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_organisasi`
+-- Struktur dari tabel `tb_organisasi`
 --
 
 CREATE TABLE `tb_organisasi` (
@@ -186,7 +186,29 @@ CREATE TABLE `tb_organisasi` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_pendidikan`
+-- Struktur dari tabel `tb_pemindahan_barang`
+--
+
+CREATE TABLE `tb_pemindahan_barang` (
+  `id_pemindahan` int(11) NOT NULL,
+  `kode_barang` varchar(15) NOT NULL,
+  `tanggal_pemindahan` date NOT NULL,
+  `ke_unit` varchar(50) NOT NULL,
+  `alasan_pemindahan` text NOT NULL,
+  `id_user` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `tb_pemindahan_barang`
+--
+
+INSERT INTO `tb_pemindahan_barang` (`id_pemindahan`, `kode_barang`, `tanggal_pemindahan`, `ke_unit`, `alasan_pemindahan`, `id_user`) VALUES
+(0, 'BRG/RSPI-001', '2025-07-30', 'Manajemen', 'ss', 7);
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `tb_pendidikan`
 --
 
 CREATE TABLE `tb_pendidikan` (
@@ -202,7 +224,7 @@ CREATE TABLE `tb_pendidikan` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_pengajuan_barang`
+-- Struktur dari tabel `tb_pengajuan_barang`
 --
 
 CREATE TABLE `tb_pengajuan_barang` (
@@ -221,17 +243,17 @@ CREATE TABLE `tb_pengajuan_barang` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_pengajuan_barang`
+-- Dumping data untuk tabel `tb_pengajuan_barang`
 --
 
 INSERT INTO `tb_pengajuan_barang` (`id_pengajuan`, `id_staff`, `kode_barang`, `satuan`, `jumlah`, `keterangan`, `bidang_pengajuan`, `status`, `id_kepala`, `tgl_pengajuan`, `waktu_acc`, `keterangan_acc`) VALUES
-(6, 5, 'BRG/RSPI-001', '1', '1', 'sss', 'Divis Unit IT', 'Disetujui', 1, '2025-07-19 11:44:18', '2025-07-19 03:44:50', NULL),
-(7, 5, 'BRG/RSPI-002', '1', '1', 'eee', 'Divis Unit IT', '', 1, '2025-07-19 11:48:33', '2025-07-19 03:49:05', NULL);
+(6, 7, 'BRG/RSPI-001', '1', '1', 'sss', 'Divis Unit IT', 'Disetujui', 1, '2025-07-19 11:44:18', '2025-07-19 03:44:50', NULL),
+(7, 7, 'BRG/RSPI-002', '1', '1', 'eee', 'Divis Unit IT', 'Disetujui', 1, '2025-07-19 11:48:33', '2025-07-19 03:49:05', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_pengalaman`
+-- Struktur dari tabel `tb_pengalaman`
 --
 
 CREATE TABLE `tb_pengalaman` (
@@ -247,7 +269,7 @@ CREATE TABLE `tb_pengalaman` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_remote`
+-- Struktur dari tabel `tb_remote`
 --
 
 CREATE TABLE `tb_remote` (
@@ -258,7 +280,7 @@ CREATE TABLE `tb_remote` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tb_remote`
+-- Dumping data untuk tabel `tb_remote`
 --
 
 INSERT INTO `tb_remote` (`id_remote`, `ip_add`, `password`, `nama_desktop`) VALUES
@@ -267,7 +289,7 @@ INSERT INTO `tb_remote` (`id_remote`, `ip_add`, `password`, `nama_desktop`) VALU
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_sertifikasi`
+-- Struktur dari tabel `tb_sertifikasi`
 --
 
 CREATE TABLE `tb_sertifikasi` (
@@ -281,7 +303,7 @@ CREATE TABLE `tb_sertifikasi` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_user`
+-- Struktur dari tabel `tb_user`
 --
 
 CREATE TABLE `tb_user` (
@@ -300,80 +322,86 @@ CREATE TABLE `tb_user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
--- Dumping data for table `tb_user`
+-- Dumping data untuk tabel `tb_user`
 --
 
 INSERT INTO `tb_user` (`id_user`, `nip`, `username`, `password`, `nama_lengkap`, `email`, `no_hp`, `role`, `foto`, `status`, `created_at`, `updated_at`) VALUES
 (1, '097.011113', 'admin', 'admin', 'Qhusnul Arinda, Amd. Far', 'arien@gmail.com', '082130304411', 'Kepala Ruangan', NULL, 'aktif', '2024-11-30 16:00:00', '2025-07-14 08:10:31'),
 (3, '12333', 'siswa', '12345', 'aaqqqssdddsss', 'kadatahunah@gmail.com', '', 'Staff', '1752481627_WhatsApp Image 2025-05-27 at 09.20.43.jpeg', 'aktif', '2025-07-13 16:13:58', '2025-07-14 08:27:07'),
-(5, '635.090125', 'riyan', '12345', 'Riyan Aditya Pradana, S.Kom', 'riyanadityapradanaa@gmail.com', '082130304411', 'Staff', NULL, 'aktif', '2025-03-11 16:00:00', '2025-07-14 14:50:27');
+(7, '635.090125', 'riyan', '12345', 'Riyan Aditya Pradana, S.Kom', 'riyanadityapradanaa@gmail.com', '', 'Staff', '1753876878_IMG_20250227_182823-removebg-preview.png', 'aktif', '2025-07-29 15:04:10', '2025-07-30 12:01:18');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `tb_bahasa`
+-- Indeks untuk tabel `tb_bahasa`
 --
 ALTER TABLE `tb_bahasa`
   ADD PRIMARY KEY (`id_bahasa`),
   ADD KEY `id_calon` (`id_calon`);
 
 --
--- Indexes for table `tb_barang`
+-- Indeks untuk tabel `tb_barang`
 --
 ALTER TABLE `tb_barang`
   ADD PRIMARY KEY (`kode_barang`);
 
 --
--- Indexes for table `tb_calon`
+-- Indeks untuk tabel `tb_calon`
 --
 ALTER TABLE `tb_calon`
   ADD PRIMARY KEY (`id_calon`),
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- Indexes for table `tb_keahlian`
+-- Indeks untuk tabel `tb_keahlian`
 --
 ALTER TABLE `tb_keahlian`
   ADD PRIMARY KEY (`id_keahlian`),
   ADD KEY `id_calon` (`id_calon`);
 
 --
--- Indexes for table `tb_kegiatan_lembur`
+-- Indeks untuk tabel `tb_kegiatan_lembur`
 --
 ALTER TABLE `tb_kegiatan_lembur`
   ADD PRIMARY KEY (`id_kegiatan`),
   ADD KEY `id_lembur` (`id_lembur`);
 
 --
--- Indexes for table `tb_lembur`
+-- Indeks untuk tabel `tb_lembur`
 --
 ALTER TABLE `tb_lembur`
   ADD PRIMARY KEY (`id_lembur`);
 
 --
--- Indexes for table `tb_logbook`
+-- Indeks untuk tabel `tb_logbook`
 --
 ALTER TABLE `tb_logbook`
   ADD PRIMARY KEY (`id_log`);
 
 --
--- Indexes for table `tb_organisasi`
+-- Indeks untuk tabel `tb_organisasi`
 --
 ALTER TABLE `tb_organisasi`
   ADD PRIMARY KEY (`id_organisasi`),
   ADD KEY `id_calon` (`id_calon`);
 
 --
--- Indexes for table `tb_pendidikan`
+-- Indeks untuk tabel `tb_pemindahan_barang`
+--
+ALTER TABLE `tb_pemindahan_barang`
+  ADD PRIMARY KEY (`id_pemindahan`);
+
+--
+-- Indeks untuk tabel `tb_pendidikan`
 --
 ALTER TABLE `tb_pendidikan`
   ADD PRIMARY KEY (`id_pendidikan`),
   ADD KEY `id_calon` (`id_calon`);
 
 --
--- Indexes for table `tb_pengajuan_barang`
+-- Indeks untuk tabel `tb_pengajuan_barang`
 --
 ALTER TABLE `tb_pengajuan_barang`
   ADD PRIMARY KEY (`id_pengajuan`),
@@ -381,27 +409,27 @@ ALTER TABLE `tb_pengajuan_barang`
   ADD KEY `id_kepala` (`id_kepala`);
 
 --
--- Indexes for table `tb_pengalaman`
+-- Indeks untuk tabel `tb_pengalaman`
 --
 ALTER TABLE `tb_pengalaman`
   ADD PRIMARY KEY (`id_pengalaman`),
   ADD KEY `id_calon` (`id_calon`);
 
 --
--- Indexes for table `tb_remote`
+-- Indeks untuk tabel `tb_remote`
 --
 ALTER TABLE `tb_remote`
   ADD PRIMARY KEY (`id_remote`);
 
 --
--- Indexes for table `tb_sertifikasi`
+-- Indeks untuk tabel `tb_sertifikasi`
 --
 ALTER TABLE `tb_sertifikasi`
   ADD PRIMARY KEY (`id_sertifikasi`),
   ADD KEY `id_calon` (`id_calon`);
 
 --
--- Indexes for table `tb_user`
+-- Indeks untuk tabel `tb_user`
 --
 ALTER TABLE `tb_user`
   ADD PRIMARY KEY (`id_user`),
@@ -409,136 +437,129 @@ ALTER TABLE `tb_user`
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT untuk tabel yang dibuang
 --
 
 --
--- AUTO_INCREMENT for table `tb_bahasa`
+-- AUTO_INCREMENT untuk tabel `tb_bahasa`
 --
 ALTER TABLE `tb_bahasa`
   MODIFY `id_bahasa` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tb_calon`
+-- AUTO_INCREMENT untuk tabel `tb_calon`
 --
 ALTER TABLE `tb_calon`
   MODIFY `id_calon` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `tb_keahlian`
+-- AUTO_INCREMENT untuk tabel `tb_keahlian`
 --
 ALTER TABLE `tb_keahlian`
   MODIFY `id_keahlian` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tb_kegiatan_lembur`
+-- AUTO_INCREMENT untuk tabel `tb_kegiatan_lembur`
 --
 ALTER TABLE `tb_kegiatan_lembur`
   MODIFY `id_kegiatan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `tb_lembur`
+-- AUTO_INCREMENT untuk tabel `tb_lembur`
 --
 ALTER TABLE `tb_lembur`
   MODIFY `id_lembur` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT for table `tb_logbook`
+-- AUTO_INCREMENT untuk tabel `tb_logbook`
 --
 ALTER TABLE `tb_logbook`
   MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `tb_organisasi`
+-- AUTO_INCREMENT untuk tabel `tb_organisasi`
 --
 ALTER TABLE `tb_organisasi`
   MODIFY `id_organisasi` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tb_pendidikan`
+-- AUTO_INCREMENT untuk tabel `tb_pendidikan`
 --
 ALTER TABLE `tb_pendidikan`
   MODIFY `id_pendidikan` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tb_pengajuan_barang`
+-- AUTO_INCREMENT untuk tabel `tb_pengajuan_barang`
 --
 ALTER TABLE `tb_pengajuan_barang`
   MODIFY `id_pengajuan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `tb_pengalaman`
+-- AUTO_INCREMENT untuk tabel `tb_pengalaman`
 --
 ALTER TABLE `tb_pengalaman`
   MODIFY `id_pengalaman` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tb_remote`
+-- AUTO_INCREMENT untuk tabel `tb_remote`
 --
 ALTER TABLE `tb_remote`
   MODIFY `id_remote` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `tb_sertifikasi`
+-- AUTO_INCREMENT untuk tabel `tb_sertifikasi`
 --
 ALTER TABLE `tb_sertifikasi`
   MODIFY `id_sertifikasi` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tb_user`
+-- AUTO_INCREMENT untuk tabel `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- Constraints for dumped tables
+-- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
 
 --
--- Constraints for table `tb_bahasa`
+-- Ketidakleluasaan untuk tabel `tb_bahasa`
 --
 ALTER TABLE `tb_bahasa`
   ADD CONSTRAINT `tb_bahasa_ibfk_1` FOREIGN KEY (`id_calon`) REFERENCES `tb_calon` (`id_calon`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tb_keahlian`
+-- Ketidakleluasaan untuk tabel `tb_keahlian`
 --
 ALTER TABLE `tb_keahlian`
   ADD CONSTRAINT `tb_keahlian_ibfk_1` FOREIGN KEY (`id_calon`) REFERENCES `tb_calon` (`id_calon`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tb_kegiatan_lembur`
+-- Ketidakleluasaan untuk tabel `tb_kegiatan_lembur`
 --
 ALTER TABLE `tb_kegiatan_lembur`
   ADD CONSTRAINT `tb_kegiatan_lembur_ibfk_1` FOREIGN KEY (`id_lembur`) REFERENCES `tb_lembur` (`id_lembur`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tb_organisasi`
+-- Ketidakleluasaan untuk tabel `tb_organisasi`
 --
 ALTER TABLE `tb_organisasi`
   ADD CONSTRAINT `tb_organisasi_ibfk_1` FOREIGN KEY (`id_calon`) REFERENCES `tb_calon` (`id_calon`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tb_pendidikan`
+-- Ketidakleluasaan untuk tabel `tb_pendidikan`
 --
 ALTER TABLE `tb_pendidikan`
   ADD CONSTRAINT `tb_pendidikan_ibfk_1` FOREIGN KEY (`id_calon`) REFERENCES `tb_calon` (`id_calon`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tb_pengajuan_barang`
---
-ALTER TABLE `tb_pengajuan_barang`
-  ADD CONSTRAINT `tb_pengajuan_barang_ibfk_1` FOREIGN KEY (`id_staff`) REFERENCES `tb_user` (`id_user`),
-  ADD CONSTRAINT `tb_pengajuan_barang_ibfk_2` FOREIGN KEY (`id_kepala`) REFERENCES `tb_user` (`id_user`);
-
---
--- Constraints for table `tb_pengalaman`
+-- Ketidakleluasaan untuk tabel `tb_pengalaman`
 --
 ALTER TABLE `tb_pengalaman`
   ADD CONSTRAINT `tb_pengalaman_ibfk_1` FOREIGN KEY (`id_calon`) REFERENCES `tb_calon` (`id_calon`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tb_sertifikasi`
+-- Ketidakleluasaan untuk tabel `tb_sertifikasi`
 --
 ALTER TABLE `tb_sertifikasi`
   ADD CONSTRAINT `tb_sertifikasi_ibfk_1` FOREIGN KEY (`id_calon`) REFERENCES `tb_calon` (`id_calon`) ON DELETE CASCADE;
