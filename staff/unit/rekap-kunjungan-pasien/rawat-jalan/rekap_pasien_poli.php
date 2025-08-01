@@ -38,16 +38,23 @@ $penjamin = [
     'BPJ' => 'BPJS',
     'A92' => 'ASURANSI',
 ];
+// Ambil bulan dan tahun sekarang
+$bulan = date('n'); // 1-12
+$tahun = date('Y'); // 4 digit
+// Cari jumlah hari dalam bulan ini
+$jumlah_hari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
 
 // Tentukan range minggu (bisa diubah manual atau otomatis)
-$minggu = [
-    ['2025-07-01', '2025-07-07'],
-    ['2025-07-08', '2025-07-14'],
-    ['2025-07-15', '2025-07-21'],
-    ['2025-07-22', '2025-07-28'],
-    ['2025-07-29', '2025-07-31'],
-    // Tambahkan minggu lain jika perlu
-];
+$minggu = [];
+$start = 1;
+while ($start <= $jumlah_hari) {
+    $end = min($start + 6, $jumlah_hari);
+    $minggu[] = [
+        date('Y-m-d', mktime(0, 0, 0, $bulan, $start, $tahun)),
+        date('Y-m-d', mktime(0, 0, 0, $bulan, $end, $tahun))
+    ];
+    $start = $end + 1;
+}
 
 // Mapping poli utama ke daftar kode poli sub-poli
 $mapping_poli = [
