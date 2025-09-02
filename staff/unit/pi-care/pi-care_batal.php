@@ -116,8 +116,8 @@ echo "<script>console.log('Data:', " . json_encode($jumlahPasien) . ");</script>
                     <div class="card-header" style="background:rgb(0, 123, 255, 1)">
                          <h3 class="card-title" style="color: white;">DATA PASIEN</h3>
                          <div class="card-tools">
-                         <a href="" data-toggle='modal' data-target='#proses' class="btn btn-tool btn-sm"> 
-                              <i class="fas fa-print"></i>
+                         <a href="#" data-toggle='modal' data-target='#modalFilterPDF' class="btn btn-tool btn-sm"> 
+                              <i class="fas fa-file-pdf"></i>
                          </a>
                          <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse">
                               <i class="fas fa-bars"></i>
@@ -151,34 +151,33 @@ echo "<script>console.log('Data:', " . json_encode($jumlahPasien) . ");</script>
 <!-- Control sidebar content goes here -->
 </aside>
 <!-- /.control-sidebar -->
-<!-- Bagian modal -->
-<div class="container">
-     <div class="modal" id="proses" role="dialog">
-          <div class="modal-dialog">
-               <div class="modal-content">
-                    <div class="modal-header" align = "center">
-                         <h3>PILIH TANGGAL KUNJUNGAN</h3>
-                    </div>
-                    <div class="modal-body" align = "left">
-                         <form role="form" enctype="multipart/form-data" method="post" action="laporan/lap_picarebatal.php?action=tanggal" target="blank">
-                              <div class="row">
-                                   <div class="form-group col-lg-6">
-                                        <input type="date" name="tanggalawal" class="form-control" placeholder="<?=date('Y-m-d');?>">
-                                   </div>
-                                   <div class="form-group col-lg-6">
-                                        <input type="date" name="tanggalakhir" class="form-control" placeholder="<?=date('Y-m-d');?>">
-                                   </div>
+
+<!-- Modal untuk PDF -->
+<div class="modal" id="modalFilterPDF" role="dialog">
+     <div class="modal-dialog">
+          <div class="modal-content">
+               <div class="modal-header" align="center">
+                    <h3>PILIH TANGGAL UNTUK PDF</h3>
+               </div>
+               <div class="modal-body" align="left">
+                    <form role="form" method="get" action="unit/pi-care/lap_pi-care_batal_pdf.php" target="_blank">
+                         <div class="row">
+                              <div class="form-group col-lg-6">
+                                   <input type="date" name="tanggalawal" class="form-control" placeholder="<?=date('Y-m-d');?>">
                               </div>
-                              <div class="row">
-                                   <div class="col-lg-6">
-                                        <button type="submit" class="btn btn-block btn-success">PROSES</button>
-                                   </div>
-                                   <div class="col-lg-6">
-                                        <button type="button" class="btn btn-block btn-warning" data-dismiss="modal">TUTUP</button>
-                                   </div>
+                              <div class="form-group col-lg-6">
+                                   <input type="date" name="tanggalakhir" class="form-control" placeholder="<?=date('Y-m-d');?>">
                               </div>
-                         </form>
-                    </div>
+                         </div>
+                         <div class="row">
+                              <div class="col-lg-6">
+                                   <button type="submit" class="btn btn-block btn-success">PROSES</button>
+                              </div>
+                              <div class="col-lg-6">
+                                   <button type="button" class="btn btn-block btn-warning" data-dismiss="modal">TUTUP</button>
+                              </div>
+                         </div>
+                    </form>
                </div>
           </div>
      </div>

@@ -65,7 +65,7 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                     <img src="../assets/img/<?= htmlspecialchars($foto) ?>" class="img-circle elevation-2" alt="User Image" style="width: 47px; height: 52px; object-fit: cover;">
                 </div>
                 <div class="info ml-2">
-                    <a href="#" class="d-block"><?php echo htmlspecialchars($nama); ?></a>
+                    <a href="#" class="d-block" style="color: black; font-size: 1vw;"><?php echo htmlspecialchars($nama); ?></a>
                     <span class="text-muted small">Kepala Ruangan</span>
                 </div>
             </div>
@@ -87,6 +87,14 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                                 <a href="dashboard_admin.php?unit=pengajuan" class="nav-link">
                                     <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Pengajuan Barang</p>
+                                </a>
+                                <a href="http://192.168.1.66/pmkp" class="nav-link">
+                                    <i class="nav-icon fas fa-folder" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Backup Dokumen IT</p>
+                                </a>
+                                <a href="http://192.168.1.66/invent-barang" class="nav-link">
+                                    <i class="nav-icon fas fa-folder" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Inventaris Barang IT</p>
                                 </a>
                             </li>
                         </ul>

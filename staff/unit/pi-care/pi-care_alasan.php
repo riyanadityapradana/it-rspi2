@@ -99,6 +99,11 @@ foreach ($data as $val) {
         <div class="card">
           <div class="card-header" style="background:rgb(245, 3, 3)">
             <h3 class="card-title" style="color: white;">Alasan Pembatalan</h3>
+            <div class="card-tools">
+              <a href="#" data-toggle='modal' data-target='#modalFilterPDF' class="btn btn-tool btn-sm"> 
+                   <i class="fas fa-file-pdf"></i>
+              </a>
+            </div>
           </div>
           <div class="card-body" style="background:rgb(250, 255, 255)">
             <table id="example1" class="table table-bordered table-striped">
@@ -194,5 +199,39 @@ foreach ($data as $val) {
     });
   });
 </script>
+
+<!-- Modal untuk PDF -->
+<div class="modal" id="modalFilterPDF" role="dialog">
+     <div class="modal-dialog">
+          <div class="modal-content">
+               <div class="modal-header" align="center">
+                    <h3>PILIH TANGGAL UNTUK PDF</h3>
+               </div>
+               <div class="modal-body" align="left">
+                    <form role="form" method="get" action="unit/pi-care/lap_pi-care_alasan_pdf.php" target="_blank">
+                         <div class="row">
+                              <div class="form-group col-lg-6">
+                                   <label>Dari Tanggal:</label>
+                                   <input type="date" name="dari" class="form-control" value="<?=date('Y-m-01');?>">
+                              </div>
+                              <div class="form-group col-lg-6">
+                                   <label>Sampai Tanggal:</label>
+                                   <input type="date" name="sampai" class="form-control" value="<?=date('Y-m-d');?>">
+                              </div>
+                         </div>
+                         <div class="row">
+                              <div class="col-lg-6">
+                                   <button type="submit" class="btn btn-block btn-success">GENERATE PDF</button>
+                              </div>
+                              <div class="col-lg-6">
+                                   <button type="button" class="btn btn-block btn-warning" data-dismiss="modal">TUTUP</button>
+                              </div>
+                         </div>
+                    </form>
+               </div>
+          </div>
+     </div>
+</div>
+
 </body>
 </html>

@@ -1,120 +1,134 @@
 <?php 
+$unit = isset($_GET['unit']) ? $_GET['unit'] : '';
 //Dashboard
-if ($_GET['unit'] == "beranda"){
+if ($unit == "beranda"){
   require_once("unit/beranda.php");
 }
 // Barang
-else if ($_GET['unit'] == "barang"){
+else if ($unit == "barang"){
   require_once("unit/barang/barang.php");
 }
-else if ($_GET['unit'] == "create_barang"){
+else if ($unit == "create_barang"){
   require_once("unit/barang/create.php");
 }
-else if ($_GET['unit'] == "update_barang"){
+else if ($unit == "update_barang"){
   require_once("unit/barang/update.php");
 }
-else if ($_GET['unit'] == "delete_barang"){
+else if ($unit == "delete_barang"){
   require_once("unit/barang/delete.php");
 }
-else if ($_GET['unit'] == "proses_penyerahan"){
+else if ($unit == "proses_penyerahan"){
   require_once("unit/barang/proses_penyerahan.php");
 }
-else if ($_GET['unit'] == "proses_rusak"){
+else if ($unit == "proses_rusak"){
   require_once("unit/barang/proses_rusak.php");
 }
-else if ($_GET['unit'] == "proses_baik"){
+else if ($unit == "proses_baik"){
   require_once("unit/barang/proses_baik.php");
 }
 // Pemindahan Barang
-else if ($_GET['unit'] == "pemindahan"){
+else if ($unit == "pemindahan"){
   require_once("unit/pemindahan/pemindahan.php");
 }
-else if ($_GET['unit'] == "create_pemindahan"){
+else if ($unit == "create_pemindahan"){
   require_once("unit/pemindahan/create.php");
 }
-else if ($_GET['unit'] == "update_pemindahan"){
+else if ($unit == "update_pemindahan"){
   require_once("unit/pemindahan/update.php");
 }
-else if ($_GET['unit'] == "delete_pemindahan"){
+else if ($unit == "delete_pemindahan"){
   require_once("unit/pemindahan/delete.php");
 }
-else if ($_GET['unit'] == "detail_pemindahan"){
+else if ($unit == "detail_pemindahan"){
   require_once("unit/pemindahan/detail_pemindahan.php");
 }
 // PengajuanBarang
-else if ($_GET['unit'] == "pengajuan"){
+else if ($unit == "pengajuan"){
   require_once("unit/pengajuan/pengajuan.php");
 }
-else if ($_GET['unit'] == "create_pengajuan"){
+else if ($unit == "create_pengajuan"){
   require_once("unit/pengajuan/create.php");
 }
-else if ($_GET['unit'] == "update_pengajuan"){
+else if ($unit == "update_pengajuan"){
   require_once("unit/pengajuan/update.php");
 }
-else if ($_GET['unit'] == "delete_pengajuan"){
+else if ($unit == "delete_pengajuan"){
   require_once("unit/pengajuan/delete.php");
 }
 // User
-else if ($_GET['unit'] == "user"){
+else if ($unit == "user"){
   require_once("unit/user/user.php");
 }
-else if ($_GET['unit'] == "update_user"){
+else if ($unit == "update_user"){
   require_once("unit/user/update.php");
 }
 // Logbook kegiatan harian
-else if ($_GET['unit'] == "logbook"){
+else if ($unit == "logbook"){
   require_once("unit/logbook/logbook.php");
 }
-else if ($_GET['unit'] == "create_logbook"){
+else if ($unit == "create_logbook"){
   require_once("unit/logbook/create.php");
 }
-else if ($_GET['unit'] == "update_logbook"){
+else if ($unit == "update_logbook"){
   require_once("unit/logbook/update.php");
 }
-else if ($_GET['unit'] == "delete_logbook"){
+else if ($unit == "delete_logbook"){
   require_once("unit/logbook/delete.php");
 }
 // Lembur
-else if ($_GET['unit'] == "lembur"){
+else if ($unit == "lembur"){
   require_once("unit/lembur/lembur.php");
 }
-else if ($_GET['unit'] == "create_lembur"){
+else if ($unit == "create_lembur"){
   require_once("unit/lembur/create.php");
 }
-else if ($_GET['unit'] == "detail_lembur"){
+else if ($unit == "detail_lembur"){
   require_once("unit/lembur/detail.php");
 }
-else if ($_GET['unit'] == "delete_lembur"){
+else if ($unit== "delete_lembur"){
   require_once("unit/lembur/delete.php");
 }
 // Remote Desktop
-else if ($_GET['unit'] == "remote"){
+else if ($unit == "remote"){
   require_once("unit/remote_destop/remote.php");
 }
-else if ($_GET['unit'] == "create_remote"){
+else if ($unit == "create_remote"){
   require_once("unit/remote_destop/create.php");
 }
-else if ($_GET['unit'] == "update_remote"){
+else if ($unit == "update_remote"){
   require_once("unit/remote_destop/update.php");
 }
-else if ($_GET['unit'] == "delete_remote"){
+else if ($unit == "delete_remote"){
   require_once("unit/remote_destop/delete.php");
 }
 // Rekap kunjungan
-else if ($_GET['unit'] == "rekap_pasien_poli"){
+else if ($unit == "rekap_pasien_poli"){
   require_once("unit/rekap-kunjungan-pasien/rawat-jalan/rekap_pasien_poli.php");
 }
-else if ($_GET['unit'] == "rekap_pasien_ranap"){
+else if ($unit == "rekap_pasien_ranap"){
   require_once("unit/rekap-kunjungan-pasien/rawat-inap/rekap_pasien_ranap.php");
 }
+  else if ($unit == "rekap_px_usia_ranap"){
+    require_once("unit/rekap-kunjungan-pasien/rawat-inap/rekap_px_usia_ranap.php");
+  }
+else if ($unit == "rekap_px_usia_ralan"){
+  require_once("unit/rekap-kunjungan-pasien/rawat-jalan/rekap_px_usia_ralan.php");
+}
 // Picare
-else if ($_GET['unit'] == "daftar"){
+else if ($unit == "daftar"){
   require_once("unit/pi-care/pi-care_daftar.php");
 }
-else if ($_GET['unit'] == "batal"){
+else if ($unit == 'lap_pi-care_daftar'){
+  require_once("unit/pi-care/lap_pi-care_daftar.php");
+}
+else if ($unit == "batal"){
   require_once("unit/pi-care/pi-care_batal.php");
 }
-else if ($_GET['unit'] == "alasan"){
+else if ($unit == "alasan"){
   require_once("unit/pi-care/pi-care_alasan.php");
+}
+// Resep Obat Update
+else if ($unit == "rsp-obat-update"){
+  require_once("unit/rsp-obat-update/rsp-obat-update.php");
 }
 ?>
