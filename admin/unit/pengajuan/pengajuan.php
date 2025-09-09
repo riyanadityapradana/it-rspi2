@@ -1,32 +1,34 @@
+
 <?php
 require_once("../config/koneksi.php");
 $today = date('Y-m-d');
 // Proses ACC/Tolak
 if (isset($_GET['aksi']) && isset($_GET['id'])) {
-    $id_pengajuan = intval($_GET['id']);
-    $id_kepala = $_SESSION['id_user'];
-    if ($_GET['aksi'] == 'acc') {
-        $q = mysqli_query($config, "UPDATE tb_pengajuan_barang SET status='Disetujui', id_kepala='$id_kepala', waktu_acc=NOW() WHERE id_pengajuan='$id_pengajuan' AND status='Menunggu'");
-        if ($q && mysqli_affected_rows($config) > 0) {
-            $_SESSION['toastr'] = ['type' => 'success', 'msg' => 'Pengajuan berhasil di-ACC!'];
-        } else {
-            $_SESSION['toastr'] = ['type' => 'error', 'msg' => 'Gagal ACC pengajuan!'];
-        }
-        header('Location: dashboard_admin.php?unit=pengajuan');
-        exit;
-    } elseif ($_GET['aksi'] == 'tolak') {
-        $q = mysqli_query($config, "UPDATE tb_pengajuan_barang SET status='Ditolak', id_kepala='$id_kepala', waktu_acc=NOW() WHERE id_pengajuan='$id_pengajuan' AND status='Menunggu'");
-        if ($q && mysqli_affected_rows($config) > 0) {
-            $_SESSION['toastr'] = ['type' => 'success', 'msg' => 'Pengajuan berhasil ditolak!'];
-        } else {
-            $_SESSION['toastr'] = ['type' => 'error', 'msg' => 'Gagal menolak pengajuan!'];
-        }
-        header('Location: dashboard_admin.php?unit=pengajuan');
-        exit;
+  $id_pengajuan = intval($_GET['id']);
+  if ($_GET['aksi'] == 'acc') {
+    $q = mysqli_query($config, "UPDATE tb_pengajuan SET status='disetujui', tanggal_acc=CURDATE() WHERE pengajuan_id='$id_pengajuan' AND status='diajukan'");
+    if ($q && mysqli_affected_rows($config) > 0) {
+      header('Location: dashboard_admin.php?unit=pengajuan&msg=Pengajuan barang berhasil di-ACC!');
+      exit;
+    } else {
+      header('Location: dashboard_admin.php?unit=pengajuan&err=Gagal ACC pengajuan!');
+      exit;
     }
+  } elseif ($_GET['aksi'] == 'tolak') {
+    $q = mysqli_query($config, "UPDATE tb_pengajuan SET status='ditolak', tanggal_acc=CURDATE() WHERE pengajuan_id='$id_pengajuan' AND status='diajukan'" );
+    if ($q && mysqli_affected_rows($config) > 0) {
+      header('Location: dashboard_admin.php?unit=pengajuan&msg=Pengajuan barang berhasil ditolak!');
+      exit;
+    } else {
+      header('Location: dashboard_admin.php?unit=pengajuan&err=Gagal menolak pengajuan!');
+      exit;
+    }
+  }
 }
+// ...existing code...
 // Ambil semua pengajuan barang
-$q = mysqli_query($config, "SELECT p.*, b.nama_barang, u.nama_lengkap FROM tb_pengajuan_barang p LEFT JOIN tb_barang b ON p.kode_barang = b.kode_barang LEFT JOIN tb_user u ON p.id_staff = u.id_user ORDER BY p.tgl_pengajuan DESC");
+// Ambil semua pengajuan barang dari tabel baru
+$q = mysqli_query($config, "SELECT p.*, u.nama_lengkap FROM tb_pengajuan p LEFT JOIN tb_user u ON p.id_user = u.id_user ORDER BY p.tanggal_pengajuan DESC");
 ?>
 <section class="content-header">
   <div class="container-fluid">
@@ -69,11 +71,14 @@ $q = mysqli_query($config, "SELECT p.*, b.nama_barang, u.nama_lengkap FROM tb_pe
                 <tr>
                   <th>No</th>
                   <th>Nama Staff</th>
-                  <th>Kode Barang</th>
                   <th>Nama Barang</th>
-                  <th>Satuan</th>
+                  <th>Unit</th>
                   <th>Jumlah</th>
+                  <th>Perkiraan Harga</th>
+                  <th>Keterangan</th>
                   <th>Status</th>
+                  <th>Tanggal Pengajuan</th>
+                  <th>Tanggal ACC</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -82,30 +87,35 @@ $q = mysqli_query($config, "SELECT p.*, b.nama_barang, u.nama_lengkap FROM tb_pe
                 <tr>
                   <td><?= $no++; ?></td>
                   <td><?= htmlspecialchars($row['nama_lengkap']); ?></td>
-                  <td><?= htmlspecialchars($row['kode_barang']); ?></td>
                   <td><?= htmlspecialchars($row['nama_barang']); ?></td>
-                  <td><?= htmlspecialchars($row['satuan']); ?></td>
+                  <td><?= htmlspecialchars($row['unit']); ?></td>
                   <td><?= htmlspecialchars($row['jumlah']); ?></td>
+                  <td><?= htmlspecialchars(number_format($row['perkiraan_harga'],0,',','.')); ?></td>
+                  <td><?= htmlspecialchars($row['keterangan']); ?></td>
                   <td>
                     <?php
                     $status = $row['status'];
-                    if ($status == 'Menunggu') {
-                        echo '<span class="badge badge-warning" style="font-size:1em;">' . $status . '</span>';
-                    } elseif ($status == 'Disetujui') {
-                        echo '<span class="badge badge-success" style="font-size:1em;">' . $status . '</span>';
-                    } elseif ($status == 'Ditolak') {
-                        echo '<span class="badge badge-danger" style="font-size:1em;">' . $status . '</span>';
+                    if ($status == 'diajukan') {
+                        echo '<span class="badge badge-warning" style="font-size:1em;">Diajukan</span>';
+                    } elseif ($status == 'disetujui') {
+                        echo '<span class="badge badge-success" style="font-size:1em;">Disetujui</span>';
+                    } elseif ($status == 'ditolak') {
+                        echo '<span class="badge badge-danger" style="font-size:1em;">Ditolak</span>';
+                    } elseif ($status == 'selesai') {
+                        echo '<span class="badge badge-primary" style="font-size:1em;">Selesai</span>';
                     } else {
-                        echo '<span class="badge badge-secondary" style="font-size:1em;">' . $status . '</span>';
+                        echo '<span class="badge badge-secondary" style="font-size:1em;">' . htmlspecialchars($status) . '</span>';
                     }
                     ?>
                   </td>
+                  <td><?= htmlspecialchars($row['tanggal_pengajuan']); ?></td>
+                  <td><?= htmlspecialchars($row['tanggal_acc']); ?></td>
                   <td>
-                    <?php if ($row['status'] == 'Menunggu'): ?>
-                      <a href="dashboard_admin.php?unit=pengajuan&aksi=acc&id=<?= $row['id_pengajuan'] ?>" class="btn btn-success btn-sm">ACC</a>
-                      <a href="dashboard_admin.php?unit=pengajuan&aksi=tolak&id=<?= $row['id_pengajuan'] ?>" class="btn btn-danger btn-sm">Tolak</a>
-                    <?php elseif ($row['status'] == 'Disetujui'): ?>
-                      <a href="unit/pengajuan/lap_pemintaan_brg.php?id=<?= $row['id_pengajuan'] ?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-print"></i> Cetak</a>
+                    <?php if ($row['status'] == 'diajukan'): ?>
+                      <a href="dashboard_admin.php?unit=pengajuan&aksi=acc&id=<?= $row['pengajuan_id'] ?>" class="btn btn-success btn-sm">ACC</a>
+                      <a href="dashboard_admin.php?unit=pengajuan&aksi=tolak&id=<?= $row['pengajuan_id'] ?>" class="btn btn-danger btn-sm">Tolak</a>
+                    <?php elseif ($row['status'] == 'disetujui'): ?>
+                      <a href="unit/pengajuan/lap_pemintaan_brg.php?id=<?= $row['pengajuan_id'] ?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-print"></i> Cetak</a>
                     <?php else: ?>
                       <span class="text-muted">-</span>
                     <?php endif; ?>
@@ -119,10 +129,4 @@ $q = mysqli_query($config, "SELECT p.*, b.nama_barang, u.nama_lengkap FROM tb_pe
       </div>
     </div>
   </div>
-</section>
-<?php if (isset($_SESSION['toastr'])): ?>
-<script>
-toastr.options = {"positionClass": "toast-top-right", "timeOut": "3000"};
-toastr.<?= $_SESSION['toastr']['type'] ?>("<?= addslashes($_SESSION['toastr']['msg']) ?>");
-</script>
-<?php unset($_SESSION['toastr']); endif; ?> 
+</section>  

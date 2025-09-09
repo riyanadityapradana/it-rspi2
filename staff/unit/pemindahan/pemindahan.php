@@ -42,54 +42,51 @@ require_once("../config/koneksi.php");
                 <thead style="background:rgb(129, 2, 0, 1); color:white;">
                     <tr>
                     <th>No</th>
-                    <th>Kode Barang</th>
-                    <th>Nama Barang</th>
-                    <th>Tanggal Pemindahan</th>
-                    <th>Ke Unit</th>
-                    <th>Alasan Pemindahan</th>
-                    <th>Staff</th>
-                    <th>Aksi</th>
+                      <th>Nama Barang</th>
+                      <th>Lokasi Asal</th>
+                      <th>Lokasi Tujuan</th>
+                      <th>Tanggal Mutasi</th>
+                      <th>Keterangan</th>
+                      <th>Staff</th>
+                      <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $no = 1;
-                    $q = mysqli_query($config, "SELECT pm.*, b.nama_barang, b.jenis_barang, b.penyerahan, u.nama_lengkap as nama_staff 
-                        FROM tb_pemindahan_barang pm 
-                        LEFT JOIN tb_barang b ON pm.kode_barang = b.kode_barang 
-                        LEFT JOIN tb_user u ON pm.id_user = u.id_user 
-                        ORDER BY pm.tanggal_pemindahan DESC");
-                    while ($row = mysqli_fetch_assoc($q)) : ?>
-                    <tr>
-                        <td><?= $no++; ?></td>
-                        <td><?= htmlspecialchars($row['kode_barang']); ?></td>
-                        <td><?= htmlspecialchars($row['nama_barang']); ?></td>
-                        <td><?= date('d/m/Y', strtotime($row['tanggal_pemindahan'])); ?></td>
-                        <td><?= htmlspecialchars($row['ke_unit']); ?></td>
-                        <td><?= htmlspecialchars($row['alasan_pemindahan']); ?></td>
-                        <td><?= htmlspecialchars($row['nama_staff']); ?></td>
-                        <td>
-                        <a href="dashboard_staff.php?unit=update_pemindahan&id=<?= urlencode($row['id_pemindahan']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
-                        <a href="dashboard_staff.php?unit=delete_pemindahan&id=<?= urlencode($row['id_pemindahan']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus data pemindahan ini?')"><i class="fa fa-trash"></i> Hapus</a>
-                        <a href="?unit=detail_pemindahan&id=<?= $row['id_pemindahan'] ?>" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Detail</a>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
+          $q = mysqli_query($config, "SELECT m.*, b.nama_barang, l1.nama_lokasi AS lokasi_asal_nama, l2.nama_lokasi AS lokasi_tujuan_nama, u.nama_lengkap as nama_staff 
+            FROM tb_mutasi_barang m 
+            LEFT JOIN tb_barang b ON m.barang_id = b.barang_id 
+            LEFT JOIN tb_lokasi l1 ON m.lokasi_asal = l1.lokasi_id 
+            LEFT JOIN tb_lokasi l2 ON m.lokasi_tujuan = l2.lokasi_id 
+            LEFT JOIN tb_user u ON m.id_user = u.id_user 
+            ORDER BY m.tanggal_mutasi DESC");
+          while ($row = mysqli_fetch_assoc($q)) : ?>
+          <tr>
+            <td><?= $no++; ?></td>
+            <td><?= htmlspecialchars($row['nama_barang']); ?></td>
+            <td><?= htmlspecialchars($row['lokasi_asal_nama']); ?></td>
+            <td><?= htmlspecialchars($row['lokasi_tujuan_nama']); ?></td>
+            <td><?= !empty($row['tanggal_mutasi']) ? date('d/m/Y', strtotime($row['tanggal_mutasi'])) : '-'; ?></td>
+            <td><?= htmlspecialchars($row['keterangan']); ?></td>
+            <td><?= htmlspecialchars($row['nama_staff']); ?></td>
+            <td>
+            <a href="dashboard_staff.php?unit=update_pemindahan&id=<?= urlencode($row['mutasi_id']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
+            <a href="dashboard_staff.php?unit=delete_pemindahan&id=<?= urlencode($row['mutasi_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus data mutasi ini?')"><i class="fa fa-trash"></i> Hapus</a>
+            <a href="?unit=detail_pemindahan&id=<?= $row['mutasi_id'] ?>" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Detail</a>
+            </td>
+          </tr>
+          <?php endwhile; ?>
                 </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Modal Print -->
 <div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <form id="formPrint" method="get" target="_blank" action="unit/pemindahan/print_pemindahan.php">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalPrintLabel">Cetak Laporan Pemindahan</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+            <td><?= htmlspecialchars($row['nama_barang']); ?></td>
+            <td><?= htmlspecialchars($row['lokasi_asal_nama']); ?></td>
+            <td><?= htmlspecialchars($row['lokasi_tujuan_nama']); ?></td>
+            <td><?= date('d/m/Y', strtotime($row['tanggal_mutasi'])); ?></td>
+            <td><?= htmlspecialchars($row['keterangan']); ?></td>
           </button>
         </div>
         <div class="modal-body">

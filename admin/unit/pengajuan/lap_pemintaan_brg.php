@@ -11,50 +11,40 @@ $tanggal = '....................................................';
 if (isset($_GET['dari']) && isset($_GET['sampai'])) {
     $dari = $_GET['dari'];
     $sampai = $_GET['sampai'];
-    $q = mysqli_query($config, "
-        SELECT pb.*, b.nama_barang, b.spesifikasi 
-        FROM tb_pengajuan_barang pb
-        JOIN tb_barang b ON pb.kode_barang = b.kode_barang
-        WHERE DATE(pb.tgl_pengajuan) BETWEEN '$dari' AND '$sampai'
-        ORDER BY pb.tgl_pengajuan, pb.kode_barang
-    ");
+    $q = mysqli_query($config, "SELECT * FROM tb_pengajuan WHERE DATE(tanggal_pengajuan) BETWEEN '$dari' AND '$sampai' ORDER BY tanggal_pengajuan, pengajuan_id");
     while ($row = mysqli_fetch_assoc($q)) {
         $dataBarang[] = [
             'nama' => $row['nama_barang'],
-            'satuan' => $row['satuan'],
+            'unit' => $row['unit'],
             'jumlah' => $row['jumlah'],
+            'perkiraan_harga' => $row['perkiraan_harga'],
             'keterangan' => $row['keterangan'],
-            'unit' => $row['bidang_pengajuan'],
-            'tanggal' => $row['tgl_pengajuan']
+            'tanggal' => $row['tanggal_pengajuan']
         ];
     }
-    // Untuk header, ambil unit dan tanggal dari data pertama jika ada
     if (count($dataBarang) > 0) {
         $unit = $dataBarang[0]['unit'];
         $tanggal = date('Y-m-d', strtotime($dataBarang[0]['tanggal']));
     }
 } elseif (isset($_GET['id'])) {
     $id = intval($_GET['id']);
-    $q = mysqli_query($config, "
-        SELECT pb.*, b.nama_barang, b.spesifikasi 
-        FROM tb_pengajuan_barang pb
-        JOIN tb_barang b ON pb.kode_barang = b.kode_barang
-        WHERE pb.id_pengajuan = '$id'
-    ");
+    $q = mysqli_query($config, "SELECT * FROM tb_pengajuan WHERE pengajuan_id = '$id'");
     if ($row = mysqli_fetch_assoc($q)) {
         $dataBarang[] = [
             'nama' => $row['nama_barang'],
-            'satuan' => $row['satuan'],
+            'unit' => $row['unit'],
             'jumlah' => $row['jumlah'],
-            'keterangan' => $row['keterangan']
+            'perkiraan_harga' => $row['perkiraan_harga'],
+            'keterangan' => $row['keterangan'],
+            'tanggal' => $row['tanggal_pengajuan']
         ];
-        $unit = $row['bidang_pengajuan'];
-        $tanggal = $row['tgl_pengajuan'] != '0000-00-00' ? date('d-m-Y', strtotime($row['tgl_pengajuan'])) : '....................................................';
+        $unit = $row['unit'];
+        $tanggal = $row['tanggal_pengajuan'] != '0000-00-00' ? date('d-m-Y', strtotime($row['tanggal_pengajuan'])) : '....................................................';
     }
 }
 // Tetap 10 baris minimal
 while (count($dataBarang) < 10) {
-    $dataBarang[] = ['nama' => '', 'satuan' => '', 'jumlah' => '', 'keterangan' => ''];
+    $dataBarang[] = ['nama' => '', 'unit' => '', 'jumlah' => '', 'perkiraan_harga' => '', 'keterangan' => '', 'tanggal' => ''];
 }
 
 // Mulai PDF
@@ -93,30 +83,37 @@ $html .= '<table cellpadding="2" style="margin-bottom:10px;">
 $html .= '<p>Melalui surat ini, Mohon disediakan alat/barang sebagai berikut :</p>';
 
 // Tabel barang
-$html .= '<table border="1" cellpadding="4" style="border-collapse:collapse; margin:auto;">
-<tr style="background:#eee;">
-    <th width="30" align="center">No.</th>
-    <th width="180" align="center">NAMA BARANG</th>
-    <th width="60" align="center">Satuan</th>
-    <th width="60" align="center">Jumlah</th>
-    <th width="180" align="center">Keterangan</th>
-</tr>';
+
+$html .= '<table border="1" cellpadding="4" style="border-collapse:collapse; margin:auto; font-size:11px;">
+<thead>
+<tr style="background:#f2f2f2;">
+    <th width="30" align="center" style="font-weight:bold;">No.</th>
+    <th width="140" align="center" style="font-weight:bold;">Nama Barang</th>
+    <th width="50" align="center" style="font-weight:bold;">Unit</th>
+    <th width="50" align="center" style="font-weight:bold;">Jumlah</th>
+    <th width="80" align="center" style="font-weight:bold;">Perkiraan Harga</th>
+    <th width="140" align="center" style="font-weight:bold;">Keterangan</th>
+</tr>
+</thead>
+<tbody>
+';
 if (count(array_filter(array_column($dataBarang, 'nama'))) == 0) {
-    $html .= '<tr><td colspan="5" align="center">Tidak ada data pengajuan pada tanggal tersebut.</td></tr>';
+    $html .= '<tr><td colspan="6" align="center">Tidak ada data pengajuan pada tanggal tersebut.</td></tr>';
 } else {
     for ($i=0; $i<count($dataBarang); $i++) {
         $no = $i+1;
         $row = $dataBarang[$i];
         $html .= '<tr>
-            <td align="center">'.$no.'</td>
-            <td>'.$row['nama'].'</td>
-            <td align="center">'.$row['satuan'].'</td>
-            <td align="center">'.$row['jumlah'].'</td>
-            <td>'.$row['keterangan'].'</td>
+            <td width="30" align="center">'.$no.'</td>
+            <td width="140" align="center">'.htmlspecialchars($row['nama']).'</td>
+            <td width="50" align="center">'.htmlspecialchars($row['unit']).'</td>
+            <td width="50" align="center">'.htmlspecialchars($row['jumlah']).'</td>
+            <td width="80" align="center">'.(is_numeric($row['perkiraan_harga']) ? number_format($row['perkiraan_harga'],0,',','.') : '').'</td>
+            <td width="140">'.htmlspecialchars($row['keterangan']).'</td>
         </tr>';
     }
 }
-$html .= '</table>';
+$html .= '</tbody></table>';
 
 $html .= '<br><br><br>';
 $html .= '<table width="100%" style="font-size:11px;">

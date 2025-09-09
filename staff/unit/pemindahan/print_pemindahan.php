@@ -8,18 +8,20 @@ $bulan       = isset($_GET['bulan']) ? $_GET['bulan'] : date('n');
 $tahun       = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
 
 // Query dasar
-$where = "WHERE MONTH(pm.tanggal_pemindahan) = '" . mysqli_real_escape_string($config, $bulan) . "' AND YEAR(pm.tanggal_pemindahan) = '" . mysqli_real_escape_string($config, $tahun) . "'";
+$where = "WHERE MONTH(m.tanggal_mutasi) = '" . mysqli_real_escape_string($config, $bulan) . "' AND YEAR(m.tanggal_mutasi) = '" . mysqli_real_escape_string($config, $tahun) . "'";
 if ($printType === 'jenis' && $jenisBarang) {
     $where .= " AND b.jenis_barang = '" . mysqli_real_escape_string($config, $jenisBarang) . "'";
 }
 
 $query = "
-SELECT pm.*, b.nama_barang, b.jenis_barang, u.nama_lengkap as nama_staff
-FROM tb_pemindahan_barang pm
-LEFT JOIN tb_barang b ON pm.kode_barang = b.kode_barang
-LEFT JOIN tb_user u ON pm.id_user = u.id_user
+SELECT m.*, b.nama_barang, b.jenis_barang, l1.nama_lokasi AS lokasi_asal_nama, l2.nama_lokasi AS lokasi_tujuan_nama, u.nama_lengkap as nama_staff
+FROM tb_mutasi_barang m
+LEFT JOIN tb_barang b ON m.barang_id = b.barang_id
+LEFT JOIN tb_lokasi l1 ON m.lokasi_asal = l1.lokasi_id
+LEFT JOIN tb_lokasi l2 ON m.lokasi_tujuan = l2.lokasi_id
+LEFT JOIN tb_user u ON m.id_user = u.id_user
 $where
-ORDER BY pm.tanggal_pemindahan DESC
+ORDER BY m.tanggal_mutasi DESC
 ";
 
 $q = mysqli_query($config, $query);
@@ -76,25 +78,27 @@ while ($row = mysqli_fetch_assoc($q)) {
         <thead>
             <tr>
                 <th>No</th>
-                <th>Kode Barang</th>
                 <th>Nama Barang</th>
-                <th>Tanggal Pemindahan</th>
-                <th>Ke Unit</th>
-                <th>Alasan Pemindahan</th>
+                <th>Jenis Barang</th>
+                <th>Lokasi Asal</th>
+                <th>Lokasi Tujuan</th>
+                <th>Tanggal Mutasi</th>
+                <th>Keterangan</th>
                 <th>Staff</th>
             </tr>
         </thead>
         <tbody>
         <?php if(empty($data)): ?>
-            <tr><td colspan="7" class="text-center text-muted">Tidak ada data</td></tr>
+            <tr><td colspan="8" class="text-center text-muted">Tidak ada data</td></tr>
         <?php else: foreach($data as $i => $row): ?>
             <tr>
                 <td><?= $i+1 ?></td>
-                <td><?= htmlspecialchars($row['kode_barang']) ?></td>
                 <td><?= htmlspecialchars($row['nama_barang']) ?></td>
-                <td><?= date('d/m/Y', strtotime($row['tanggal_pemindahan'])) ?></td>
-                <td><?= htmlspecialchars($row['ke_unit']) ?></td>
-                <td><?= htmlspecialchars($row['alasan_pemindahan']) ?></td>
+                <td><?= htmlspecialchars($row['jenis_barang']) ?></td>
+                <td><?= htmlspecialchars($row['lokasi_asal_nama']) ?></td>
+                <td><?= htmlspecialchars($row['lokasi_tujuan_nama']) ?></td>
+                <td><?= date('d/m/Y', strtotime($row['tanggal_mutasi'])) ?></td>
+                <td><?= htmlspecialchars($row['keterangan']) ?></td>
                 <td><?= htmlspecialchars($row['nama_staff']) ?></td>
             </tr>
         <?php endforeach; endif; ?>

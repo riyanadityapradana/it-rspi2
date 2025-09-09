@@ -1,39 +1,35 @@
+
 <?php
 require_once("../config/koneksi.php");
 if (!isset($_GET['id'])) {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Pengajuan tidak ditemukan!');
     exit;
 }
-$id_pengajuan = $_GET['id'];
-$id_staff = $_SESSION['id_user'];
+$pengajuan_id = intval($_GET['id']);
+$id_user = $_SESSION['id_user'];
 // Ambil data pengajuan
-$q = mysqli_query($config, "SELECT * FROM tb_pengajuan_barang WHERE id_pengajuan='".intval($id_pengajuan)."' AND id_staff='$id_staff'");
+$q = mysqli_query($config, "SELECT * FROM tb_pengajuan WHERE pengajuan_id='$pengajuan_id' AND id_user='$id_user'");
 $data = mysqli_fetch_assoc($q);
 if (!$data) {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Pengajuan tidak ditemukan!');
     exit;
 }
-if ($data['status'] !== 'Menunggu') {
+if ($data['status'] !== 'diajukan') {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Pengajuan tidak bisa diedit!');
     exit;
 }
-// Ambil data barang untuk dropdown
-$barang = [];
-$qbarang = mysqli_query($config, "SELECT kode_barang, nama_barang FROM tb_barang ORDER BY nama_barang ASC");
-while ($row = mysqli_fetch_assoc($qbarang)) {
-    $barang[] = $row;
-}
 // Proses update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $satuan      = trim($_POST['satuan']);
-    $jumlah      = intval($_POST['jumlah']);
-    $keterangan  = trim($_POST['keterangan']);
-    $bidang      = isset($_POST['bidang_pengajuan']) ? trim($_POST['bidang_pengajuan']) : '';
-    if (!$satuan || !$jumlah) {
+    $nama_barang = trim($_POST['nama_barang']);
+    $unit = trim($_POST['unit']);
+    $jumlah = intval($_POST['jumlah']);
+    $perkiraan_harga = floatval($_POST['perkiraan_harga']);
+    $keterangan = trim($_POST['keterangan']);
+    if (!$nama_barang || !$unit || !$jumlah || !$perkiraan_harga) {
         header('Location: dashboard_staff.php?unit=pengajuan&err=Data tidak lengkap!');
         exit;
     }
-    $q = mysqli_query($config, "UPDATE tb_pengajuan_barang SET satuan='$satuan', jumlah=$jumlah, keterangan='$keterangan', bidang_pengajuan='$bidang' WHERE id_pengajuan='$id_pengajuan' AND id_staff='$id_staff'");
+    $q = mysqli_query($config, "UPDATE tb_pengajuan SET nama_barang='$nama_barang', unit='$unit', jumlah=$jumlah, perkiraan_harga=$perkiraan_harga, keterangan='$keterangan' WHERE pengajuan_id='$pengajuan_id' AND id_user='$id_user' AND status='diajukan'");
     if ($q) {
         header('Location: dashboard_staff.php?unit=pengajuan&msg=Pengajuan barang berhasil diupdate!');
         exit;
@@ -59,27 +55,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="post">
           <div class="form-group">
             <label>Nama Barang</label>
-            <select name="kode_barang" class="form-control select2" disabled readonly>
-              <?php foreach ($barang as $b): ?>
-                <option value="<?= htmlspecialchars($b['kode_barang']) ?>" <?= $data['kode_barang'] == $b['kode_barang'] ? 'selected' : '' ?>><?= htmlspecialchars($b['nama_barang']) ?></option>
-              <?php endforeach; ?>
-            </select>
+            <input type="text" name="nama_barang" class="form-control" value="<?= htmlspecialchars($data['nama_barang']) ?>" required maxlength="150">
           </div>
           <div class="form-group">
-            <label>Satuan</label>
-            <input type="text" name="satuan" class="form-control" value="<?= htmlspecialchars($data['satuan']) ?>" required maxlength="15">
+            <label>Unit</label>
+            <input type="text" name="unit" class="form-control" value="<?= htmlspecialchars($data['unit']) ?>" readonly maxlength="50">
           </div>
           <div class="form-group">
             <label>Jumlah</label>
             <input type="number" name="jumlah" class="form-control" min="1" value="<?= htmlspecialchars($data['jumlah']) ?>" required>
           </div>
           <div class="form-group">
-            <label>Keterangan</label>
-            <textarea name="keterangan" class="form-control" rows="2"><?= htmlspecialchars($data['keterangan']) ?></textarea>
+            <label>Perkiraan Harga</label>
+            <input type="number" name="perkiraan_harga" class="form-control" min="0" step="0.01" value="<?= htmlspecialchars($data['perkiraan_harga']) ?>" required>
           </div>
           <div class="form-group">
-            <label>Bidang Pengajuan</label>
-            <input type="text" name="bidang_pengajuan" class="form-control" value="<?= htmlspecialchars($data['bidang_pengajuan']) ?>" readonly required>
+            <label>Keterangan</label>
+            <textarea name="keterangan" class="form-control" rows="2"><?= htmlspecialchars($data['keterangan']) ?></textarea>
           </div>
           <button type="submit" class="btn btn-primary">Update</button>
           <a href="dashboard_staff.php?unit=pengajuan" class="btn btn-secondary">Kembali</a>

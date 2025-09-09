@@ -5,35 +5,45 @@ if (!function_exists('toastr_script')) {
 function toastr_script($msg, $type = 'success') {
     echo "<script>toastr.$type('$msg');</script>";
 }}
-// Generate kode otomatis
-$q = mysqli_query($config, "SELECT kode_barang FROM tb_barang WHERE kode_barang LIKE 'BRG/RSPI-%' ORDER BY kode_barang DESC LIMIT 1");
-$last = mysqli_fetch_assoc($q);
-if ($last && preg_match('/(\\d+)$/', $last['kode_barang'], $m)) {
-    $next = intval($m[1]) + 1;
-} else {
-    $next = 1;
+// ...existing code...
+// Ambil lokasi
+$lokasi_q = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
+$lokasi_list = [];
+while ($row = mysqli_fetch_assoc($lokasi_q)) {
+  $lokasi_list[] = $row;
 }
-$kode_baru = 'BRG/RSPI-' . str_pad($next, 3, '0', STR_PAD_LEFT);
 // Proses simpan
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $kode_barang   = trim($_POST['kode_barang']);
-    $nama_barang   = trim($_POST['nama_barang']);
-    $spesifikasi   = trim($_POST['spesifikasi']);
-    $jenis_barang  = trim($_POST['jenis_barang']);
-    $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE kode_barang='$kode_barang'");
-    if (mysqli_num_rows($cek) > 0) {
-        header('Location: dashboard_staff.php?unit=barang&err=Kode barang sudah terdaftar!');
-        exit;
+  $pengajuan_id = isset($_POST['pengajuan_id']) ? intval($_POST['pengajuan_id']) : NULL;
+  $nama_barang = trim($_POST['nama_barang']);
+  $jenis_barang = trim($_POST['jenis_barang']);
+  $nomor_seri = trim($_POST['nomor_seri']);
+  // Jika jenis barang bukan Komputer & Laptop, ip_address = null
+  if ($jenis_barang === 'Komputer & Laptop') {
+    $ip_address = trim($_POST['ip_address']);
+  } else {
+    $ip_address = '';
+  }
+  $jumlah = intval($_POST['jumlah']);
+  $harga = floatval($_POST['harga']);
+  $spesifikasi = trim($_POST['spesifikasi']);
+  $tanggal_terima = trim($_POST['tanggal_terima']);
+  $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE nama_barang='$nama_barang' AND nomor_seri='$nomor_seri'");
+  if (mysqli_num_rows($cek) > 0) {
+    header('Location: dashboard_staff.php?unit=barang&err=Barang sudah terdaftar!');
+    exit;
+  } else {
+    $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima) VALUES (
+      " . ($pengajuan_id ? "'$pengajuan_id'," : "NULL,") . "
+      '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', $jumlah, $harga, '$spesifikasi', '$tanggal_terima')");
+    if ($q) {
+      header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
+      exit;
     } else {
-        $q = mysqli_query($config, "INSERT INTO tb_barang (kode_barang, nama_barang, spesifikasi, jenis_barang, stts_brg, status_perbaikan) VALUES ('$kode_barang', '$nama_barang', '$spesifikasi', '$jenis_barang', NULL, NULL)");
-        if ($q) {
-            header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
-            exit;
-        } else {
-            header('Location: dashboard_staff.php?unit=barang&err=Gagal menambah barang!');
-            exit;
-        }
+      header('Location: dashboard_staff.php?unit=barang&err=Gagal menambah barang!');
+      exit;
     }
+  }
 }
 // Pilihan jenis barang
 $jenis_list = [
@@ -59,12 +69,8 @@ $jenis_list = [
       <div class="card-body">
         <form method="post">
           <div class="form-group">
-            <label>Kode Barang</label>
-            <input type="text" name="kode_barang" class="form-control" value="<?= $kode_baru ?>" readonly required maxlength="15">
-          </div>
-          <div class="form-group">
             <label>Nama Barang</label>
-            <input type="text" name="nama_barang" class="form-control" required maxlength="100">
+            <input type="text" name="nama_barang" class="form-control" required maxlength="150">
           </div>
           <div class="form-group">
             <label>Jenis Barang</label>
@@ -76,9 +82,69 @@ $jenis_list = [
             </select>
           </div>
           <div class="form-group">
+            <label>Nomor Seri</label>
+            <input type="text" name="nomor_seri" class="form-control" maxlength="150"  placeholder="Contoh: SN123456789">
+          </div>
+          <div class="form-group" id="ipAddressGroup" style="display:none;">
+            <label>IP Address</label>
+            <input type="text" name="ip_address" class="form-control" maxlength="50" placeholder="Contoh: 192.168.1.10">
+          </div>
+          <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            var jenisSelect = document.querySelector('select[name="jenis_barang"]');
+            var ipGroup = document.getElementById('ipAddressGroup');
+            function toggleIp() {
+              if (jenisSelect.value === 'Komputer & Laptop') {
+                ipGroup.style.display = '';
+              } else {
+                ipGroup.style.display = 'none';
+                ipGroup.querySelector('input').value = '';
+              }
+            }
+            // Trigger on select2 change too
+            $(jenisSelect).on('change', toggleIp);
+            // Initial check
+            setTimeout(toggleIp, 100);
+          });
+          </script>
+          <div class="form-group">
+            <label>Jumlah</label>
+            <input type="number" name="jumlah" class="form-control" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>Harga</label>
+            <input type="number" name="harga" class="form-control" min="0" step="0.01" required>
+          </div>
+          <div class="form-group">
             <label>Spesifikasi</label>
             <textarea name="spesifikasi" class="form-control" rows="2"></textarea>
           </div>
+          <div class="form-group">
+            <label>Tanggal Terima</label>
+            <input type="date" name="tanggal_terima" class="form-control" value="<?= date('Y-m-d') ?>" required>
+          </div>
+          <!-- <div class="form-group"> 
+            <label>Kondisi</label>
+            <select name="kondisi" class="form-control" required>
+              <option value="baru">Baru</option>
+              <option value="bekas">Bekas</option>
+              <option value="rusak">Rusak</option>
+              <option value="dalam perbaikan">Dalam Perbaikan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Lokasi</label>
+            <select name="lokasi_id" class="form-control select2" required>
+              <option value="">-- Pilih Lokasi --</option>
+              <?php foreach ($lokasi_list as $lokasi): ?>
+                <option value="<?= $lokasi['lokasi_id'] ?>"><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Keterangan</label>
+            <textarea name="keterangan" class="form-control" rows="2"></textarea>
+          </div>-->
           <button type="submit" class="btn btn-primary">Simpan</button>
           <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>
         </form>

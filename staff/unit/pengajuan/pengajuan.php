@@ -37,56 +37,62 @@ $id_staff = $_SESSION['id_user'];
 			</div>
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
-                <thead style="background:rgb(129, 2, 0, 1); color:white;">
-                    <tr>
-                    <th>No</th>
-                    <th>Kode Barang</th>
-                    <th>Nama Barang</th>
-                    <th>Satuan</th>
-                    <th>Jumlah</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                    </tr>
-                </thead>
+        <thead style="background:rgb(129, 2, 0, 1); color:white;">
+          <tr>
+          <th>No</th>
+          <th>Nama Barang</th>
+          <th>Unit</th>
+          <th>Jumlah</th>
+          <th>Perkiraan Harga</th>
+          <th>Keterangan</th>
+          <th>Status</th>
+          <th>Tanggal Pengajuan</th>
+          <th>Aksi</th>
+          </tr>
+        </thead>
                 <tbody>
                     <?php
-                    $no = 1;
-                    $q = mysqli_query($config, "SELECT p.*, b.nama_barang FROM tb_pengajuan_barang p LEFT JOIN tb_barang b ON p.kode_barang = b.kode_barang WHERE p.id_staff='$id_staff' ORDER BY p.tgl_pengajuan DESC");
-                    while ($row = mysqli_fetch_assoc($q)) : ?>
-                    <tr>
-                        <td><?= $no++; ?></td>
-                        <td><?= htmlspecialchars($row['kode_barang']); ?></td>
-                        <td><?= htmlspecialchars($row['nama_barang']); ?></td>
-                        <td><?= htmlspecialchars($row['satuan']); ?></td>
-                        <td><?= htmlspecialchars($row['jumlah']); ?></td>
-                        <td>
-                        <?php
-                        $status = $row['status'];
-                        if ($status == 'Menunggu') {
-                            echo '<span class="badge badge-warning" style="font-size:1em;">' . $status . '</span>';
-                        } elseif ($status == 'Disetujui') {
-                            echo '<span class="badge badge-success" style="font-size:1em;">' . $status . '</span>';
-                        } elseif ($status == 'Ditolak') {
-                            echo '<span class="badge badge-danger" style="font-size:1em;">' . $status . '</span>';
-                        } else {
-                            echo '<span class="badge badge-secondary" style="font-size:1em;">' . $status . '</span>';
-                        }
-                        ?>
-                        </td>
-                        <td>
-                        <?php if ($row['status'] == 'Menunggu'): ?>
-                            <a href="dashboard_staff.php?unit=update_pengajuan&id=<?= urlencode($row['id_pengajuan']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
-                            <a href="dashboard_staff.php?unit=delete_pengajuan&id=<?= urlencode($row['id_pengajuan']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus pengajuan ini?')"><i class="fa fa-trash"></i> Hapus</a>
-                            <button type="button" class="btn btn-success btn-sm ml-2" style="margin-left:10px;" data-toggle="modal" data-target="#modalWa"
-                                onclick="setPengajuanData('<?= $row['id_pengajuan'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= htmlspecialchars($row['jumlah']) ?>')">
-                                <i class="fab fa-whatsapp"></i> Kirim Via WA
-                            </button>
-                        <?php else: ?>
-                            <span class="text-muted">-</span>
-                        <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
+          $no = 1;
+          $q = mysqli_query($config, "SELECT * FROM tb_pengajuan WHERE id_user='$id_staff' ORDER BY tanggal_pengajuan DESC");
+          while ($row = mysqli_fetch_assoc($q)) : ?>
+          <tr>
+            <td><?= $no++; ?></td>
+            <td><?= htmlspecialchars($row['nama_barang']); ?></td>
+            <td><?= htmlspecialchars($row['unit']); ?></td>
+            <td><?= htmlspecialchars($row['jumlah']); ?></td>
+            <td><?= htmlspecialchars(number_format($row['perkiraan_harga'],0,',','.')); ?></td>
+            <td><?= htmlspecialchars($row['keterangan']); ?></td>
+            <td>
+            <?php
+            $status = $row['status'];
+            if ($status == 'diajukan') {
+              echo '<span class="badge badge-warning" style="font-size:1em;">Diajukan</span>';
+            } elseif ($status == 'disetujui') {
+              echo '<span class="badge badge-success" style="font-size:1em;">Disetujui</span>';
+            } elseif ($status == 'ditolak') {
+              echo '<span class="badge badge-danger" style="font-size:1em;">Ditolak</span>';
+            } elseif ($status == 'selesai') {
+              echo '<span class="badge badge-primary" style="font-size:1em;">Selesai</span>';
+            } else {
+              echo '<span class="badge badge-secondary" style="font-size:1em;">' . htmlspecialchars($status) . '</span>';
+            }
+            ?>
+            </td>
+            <td><?= htmlspecialchars($row['tanggal_pengajuan']); ?></td>
+            <td>
+            <?php if ($row['status'] == 'diajukan'): ?>
+              <a href="dashboard_staff.php?unit=update_pengajuan&id=<?= urlencode($row['pengajuan_id']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
+              <a href="dashboard_staff.php?unit=delete_pengajuan&id=<?= urlencode($row['pengajuan_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus pengajuan ini?')"><i class="fa fa-trash"></i> Hapus</a>
+              <button type="button" class="btn btn-success btn-sm ml-2" style="margin-left:10px;" data-toggle="modal" data-target="#modalWa"
+                onclick="setPengajuanData('<?= $row['pengajuan_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= htmlspecialchars($row['jumlah']) ?>')">
+                <i class="fab fa-whatsapp"></i> Kirim Via WA
+              </button>
+            <?php else: ?>
+              <span class="text-muted">-</span>
+            <?php endif; ?>
+            </td>
+          </tr>
+          <?php endwhile; ?>
                 </tbody>
                 </table>
             </div>

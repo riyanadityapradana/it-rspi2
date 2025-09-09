@@ -1,24 +1,19 @@
+
 <?php
 require_once("../config/koneksi.php");
-$id_staff = $_SESSION['id_user'];
-// Ambil data barang untuk dropdown
-$barang = [];
-$q = mysqli_query($config, "SELECT kode_barang, nama_barang FROM tb_barang ORDER BY nama_barang ASC");
-while ($row = mysqli_fetch_assoc($q)) {
-    $barang[] = $row;
-}
+$id_user = $_SESSION['id_user'];
 // Proses simpan
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $kode_barang = trim($_POST['kode_barang']);
-    $satuan      = trim($_POST['satuan']);
-    $jumlah      = intval($_POST['jumlah']);
-    $keterangan  = trim($_POST['keterangan']);
-    $bidang      = isset($_POST['bidang_pengajuan']) ? trim($_POST['bidang_pengajuan']) : '';
-    if (!$kode_barang || !$satuan || !$jumlah) {
+    $nama_barang = trim($_POST['nama_barang']);
+  $unit = 'Unit IT';
+    $jumlah = intval($_POST['jumlah']);
+    $perkiraan_harga = floatval($_POST['perkiraan_harga']);
+    $keterangan = trim($_POST['keterangan']);
+    if (!$nama_barang || !$unit || !$jumlah || !$perkiraan_harga) {
         header('Location: dashboard_staff.php?unit=pengajuan&err=Data tidak lengkap!');
         exit;
     }
-    $q = mysqli_query($config, "INSERT INTO tb_pengajuan_barang (id_staff, kode_barang, satuan, jumlah, keterangan, bidang_pengajuan) VALUES ('$id_staff', '$kode_barang', '$satuan', $jumlah, '$keterangan', '$bidang')");
+    $q = mysqli_query($config, "INSERT INTO tb_pengajuan (id_user, nama_barang, unit, jumlah, perkiraan_harga, keterangan, status, tanggal_pengajuan) VALUES ('$id_user', '$nama_barang', '$unit', $jumlah, $perkiraan_harga, '$keterangan', 'diajukan', CURDATE())");
     if ($q) {
         header('Location: dashboard_staff.php?unit=pengajuan&msg=Pengajuan barang berhasil ditambahkan!');
         exit;
@@ -44,28 +39,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="post">
           <div class="form-group">
             <label>Nama Barang</label>
-            <select name="kode_barang" class="form-control select2" required>
-              <option value="">-- Pilih Barang --</option>
-              <?php foreach ($barang as $b): ?>
-                <option value="<?= htmlspecialchars($b['kode_barang']) ?>"><?= htmlspecialchars($b['nama_barang']) ?></option>
-              <?php endforeach; ?>
-            </select>
+            <input type="text" name="nama_barang" class="form-control" required maxlength="150">
           </div>
           <div class="form-group">
-            <label>Satuan</label>
-            <input type="text" name="satuan" class="form-control" required maxlength="15">
+            <label>Unit</label>
+            <input type="text" name="unit" class="form-control" value="Unit IT" readonly required maxlength="50">
           </div>
           <div class="form-group">
             <label>Jumlah</label>
             <input type="number" name="jumlah" class="form-control" min="1" required>
           </div>
           <div class="form-group">
-            <label>Keterangan</label>
-            <textarea name="keterangan" class="form-control" rows="2"></textarea>
+            <label>Perkiraan Harga</label>
+            <input type="number" name="perkiraan_harga" class="form-control" min="0" step="0.01" required>
           </div>
           <div class="form-group">
-            <label>Bidang Pengajuan</label>
-            <input type="text" name="bidang_pengajuan" class="form-control" value="Divis Unit IT" readonly required>
+            <label>Keterangan</label>
+            <textarea name="keterangan" class="form-control" rows="2"></textarea>
           </div>
           <button type="submit" class="btn btn-primary">Simpan</button>
           <a href="dashboard_staff.php?unit=pengajuan" class="btn btn-secondary">Kembali</a>

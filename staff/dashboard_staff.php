@@ -164,20 +164,20 @@ $id 	= $_SESSION['id_user'];
                             </li>
                         </ul>
                     </li>
-                    <!-- <li class="nav-item">
+                    <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-boxes" style="color: black;"></i>
                             <p style="color: black;">Master Barang <i class="right fas fa-angle-left" style="color: black;"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="dashboard_staff.php?unit=barang" class="nav-link">
-                                    <i class="nav-icon fas fa-box" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Data Barang</p>
-                                </a>
                                 <a href="dashboard_staff.php?unit=pengajuan" class="nav-link">
                                     <i class="nav-icon fas fa-file-alt" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Pengajuan Barang</p>
+                                </a>
+                                <a href="dashboard_staff.php?unit=barang" class="nav-link">
+                                    <i class="nav-icon fas fa-box" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Data Barang</p>
                                 </a>
                                 <a href="dashboard_staff.php?unit=pemindahan" class="nav-link">
                                     <i class="nav-icon fas fa-exchange-alt" style="color: black;"></i>
@@ -185,7 +185,7 @@ $id 	= $_SESSION['id_user'];
                                 </a>
                             </li>
                         </ul>
-                    </li> -->
+                    </li>
                     <li class="nav-item menu-open">
                         <a href="dashboard_staff.php?unit=rsp-obat-update" class="nav-link active">
                             <i class="nav-icon fas fa-tachometer-alt"></i>

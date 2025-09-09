@@ -191,17 +191,20 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                 }
             }
         });
-        // Toastr notification
-        <?php if(isset($_GET['msg'])): ?>
-            toastr.options = {"positionClass": "toast-top-right", "timeOut": "3000"};
-            toastr.success("<?= htmlspecialchars($_GET['msg']) ?>");
-        <?php endif; ?>
-        <?php if(isset($_GET['err'])): ?>
-            toastr.options = {"positionClass": "toast-top-right", "timeOut": "3000"};
-            toastr.error("<?= htmlspecialchars($_GET['err']) ?>");
-        <?php endif; ?>
+        
     });
 </script>
-
+<!-- Toastr notification -->
+<?php if (isset($_GET['msg'])): ?>
+<script>
+toastr.options = {"positionClass": "toast-top-right", "timeOut": "3000"};
+toastr.success("<?= addslashes($_GET['msg']) ?>");
+</script>
+<?php elseif (isset($_GET['err'])): ?>
+<script>
+toastr.options = {"positionClass": "toast-top-right", "timeOut": "3000"};
+toastr.error("<?= addslashes($_GET['err']) ?>");
+</script>
+<?php endif; ?>
 </body>
 </html> 

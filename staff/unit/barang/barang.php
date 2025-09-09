@@ -1,5 +1,20 @@
 <?php
 require_once("../config/koneksi.php");
+// Proses update penyerahan barang
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset($_POST['lokasi_id']) && isset($_POST['kondisi'])) {
+  $barang_id = intval($_POST['barang_id']);
+  $lokasi_id = intval($_POST['lokasi_id']);
+  $kondisi = trim($_POST['kondisi']);
+  $keterangan = isset($_POST['keterangan']) ? trim($_POST['keterangan']) : '';
+  $update = mysqli_query($config, "UPDATE tb_barang SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE barang_id='$barang_id'");
+    if ($update) {
+    header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil Diserahkan!');
+    exit;
+  } else {
+    header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan barang!');
+    exit;
+  }
+}
 ?>
 <!-- Content Header (Page header) -->
 <section class="content-header">
@@ -39,8 +54,10 @@ require_once("../config/koneksi.php");
             </select>
             <select id="filterStatusBarang" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;">
               <option value="">Semua Status</option>
-              <option value="Baik">Baik</option>
+              <option value="Baru">Baik</option>
+              <option value="Bekas">Bekas</option>
               <option value="Rusak">Rusak</option>
+              <option value="Dalam Perbaikan">Dalam Perbaikan</option>
             </select>
             <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">
               <i class="fas fa-bars"></i>
@@ -59,209 +76,105 @@ require_once("../config/koneksi.php");
                     <th>Jenis Barang</th>
                     <th>Penyerahan</th>
                     <th>Status Barang</th>
-                    <th>Status Kerusakan</th>
                     <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $no = 1;
-                    $q = mysqli_query($config, "SELECT b.*, 
-                        CASE 
-                            WHEN p.status = 'Disetujui' THEN 'Disetujui'
-                            ELSE 'Tidak Ada Pengajuan'
-                        END as status_pengajuan,
-                        p.id_pengajuan
-                        FROM tb_barang b 
-                        LEFT JOIN (
-                            SELECT pb1.kode_barang, pb1.status, pb1.id_pengajuan 
-                            FROM tb_pengajuan_barang pb1
-                            INNER JOIN (
-                                SELECT kode_barang, MAX(id_pengajuan) as max_id
-                                FROM tb_pengajuan_barang
-                                GROUP BY kode_barang
-                            ) pb2 ON pb1.kode_barang = pb2.kode_barang AND pb1.id_pengajuan = pb2.max_id
-                            WHERE pb1.status = 'Disetujui' AND pb1.status != 'Selesai'
-                        ) p ON b.kode_barang = p.kode_barang 
-                        ORDER BY b.kode_barang ASC");
+                    // Ambil lokasi
+                    $lokasi_q = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
+                    $lokasi_list = [];
+                    while ($row = mysqli_fetch_assoc($lokasi_q)) {
+                      $lokasi_list[] = $row;
+                    }
+                    $q = mysqli_query($config, "SELECT b.*, l.nama_lokasi FROM tb_barang b LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id ORDER BY b.barang_id ASC");
                     while ($row = mysqli_fetch_assoc($q)) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
                         <td><?= htmlspecialchars($row['nama_barang']); ?></td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
-                        <td><?= htmlspecialchars($row['penyerahan']); ?></td>
+                        <td><?= htmlspecialchars($row['nama_lokasi']); ?></td>
                         <td class="text-center">
-                            <?php if (!empty($row['stts_brg'])): ?>
-                                <span class="badge badge-<?= $row['stts_brg'] == 'Baik' ? 'success' : 'danger' ?>">
-                                    <?= htmlspecialchars($row['stts_brg']); ?>
-                                </span>
-                            <?php else: ?>
-                                <span class="badge badge-secondary">-</span>
-                            <?php endif; ?>
-                        </td>
-                        <td class="text-center">
-                            <?php if (!empty($row['status_perbaikan'])): ?>
-                                <?php if ($row['status_perbaikan'] == 'Belum Ada Perbaikan'): ?>
-                                    <span class="badge badge-secondary">Belum Ada Perbaikan</span>
-                                <?php else: ?>
-                                    <span class="badge badge-<?= $row['status_perbaikan'] == 'Dapat Diperbaiki' ? 'warning' : 'danger' ?>">
-                                        <?= htmlspecialchars($row['status_perbaikan']); ?>
-                                    </span>
-                                <?php endif; ?>
-                                <?php if (!empty($row['keterangan_rusak'])): ?>
-                                    <br><small class="text-muted"><?= htmlspecialchars($row['keterangan_rusak']); ?></small>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                Ket :<span class="badge badge-secondary">-</span>
-                            <?php endif; ?>
+                          <?php if (!empty($row['kondisi'])): ?>
+                            <span class="badge badge-<?= $row['kondisi'] == 'baru' ? 'success' : ($row['kondisi'] == 'bekas' ? 'info' : ($row['kondisi'] == 'rusak' ? 'danger' : 'warning')) ?>">
+                              <?= htmlspecialchars(ucwords($row['kondisi'])); ?>
+                            </span>
+                          <?php else: ?>
+                            <span class="badge badge-secondary">-</span>
+                          <?php endif; ?>
                         </td>
                         <td>
-                        <a href="dashboard_staff.php?unit=update_barang&id=<?= urlencode($row['kode_barang']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
-                        <a href="dashboard_staff.php?unit=delete_barang&id=<?= urlencode($row['kode_barang']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus barang ini?')"><i class="fa fa-trash"></i> Hapus</a>
-                        
-                        <?php if ($row['status_pengajuan'] == 'Disetujui' && empty($row['penyerahan'])): ?>
-                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalPenyerahan" 
-                                    onclick="setPenyerahanData('<?= htmlspecialchars($row['kode_barang']); ?>', '<?= htmlspecialchars($row['nama_barang']); ?>', '<?= $row['id_pengajuan']; ?>')">
-                                <i class="fa fa-handshake"></i> Input Penyerahan
-                            </button>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($row['stts_brg']) && $row['stts_brg'] == 'Baik'): ?>
-                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modalRusak"
-                                onclick="setRusakData('<?= htmlspecialchars($row['kode_barang']); ?>', '<?= htmlspecialchars($row['nama_barang']); ?>')">
-                                <i class="fa fa-exclamation-triangle"></i> Input Kerusakan
-                            </button>
-                        <?php endif; ?>
-                        <?php if (isset($row['status_perbaikan']) && $row['status_perbaikan'] == 'Tidak Dapat Diperbaiki'): ?>
-                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalBaik" 
-                                    onclick="setBaikData('<?= htmlspecialchars($row['kode_barang']); ?>', '<?= htmlspecialchars($row['nama_barang']); ?>')">
-                                <i class="fa fa-check"></i> Set Baik
-                            </button>
-                        <?php endif; ?>
+                          <a href="dashboard_staff.php?unit=update_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
+                          <a href="dashboard_staff.php?unit=delete_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus barang ini?')"><i class="fa fa-trash"></i> Hapus</a>
+                          <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['kondisi']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= $row['lokasi_id'] ?>')">
+                            <i class="fa fa-handshake"></i> Penyerahan
+                          </button>
+                          <!-- ...existing code for other buttons... -->
                         </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Modal Input Penyerahan -->
-<div class="modal fade" id="modalPenyerahan" tabindex="-1" role="dialog" aria-labelledby="modalPenyerahanLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalPenyerahanLabel">Input Penyerahan Barang</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <form id="formPenyerahan" method="POST" action="dashboard_staff.php?unit=proses_penyerahan">
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Kode Barang:</label>
-            <input type="text" class="form-control" id="kodeBarang" name="kode_barang" readonly>
-          </div>
-          <div class="form-group">
-            <label>Nama Barang:</label>
-            <input type="text" class="form-control" id="namaBarang" readonly>
-          </div>
-          <div class="form-group">
-            <label>Penyerahan ke Unit:</label>
-            <input type="text" class="form-control" name="penyerahan" placeholder="Contoh: Manajemen, Keuangan, SDM, dll." required>
-          </div>
-          <div class="form-group">
-            <label>Tanggal Penyerahan:</label>
-            <input type="date" class="form-control" id="tglPenyerahan" name="tgl_penyerahan" readonly>
-          </div>
-          <input type="hidden" name="id_pengajuan" id="idPengajuan">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-success">Simpan Penyerahan</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Set Baik -->
-<div class="modal fade" id="modalBaik" tabindex="-1" role="dialog" aria-labelledby="modalBaikLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalBaikLabel">Set Status Barang Baik</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <form id="formBaik" method="POST" action="dashboard_staff.php?unit=proses_baik">
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Kode Barang:</label>
-            <input type="text" class="form-control" id="kodeBarangBaik" name="kode_barang" readonly>
-          </div>
-          <div class="form-group">
-            <label>Nama Barang:</label>
-            <input type="text" class="form-control" id="namaBarangBaik" readonly>
-          </div>
-          <div class="form-group">
-            <label>Keterangan Perbaikan:</label>
-            <textarea class="form-control" name="keterangan_perbaikan" rows="3" placeholder="Jelaskan perbaikan yang telah dilakukan..." required></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-success">Set Baik</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Set Rusak -->
-<div class="modal fade" id="modalRusak" tabindex="-1" role="dialog" aria-labelledby="modalRusakLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalRusakLabel">Input Data Kerusakan Barang</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <form id="formRusak" method="POST" action="dashboard_staff.php?unit=proses_rusak">
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Kode Barang:</label>
-            <input type="text" class="form-control" id="kodeBarangRusak" name="kode_barang" readonly>
-          </div>
-          <div class="form-group">
-            <label>Nama Barang:</label>
-            <input type="text" class="form-control" id="namaBarangRusak" readonly>
-          </div>
-          <div class="form-group">
-            <label>Keterangan Kerusakan:</label>
-            <textarea class="form-control" name="keterangan_rusak" rows="3" placeholder="Jelaskan kerusakan yang terjadi..." required></textarea>
-          </div>
-          <div class="form-group">
-            <label>Status Perbaikan:</label>
-            <select class="form-control" name="status_perbaikan" required>
-              <option value="">Pilih Status</option>
-              <option value="Dapat Diperbaiki">Dapat Diperbaiki</option>
-              <option value="Tidak Dapat Diperbaiki">Tidak Dapat Diperbaiki</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-danger">Simpan Data</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+                    <!-- Modal Update Lokasi/Kondisi/Keterangan -->
+                    <div class="modal fade" id="modalUpdateLokasi" tabindex="-1" role="dialog" aria-labelledby="modalUpdateLokasiLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="modalUpdateLokasiLabel">Penyerahan Barang</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                      <form id="formUpdateLokasi" method="POST" action="">
+                            <div class="modal-body">
+                              <input type="hidden" name="barang_id" id="updateBarangId">
+                              <div class="form-group">
+                                <label>Nama Barang:</label>
+                                <input type="text" class="form-control" id="updateNamaBarang" readonly>
+                              </div>
+                              <div class="form-group">
+                                <label>Lokasi:</label>
+                                <select class="form-control select2" name="lokasi_id" id="updateLokasiId" required>
+                                  <option value="">-- Pilih Lokasi --</option>
+                                  <?php foreach ($lokasi_list as $lokasi): ?>
+                                    <option value="<?= $lokasi['lokasi_id'] ?>" <?= $row['lokasi_id']==$lokasi['lokasi_id']?'selected':'' ?>><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
+                                  <?php endforeach; ?>
+                                </select>
+                              </div>
+                              <div class="form-group">
+                                <label>Kondisi:</label>
+                                <select class="form-control select2" name="kondisi" id="updateKondisi" required>
+                                  <option value="baru" <?= $row['kondisi']=='baru'?'selected':'' ?>>Baru</option>
+                                  <option value="bekas" <?= $row['kondisi']=='bekas'?'selected':'' ?>>Bekas</option>
+                                </select>
+                              </div>
+                              <div class="form-group">
+                                <label>Keterangan:</label>
+                                <textarea class="form-control" name="keterangan" id="updateKeterangan" rows="2"></textarea>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                              <button type="submit" class="btn btn-success">Update</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    <script>
+                    function setUpdateLokasiData(barangId, namaBarang, kondisi, keterangan, lokasiId) {
+                      document.getElementById('updateBarangId').value = barangId;
+                      document.getElementById('updateNamaBarang').value = namaBarang;
+                      document.getElementById('updateKondisi').value = kondisi;
+                      document.getElementById('updateKeterangan').value = keterangan;
+                      document.getElementById('updateLokasiId').value = lokasiId;
+                    }
+                    </script>
+                                        </tr>
+                                        <?php endwhile; ?>
+                                    </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
 <!-- Modal Print -->
 <div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
@@ -330,23 +243,6 @@ require_once("../config/koneksi.php");
 </div>
 
 <script>
-function setPenyerahanData(kodeBarang, namaBarang, idPengajuan) {
-    document.getElementById('kodeBarang').value = kodeBarang;
-    document.getElementById('namaBarang').value = namaBarang;
-    document.getElementById('idPengajuan').value = idPengajuan;
-    document.getElementById('tglPenyerahan').value = new Date().toISOString().slice(0, 10); // Set tanggal hari ini
-}
-
-function setRusakData(kodeBarang, namaBarang) {
-    document.getElementById('kodeBarangRusak').value = kodeBarang;
-    document.getElementById('namaBarangRusak').value = namaBarang;
-}
-
-function setBaikData(kodeBarang, namaBarang) {
-    document.getElementById('kodeBarangBaik').value = kodeBarang;
-    document.getElementById('namaBarangBaik').value = namaBarang;
-}
-
 document.getElementById('printType').addEventListener('change', function() {
   const jenisGroup = document.getElementById('jenisBarangGroup');
   const statusGroup = document.getElementById('statusBarangGroup');
