@@ -161,9 +161,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                         <option value="">- Pilih Jenis Barang -</option>
                         <option value="Komputer & Laptop">Komputer & Laptop</option>
                         <option value="Komponen Komputer & Laptop">Komponen Komputer & Laptop</option>
-                        <option value="Jaringan & Internet">Jaringan & Internet</option>
+                        <option value="Komponen Network">Komponen Network</option>
                         <option value="Printer & Scanner">Printer & Scanner</option>
-                        <option value="Lainnya">Lainnya</option>
+                        <option value="Komponen Printer & Scanner">Komponen Printer & Scanner</option>
                       </select>
                     </div>
                     <div class="form-group">

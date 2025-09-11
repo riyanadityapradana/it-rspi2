@@ -18,9 +18,11 @@
 					mysqli_query($config, "INSERT INTO tb_kegiatan_lembur (id_lembur, kegiatan) VALUES ('$id_lembur', '$kegiatan')");
 				}
 			}
-			echo "<script>alert('Data lembur berhasil disimpan!'); window.location='dashboard_staff.php?unit=lembur';</script>";
+			header('Location: dashboard_staff.php?unit=lembur&msg=Data Lembur berhasil Diserahkan!');
+    		exit;
 		} else {
-			echo "<script>alert('Gagal menyimpan data!');</script>";
+			header('Location: dashboard_staff.php?unit=lembur&err=Gagal menyerahkan lembur!');
+    		exit;
 		}
 	}
 ?>

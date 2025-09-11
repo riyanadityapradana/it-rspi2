@@ -69,6 +69,10 @@ $jenis_list = [
       <div class="card-body">
         <form method="post">
           <div class="form-group">
+            <label>Tanggal Terima</label>
+            <input type="date" name="tanggal_terima" class="form-control" value="<?= date('Y-m-d') ?>" required>
+          </div>
+          <div class="form-group">
             <label>Nama Barang</label>
             <input type="text" name="nama_barang" class="form-control" required maxlength="150">
           </div>
@@ -118,10 +122,6 @@ $jenis_list = [
           <div class="form-group">
             <label>Spesifikasi</label>
             <textarea name="spesifikasi" class="form-control" rows="2"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Tanggal Terima</label>
-            <input type="date" name="tanggal_terima" class="form-control" value="<?= date('Y-m-d') ?>" required>
           </div>
           <!-- <div class="form-group"> 
             <label>Kondisi</label>

@@ -25,10 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $query = mysqli_query ($config,$edit);
 
     if ($query) {
-        echo "<script>alert('Data Telah Berhasil Terubah'); window.location = 'dashboard_staff.php?unit=logbook&action=datagrid'</script>";
-        exit();
+        header('Location: dashboard_staff.php?unit=logbook&msg=Data Logbook berhasil Diupdate!');
+    		exit;
     } else {
-        echo "<script>alert('Gagal menyimpan data dalam database');</script>";
+        header('Location: dashboard_staff.php?unit=logbook&err=Gagal menyimpan data dalam database!');
+    		exit;
     }
 }
 ?>

@@ -16,10 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $input = mysqli_query($config, $query);
 
     if ($input) {
-        echo "<script>alert('Data Telah Berhasil Tersimpan'); window.location = 'dashboard_staff.php?unit=logbook'</script>";
-        exit();
+        header('Location: dashboard_staff.php?unit=logbook&msg=Data Logbook berhasil Dicatat!');
+    		exit;
     } else {
-        echo "<script>alert('Gagal menyimpan data dalam database');</script>";
+        header('Location: dashboard_staff.php?unit=logbook&err=Gagal menyimpan data dalam database!');
+    		exit;
+        // echo "Error: " . mysqli_error($config); // Debugging error
     }
 }
 ?>

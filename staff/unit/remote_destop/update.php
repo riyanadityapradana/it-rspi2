@@ -21,10 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $query = mysqli_query ($config,$edit);
 
     if ($query) {
-        echo "<script>alert('Data Telah Berhasil Terubah'); window.location = 'dashboard_staff.php?unit=remote&action=datagrid'</script>";
-        exit();
+        header('Location: dashboard_staff.php?unit=remote&msg=Data Remote berhasil Diupdate!');
+    		exit;
     } else {
-        echo "<script>alert('Gagal menyimpan data dalam database');</script>";
+        header('Location: dashboard_staff.php?unit=remote&err=Gagal menyimpan data dalam database!');
+    		exit;
+        // echo "Error: " . mysqli_error($config); // Debugging error
     }
 }
 ?>

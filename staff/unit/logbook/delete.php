@@ -9,9 +9,10 @@
 	$query  = "DELETE FROM tb_logbook WHERE id_log = '$id' ";
 	
 	if(mysqli_query($config, $query)){
-		echo "<script>alert('Data Telah Berhasil Dihapus'); window.location = 'dashboard_staff.php?unit=logbook&action=datagrid'</script>";
-        exit();
+		header('Location: dashboard_staff.php?unit=logbook&msg=Data Logbook berhasil Dihapus!');
+    		exit;
 	} else {
-		echo "<script>alert('Gagal menyimpan data dalam database');</script>";
+		header('Location: dashboard_staff.php?unit=logbook&err=Gagal menyimpan data dalam database!');
+    		exit;
 	}
 	?>

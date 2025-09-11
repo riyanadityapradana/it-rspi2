@@ -9,9 +9,10 @@
 	$query  = "DELETE FROM tb_remote WHERE id_remote = '$id' ";
 	
 	if(mysqli_query($config, $query)){
-		echo "<script>alert('Data Telah Berhasil Dihapus'); window.location = 'dashboard_staff.php?unit=remote&action=datagrid'</script>";
-        exit();
+		header('Location: dashboard_staff.php?unit=remote&msg=Data Remote berhasil Dihapus!');
+    		exit;
 	} else {
-		echo "<script>alert('Gagal menyimpan data dalam database');</script>";
+		header('Location: dashboard_staff.php?unit=remote&err=Gagal menyimpan data dalam database!');
+    		exit;
 	}
 	?>

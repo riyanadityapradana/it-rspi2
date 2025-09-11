@@ -18,9 +18,11 @@
 			$hapus = mysqli_query($config, "DELETE FROM tb_lembur WHERE id_lembur='$id_lembur'");
 
 			if ($hapus) {
-				echo "<script>alert('Data lembur berhasil dihapus'); window.location='dashboard_staff.php?unit=lembur';</script>";
+				header('Location: dashboard_staff.php?unit=lembur&msg=Data Lembur berhasil Dihapus!');
+    		exit;
 			} else {
-				echo "<script>alert('Gagal menghapus data lembur'); window.history.back();</script>";
+				header('Location: dashboard_staff.php?unit=lembur&err=Gagal menghapus data lembur!');
+    		exit;
 			}
 		} else {
 			echo "<script>alert('Data tidak ditemukan atau sudah diproses'); window.history.back();</script>";

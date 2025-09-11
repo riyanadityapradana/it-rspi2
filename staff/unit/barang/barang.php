@@ -105,12 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           <?php endif; ?>
                         </td>
                         <td>
-                          <a href="dashboard_staff.php?unit=update_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
-                          <a href="dashboard_staff.php?unit=delete_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus barang ini?')"><i class="fa fa-trash"></i> Hapus</a>
-                          <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['kondisi']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= $row['lokasi_id'] ?>')">
-                            <i class="fa fa-handshake"></i> Penyerahan
-                          </button>
-                          <!-- ...existing code for other buttons... -->
+                          <?php if ($row['kondisi'] == '-'): ?>
+                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['kondisi']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= $row['lokasi_id'] ?>')">
+                              <i class="fa fa-handshake"></i> Penyerahan
+                            </button>
+                            <a href="dashboard_staff.php?unit=delete_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus barang ini?')"><i class="fa fa-trash"></i> Hapus</a>
+                          <?php else: ?>
+                            <a href="dashboard_staff.php?unit=update_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
+                            <a href="dashboard_staff.php?unit=delete_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus barang ini?')"><i class="fa fa-trash"></i> Hapus</a>
+                          <?php endif; ?>
                         </td>
                     <!-- Modal Update Lokasi/Kondisi/Keterangan -->
                     <div class="modal fade" id="modalUpdateLokasi" tabindex="-1" role="dialog" aria-labelledby="modalUpdateLokasiLabel" aria-hidden="true">
@@ -159,22 +162,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       </div>
                     </div>
                     <script>
-                    function setUpdateLokasiData(barangId, namaBarang, kondisi, keterangan, lokasiId) {
-                      document.getElementById('updateBarangId').value = barangId;
-                      document.getElementById('updateNamaBarang').value = namaBarang;
-                      document.getElementById('updateKondisi').value = kondisi;
-                      document.getElementById('updateKeterangan').value = keterangan;
-                      document.getElementById('updateLokasiId').value = lokasiId;
-                    }
+                      function setUpdateLokasiData(barangId, namaBarang, kondisi, keterangan, lokasiId) {
+                        document.getElementById('updateBarangId').value = barangId;
+                        document.getElementById('updateNamaBarang').value = namaBarang;
+                        document.getElementById('updateKondisi').value = kondisi;
+                        document.getElementById('updateKeterangan').value = keterangan;
+                        document.getElementById('updateLokasiId').value = lokasiId;
+                      }
                     </script>
-                                        </tr>
-                                        <?php endwhile; ?>
-                                    </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+          </table>
+        </div>
+    </div>
+</div>
+</section>
 
 <!-- Modal Print -->
 <div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
@@ -199,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
            </div>
                      <div class="form-group" id="jenisBarangGroup" style="display:none;">
              <label>Jenis Barang</label>
-             <select class="form-control" name="jenis_barang" id="jenis_barang">
+             <select class="form-control select2" name="jenis_barang" id="jenis_barang">
                <option value="">-- Pilih Jenis Barang --</option>
                <!-- Isi dengan data dari database -->
                <option value="Komputer & Laptop">Komputer & Laptop</option>
@@ -211,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
            </div>
            <div class="form-group" id="statusBarangGroup" style="display:none;">
              <label>Status Barang</label>
-             <select class="form-control" name="status_barang" id="status_barang">
+             <select class="form-control select2" name="status_barang" id="status_barang">
                <option value="">-- Pilih Status Barang --</option>
                <option value="Baik">Baik</option>
                <option value="Rusak">Rusak</option>
