@@ -68,7 +68,7 @@ $id 	= $_SESSION['id_user'];
                     <img src="../assets/img/<?= htmlspecialchars($foto) ?>" class="img-circle elevation-2" alt="User Image" style="width: 47px; height: 52px; object-fit: cover;">
                 </div>
                 <div class="info ml-2">
-                    <a href="#" class="d-block" style="color: black; font-size: 1vw;"><?php echo htmlspecialchars($nama); ?></a>
+                    <a href="#" class="d-block" style="color: black; font-size: 12px; color: black; white-space: normal; word-break: break-word; line-height: 1.2;"><?php echo htmlspecialchars($nama); ?></a>
                     <span class="text-muted small">STAFF IT</span>
                 </div>
             </div>
@@ -155,11 +155,11 @@ $id 	= $_SESSION['id_user'];
                                 </a>
                                 <a href="http://192.168.1.66/pmkp" class="nav-link">
                                     <i class="nav-icon fas fa-folder" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Backup Dokumen IT</p>
+                                    <p style="font-size: 12px; color: black; white-space: normal; word-break: break-word; line-height: 1.2; margin-bottom: 0;">Backup Dokumen IT</p>
                                 </a>
                                 <a href="http://192.168.1.66/invent-barang" class="nav-link">
                                     <i class="nav-icon fas fa-folder" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Inventaris Barang IT</p>
+                                    <p style="font-size: 13px; color: black; white-space: normal; word-break: break-word; line-height: 1.2; margin-bottom: 0;">Inventaris Barang IT</p>
                                 </a>
                             </li>
                         </ul>
