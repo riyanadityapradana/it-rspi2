@@ -71,12 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                 <table id="example1" class="table table-bordered table-striped">
                 <thead style="background:rgb(129, 2, 0, 1); color:white;">
                     <tr>
-                    <th>No</th>
-                    <th>Nama Barang</th>
-                    <th>Jenis Barang</th>
-                    <th>Penyerahan</th>
-                    <th>Status Barang</th>
-                    <th>Aksi</th>
+                    <th style="width: 50px; text-align: center;">No</th>
+                    <th style="width: 200px;">Nama Barang</th>
+                    <th style="width: 130px ;">Jenis Barang</th>
+                    <th style="width: 70px;">Penyerahan</th>
+                    <th style="width: 50px; text-align: center;">Status</th>
+                    <th style="width: 200px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,6 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           <?php endif; ?>
                         </td>
                         <td>
+                          <!-- Button Detail Data -->
+                          <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetailBarang<?= $row['barang_id'] ?>">
+                            <i class="fa fa-eye"></i> Detail
+                          </button>
                           <?php if ($row['kondisi'] == '-'): ?>
                             <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['kondisi']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= $row['lokasi_id'] ?>')">
                               <i class="fa fa-handshake"></i> Penyerahan
@@ -172,6 +176,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     </script>
                 </tr>
                 <?php endwhile; ?>
+            <!-- Modal Detail Barang -->
+            <?php foreach ($q as $detailRow): ?>
+            <div class="modal fade" id="modalDetailBarang<?= $detailRow['barang_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>" aria-hidden="true">
+              <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 12px;">
+                  <div class="modal-header" style="background: #1976d2; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title" id="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>"><i class="fa fa-eye"></i> Detail Barang</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label><strong>Nama Barang:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nama_barang']) ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Jenis Barang:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['jenis_barang']) ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Nomor Seri:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nomor_seri']) ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <?php if ($detailRow['jenis_barang'] == 'Komputer & Laptop'): ?>
+                          <label><strong>IP Address:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['ip_address']) ?> </div>
+                          <?php endif; ?>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Jumlah:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['jumlah']) ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Harga:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> Rp. <?= number_format($detailRow['harga'],0,',','.') ?> </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label><strong>Tanggal Terima:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Kondisi:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars(ucwords($detailRow['kondisi'])) ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Lokasi:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nama_lokasi']) ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Spesifikasi:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= nl2br(htmlspecialchars($detailRow['spesifikasi'])) ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Keterangan:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['keterangan']) ?> </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer" style="background: #e3f2fd; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <?php endforeach; ?>
             </tbody>
           </table>
         </div>
@@ -180,52 +256,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
 </section>
 
 <!-- Modal Print -->
+
 <div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
-         <form id="formPrint" method="get" target="_blank" action="unit/barang/print_barang.php">
+    <form id="formPrint" method="get" target="_blank" action="unit/barang/print_barang.php">
       <div class="modal-content">
-        <div class="modal-header">
-                     <h5 class="modal-title" id="modalPrintLabel">Cetak Laporan Data Barang</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <div class="modal-header" style="background: #1976d2; color: white;">
+          <h5 class="modal-title" id="modalPrintLabel"><i class="fas fa-print"></i> Cetak Laporan Data Barang</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-                     <div class="form-group">
-             <label>Pilihan Cetak</label>
-             <select class="form-control" id="printType" name="printType" required>
-               <option value="all">Cetak Semua</option>
-               <option value="jenis">Cetak Berdasarkan Jenis Barang</option>
-               <option value="status">Cetak Berdasarkan Status Barang</option>
-               <option value="jenis_status">Cetak Berdasarkan Jenis & Status Barang</option>
-             </select>
-           </div>
-                     <div class="form-group" id="jenisBarangGroup" style="display:none;">
-             <label>Jenis Barang</label>
-             <select class="form-control select2" name="jenis_barang" id="jenis_barang">
-               <option value="">-- Pilih Jenis Barang --</option>
-               <!-- Isi dengan data dari database -->
-               <option value="Komputer & Laptop">Komputer & Laptop</option>
-               <option value="Komponen Komputer & Laptop">Komponen Komputer & Laptop</option>
-               <option value="Printer & Scanner">Printer & Scanner</option>
-               <option value="Komponen Printer & Scanner">Komponen Printer & Scanner</option>
-               <option value="Komponen Network">Komponen Network</option>
-             </select>
-           </div>
-           <div class="form-group" id="statusBarangGroup" style="display:none;">
-             <label>Status Barang</label>
-             <select class="form-control select2" name="status_barang" id="status_barang">
-               <option value="">-- Pilih Status Barang --</option>
-               <option value="Baik">Baik</option>
-               <option value="Rusak">Rusak</option>
-             </select>
-           </div>
           <div class="form-group">
-            <label>Bulan</label>
-            <select class="form-control" name="bulan" required>
-              <?php for($i=1;$i<=12;$i++): ?>
-                <option value="<?= $i ?>"><?= date('F', mktime(0,0,0,$i,10)) ?></option>
-              <?php endfor; ?>
+            <label>Pilihan Kondisi Barang</label>
+            <select class="form-control" name="kondisi" required>
+              <option value="baik">Baik</option>
+              <option value="rusak">Rusak</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pilihan Lokasi</label>
+            <select class="form-control" name="lokasi_filter" required>
+              <option value="unit_it">Unit IT Saja</option>
+              <option value="all">Semua Unit</option>
             </select>
           </div>
           <div class="form-group">
@@ -237,7 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
             </select>
           </div>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer" style="background: #e3f2fd;">
           <button type="submit" class="btn btn-success"><i class="fas fa-print"></i> Cetak</button>
         </div>
       </div>

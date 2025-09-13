@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $harga = floatval($_POST['harga']);
   $spesifikasi = trim($_POST['spesifikasi']);
   $tanggal_terima = trim($_POST['tanggal_terima']);
-  $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE nama_barang='$nama_barang' AND nomor_seri='$nomor_seri'");
+  $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE nomor_seri='$nomor_seri'");
   if (mysqli_num_rows($cek) > 0) {
     header('Location: dashboard_staff.php?unit=barang&err=Barang sudah terdaftar!');
     exit;
