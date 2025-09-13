@@ -64,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
           <tr>
             <th>No</th>
             <th>Nama Barang</th>
+            <th style="text-align: center;">Perkiraan Harga</th>
             <th>Status</th>
             <th style="text-align: center;">Tanggal Pengajuan</th>
             <th style="text-align: center;">Aksi</th>
@@ -77,12 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
           <tr>
             <td><?= $no++; ?></td>
             <td><?= htmlspecialchars($row['nama_barang']); ?></td>
-            <!-- <td> 
+            <td>
               <?php
                 $harga = is_numeric($row['perkiraan_harga']) ? 'Rp. ' . number_format($row['perkiraan_harga'], 0, ',', '.') : '-';
                 echo htmlspecialchars($harga);
               ?>
-            </td> -->
+            </td>
             <td>
             <?php
             $status = $row['status'];
