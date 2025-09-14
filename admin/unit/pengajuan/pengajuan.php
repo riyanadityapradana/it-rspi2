@@ -67,7 +67,7 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap FROM tb_pengajuan p LEFT 
           </div>
           <div class="card-body">
             <table id="example1" class="table table-bordered table-striped">
-              <thead style="background:rgb(129, 2, 0, 1); color:white;">
+              <thead style="background:rgb(52, 58, 64, 1); color:white;">
                 <tr>
                   <th>No</th>
                   <th>Nama Staff</th>

@@ -42,6 +42,22 @@ else if ($unit == "delete_pemindahan"){
 else if ($unit == "detail_pemindahan"){
   require_once("unit/pemindahan/detail_pemindahan.php");
 }
+// Perbaikan Barang
+else if ($unit == "perbaikan"){
+  require_once("unit/perbaikan/perbaikan.php");
+}
+else if ($unit == "create_perbaikan"){
+  require_once("unit/perbaikan/create.php");
+}
+else if ($unit == "update_perbaikan"){
+  require_once("unit/perbaikan/update.php");
+}
+else if ($unit == "delete_perbaikan"){
+  require_once("unit/perbaikan/delete.php");
+}
+else if ($unit == "detail_perbaikan"){
+  require_once("unit/perbaikan/detail_perbaikan.php");
+}
 // PengajuanBarang
 else if ($unit == "pengajuan"){
   require_once("unit/pengajuan/pengajuan.php");

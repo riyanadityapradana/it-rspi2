@@ -52,7 +52,7 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
         </ul>
     </nav>
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="#" class="brand-link" style="background:#800000">
+        <a href="#" class="brand-link">
             <img src="../assets/img/icon.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
             <span class="brand-text font-weight-light">IT - RSPI</span>
         </a>
@@ -65,8 +65,8 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                     <img src="../assets/img/<?= htmlspecialchars($foto) ?>" class="img-circle elevation-2" alt="User Image" style="width: 47px; height: 52px; object-fit: cover;">
                 </div>
                 <div class="info ml-2">
-                    <a href="#" class="d-block" style="color: black; font-size: 1vw;"><?php echo htmlspecialchars($nama); ?></a>
-                    <span class="text-muted small">Kepala Ruangan</span>
+                    <a href="#" class="d-block" style="color: white; font-size: 13px; color: white; white-space: normal; word-break: break-word; line-height: 1.2;"><?php echo htmlspecialchars($nama); ?></a>
+                    <span class="text-muted small" style="color: white; font-size: 13px; color: white;">Kepala Ruangan</span>
                 </div>
             </div>
             <nav class="mt-2">
@@ -79,25 +79,49 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-folder" style="color: black;"></i>
-                            <p style="color: black;">Master Barang <i class="right fas fa-angle-left" style="color: black;"></i></p>
+                            <i class="nav-icon fab fa-whatsapp" style="color: green;"></i><p style="color: white;">Grafik Pi-Care<i class="fas fa-angle-left right" style="color: black;"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="dashboard_admin.php?unit=daftar" class="nav-link">
+                                    <i class="nav-icon fas fa-caret-right" style="color: white;"></i><p style="color: white;">PENDAFTARAN</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="dashboard_admin.php?unit=batal" class="nav-link">
+                                    <i class="nav-icon fas fa-caret-right" style="color: white;"></i><p style="color: white;">PEMBATALAN</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="dashboard_admin.php?unit=alasan" class="nav-link">
+                                    <i class="nav-icon fas fa-caret-right" style="color: white;"></i><p style="color: white;">ALASAN PEMBATALAN</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-folder" style="color: white;"></i>
+                            <p style="color: white;">Master Barang <i class="right fas fa-angle-left" style="color: black;"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="dashboard_admin.php?unit=pengajuan" class="nav-link">
-                                    <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Pengajuan Barang</p>
+                                    <i class="nav-icon fas fa-hospital-user" style="color: white;"></i>
+                                    <p style="font-size: 13px; color: white;">Verifikasi Pengajuan Barang</p>
                                 </a>
-                                <a href="http://192.168.1.66/pmkp" class="nav-link">
-                                    <i class="nav-icon fas fa-folder" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Backup Dokumen IT</p>
-                                </a>
-                                <a href="http://192.168.1.66/invent-barang" class="nav-link">
-                                    <i class="nav-icon fas fa-folder" style="color: black;"></i>
-                                    <p style="font-size: 14px; color: black;">Inventaris Barang IT</p>
+                                <a href="dashboard_admin.php?unit=barang" class="nav-link">
+                                    <i class="nav-icon fas fa-box" style="color: white;"></i>
+                                    <p style="font-size: 14px; color: white;">Data Barang</p>
                                 </a>
                             </li>
                         </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dashboard_admin.php?unit=lembur" class="nav-link">
+                            <i class="nav-icon fas fa-file"></i>
+                            <p>Verifikasi Lembur Staff</p>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a href="dashboard_admin.php?unit=user" class="nav-link">

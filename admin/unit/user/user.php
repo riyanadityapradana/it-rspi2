@@ -83,7 +83,7 @@ $result = $config->query('SELECT * FROM tb_user ORDER BY id_user DESC');
           <div class="card">
           <div class="card-body">
             <table id="example1" class="table table-bordered table-striped">
-              <thead style="background:rgb(129, 2, 0, 1); color:white;">
+              <thead style="background:rgb(52, 58, 64, 1); color:white;">
                 <tr>
                   <th>No</th>
                   <th>NIP</th>

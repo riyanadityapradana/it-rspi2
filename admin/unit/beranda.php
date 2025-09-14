@@ -1,5 +1,5 @@
 <?php
-// Halaman beranda admin
+// Halaman beranda staff
 ?>
 <style>
   .fc .fc-day-today {
@@ -7,61 +7,79 @@
     color: #fff !important;
     border-radius: 6px;
   }
-  .dashboard-row-equal {
-    display: flex;
-    align-items: stretch;
-  }
-  .dashboard-row-equal .card {
-    height: 100%;
-    min-height: 440px;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 0;
-  }
-  .dashboard-row-equal .card-body {
-    flex: 1 1 auto;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  @media (max-width: 991.98px) {
-    .dashboard-row-equal { flex-direction: column; }
-    .dashboard-row-equal .card { min-height: 320px; }
-  }
 </style>
-
-<div class="row">
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-danger">
-      <div class="inner">
-        <h3>3</h3>
-        <p>Usia Lebih Dari 60 th</p>
-      </div>
-      <div class="icon">
-        <i class="fas fa-child"></i>
-      </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tachometer-alt me-2"></i> Dashboard</h2>
+    <div class="text-muted">
+        <i class="fas fa-calendar me-1"></i>
+        <?php echo date('d F Y'); ?>
     </div>
-  </div>
+</div>
+<div class="row">
   <div class="col-lg-3 col-6">
     <div class="small-box bg-info">
       <div class="inner">
-        <h3>5</h3>
-        <p>Usia Kurang Dari 60 th</p>
+        <?php
+        // Hitung jumlah lembur disetujui per bulan
+        $bulan = date('m');
+        $tahun = date('Y');
+        $sqlLembur = "SELECT COUNT(*) as total FROM tb_lembur WHERE status_lembur='Diterima' AND MONTH(tanggal_lembur)='$bulan' AND YEAR(tanggal_lembur)='$tahun'";
+        $resultLembur = mysqli_query($config, $sqlLembur);
+        $totalLembur = 0;
+        if ($resultLembur) {
+          $rowLembur = mysqli_fetch_assoc($resultLembur);
+          $totalLembur = $rowLembur['total'];
+        }
+        ?>
+        <h3><?= $totalLembur ?></h3>
+        <small>Lembur Disetujui Bulan Ini</small>
       </div>
       <div class="icon">
-        <i class="fas fa-child"></i>
+        <i class="fas fa-clock"></i>
       </div>
     </div>
   </div>
   <div class="col-lg-3 col-6">
     <div class="small-box bg-success">
       <div class="inner">
-        <h3>760</h3>
-        <p>Sales</p>
+        <?php
+        // Hitung jumlah pengajuan disetujui per tahun
+          $tahun = date('Y');
+          $sqlPengajuan = "SELECT COUNT(*) as total FROM tb_pengajuan WHERE status='disetujui' AND YEAR(tanggal_pengajuan)='$tahun'";
+          $resultPengajuan = mysqli_query($config, $sqlPengajuan);
+          $totalPengajuan = 0;
+          if ($resultPengajuan) {
+            $rowPengajuan = mysqli_fetch_assoc($resultPengajuan);
+            $totalPengajuan = $rowPengajuan['total'];
+          }
+        ?>
+        <h3><?= $totalPengajuan ?></h3>
+        <small>Pengajuan Disetujui Tahun Ini</small>
       </div>
       <div class="icon">
-        <i class="fas fa-child"></i>
+        <i class="fas fa-file-alt fa-2x"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-danger">
+      <div class="inner">
+        <?php
+        // Hitung jumlah  Barang Rusak per tahun
+          $tahun = date('Y');
+          $sqlBrgRusak = "SELECT COUNT(*) as total FROM tb_barang WHERE kondisi='rusak' AND YEAR(tanggal_terima)='$tahun'";
+          $resultBrgRusak = mysqli_query($config, $sqlBrgRusak);
+          $totalBrgRusak = 0;
+          if ($resultBrgRusak) {
+            $rowBrgRusak = mysqli_fetch_assoc($resultBrgRusak);
+            $totalBrgRusak = $rowBrgRusak['total'];
+          }
+        ?>
+        <h3><?= $totalBrgRusak ?></h3>
+        <small>Barang Rusak Tahun Ini</small>
+      </div>
+      <div class="icon">
+        <i class="fa fa-trash"></i>
       </div>
     </div>
   </div>
@@ -84,20 +102,45 @@
   </div>
 </div>-->
 <hr>
-<div class="row dashboard-row-equal">
-  <div class="col-md-4 d-flex align-items-stretch">
-    <div class="card w-100">
-      <div class="card-header"><h5 class="card-title">Kalender</h5></div>
-      <div class="card-body">
-        <div id="calendar" style="width:100%;"></div>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+      <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Aktivitas Pengajuan Baru baru ini</h5>
+    </div>
+    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+      <div class="list-group list-group-flush">
+        <?php
+        $sql = "SELECT p.nama_barang, p.status, p.tanggal_pengajuan, u.nama_lengkap as staff_name 
+                      FROM tb_pengajuan p 
+                      JOIN tb_user u ON p.id_user = u.id_user 
+                      ORDER BY p.tanggal_pengajuan DESC LIMIT 10";
+        $result = mysqli_query($config, $sql);
+        if ($result && mysqli_num_rows($result) > 0):
+          while ($row = mysqli_fetch_assoc($result)):
+        ?>
+        <div class="d-flex justify-content-between align-items-center py-2">
+          <div>
+            <small class="text-muted"><?php echo htmlspecialchars($row['staff_name']); ?></small><br>
+            <strong><?php echo htmlspecialchars($row['nama_barang']); ?></strong>
+          </div>
+          <span class="badge bg-primary"><?php echo htmlspecialchars(ucwords($row['status'])); ?></span>
+        </div>
+        <?php 
+          endwhile;
+        else:
+        ?>
+        <p class="text-muted">Belum ada aktivitas</p>
+        <?php endif; ?>
       </div>
     </div>
   </div>
-  <div class="col-md-8 d-flex align-items-stretch">
-    <div class="card w-100">
-      <div class="card-header"><h5 class="card-title">Grafik Statistik (Dummy)</h5></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><h5 class="card-title">Kalender</h5></div>
       <div class="card-body">
-        <canvas id="myChart" height="120"></canvas>
+        <div id="calendar"></div>
       </div>
     </div>
   </div>

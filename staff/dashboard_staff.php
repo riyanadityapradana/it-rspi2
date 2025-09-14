@@ -8,7 +8,7 @@ if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'Staff') {
 }
 if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
 
-$id 	= $_SESSION['id_user'];
+    $id 	= $_SESSION['id_user'];
 	$query 	= "SELECT * FROM tb_user WHERE id_user = '$id'";
 	$admin 	= mysqli_fetch_array(mysqli_query($config, $query));
 	$nama 	= $admin['nama_lengkap'];
@@ -183,6 +183,10 @@ $id 	= $_SESSION['id_user'];
                                     <i class="nav-icon fas fa-exchange-alt" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Pemindahan Barang</p>
                                 </a>
+                                 <a href="dashboard_staff.php?unit=perbaikan" class="nav-link">
+                                    <i class="nav-icon fas fa-exchange-alt" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Perbaikan Barang</p>
+                                </a>
                             </li>
                         </ul>
                     </li>
@@ -219,7 +223,7 @@ $id 	= $_SESSION['id_user'];
     </div>
     <!-- Akhir Modal logout -->
 </div>
-<footer class="main-footer" style="position:fixed;bottom:0;width:100%;background:#222;color:#fff;z-index:9999;padding:0;">
+<footer class="main-footer" style="position:fixed;bottom:0;width:100%;background:#d9dde0;color:#00070c;z-index:9999;padding:0;">
   <div style="overflow:hidden;white-space:nowrap;">
     <marquee behavior="scroll" direction="left" scrollamount="6" style="font-size:16px;padding:8px 0;">
       &copy; <?= date('Y') ?> IT-RSPI | Sistem Informasi Teknologi RSPI. Dikembangkan dengan ❤️ oleh Tim IT-RSPI. Seluruh hak cipta dilindungi undang-undang.
