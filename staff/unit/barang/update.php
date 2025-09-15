@@ -39,7 +39,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $kondisi       = trim($_POST['kondisi']);
   $lokasi_id     = intval($_POST['lokasi_id']);
   $keterangan    = trim($_POST['keterangan']);
-  $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', jumlah=$jumlah, harga=$harga, spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', kondisi='$kondisi', lokasi_id=$lokasi_id, keterangan='$keterangan' WHERE barang_id='$barang_id'");
+  // Proses upload foto
+  $foto_nama = $data['foto'];
+  if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
+    $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+    $allowed = ['jpg','jpeg','png','gif','webp'];
+    if (in_array($ext, $allowed)) {
+      // Hapus foto lama jika ada
+      if (!empty($data['foto']) && file_exists(__DIR__ . '/foto-barang/' . $data['foto'])) {
+        unlink(__DIR__ . '/foto-barang/' . $data['foto']);
+      }
+      $foto_nama = uniqid('barang_') . '.' . $ext;
+      $tujuan = __DIR__ . '/foto-barang/' . $foto_nama;
+      move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
+    }
+  }
+  $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', jumlah=$jumlah, harga=$harga, spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', kondisi='$kondisi', lokasi_id=$lokasi_id, keterangan='$keterangan', foto=" . ($foto_nama ? "'$foto_nama'" : "NULL") . " WHERE barang_id='$barang_id'");
   if ($q) {
     header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
     exit;
@@ -62,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="container-fluid">
     <div class="card">
       <div class="card-body">
-        <form method="post">
+  <form method="post" enctype="multipart/form-data">
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -125,6 +140,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <div class="form-group">
                 <label>Keterangan</label>
                 <textarea name="keterangan" class="form-control" rows="3"><?= htmlspecialchars($data['keterangan']) ?></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Barang</label>
+                <input type="file" name="foto" class="form-control" accept="image/*">
+                <?php if (!empty($data['foto'])): ?>
+                  <br><img src="foto-barang/<?= htmlspecialchars($data['foto']) ?>" alt="Foto Barang" style="max-width:120px;max-height:120px;">
+                <?php endif; ?>
               </div>
             </div>
           </div>

@@ -28,14 +28,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $harga = floatval($_POST['harga']);
   $spesifikasi = trim($_POST['spesifikasi']);
   $tanggal_terima = trim($_POST['tanggal_terima']);
+  // Proses upload foto
+  $foto_nama = NULL;
+  if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
+    $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+    $allowed = ['jpg','jpeg','png','gif','webp'];
+    if (in_array($ext, $allowed)) {
+      $foto_nama = uniqid('barang_') . '.' . $ext;
+      $tujuan = __DIR__ . '/foto-barang/' . $foto_nama;
+      move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
+    }
+  }
   $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE nomor_seri='$nomor_seri'");
   if (mysqli_num_rows($cek) > 0) {
     header('Location: dashboard_staff.php?unit=barang&err=Barang sudah terdaftar!');
     exit;
   } else {
-    $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima) VALUES (
+    $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima, foto) VALUES (
       " . ($pengajuan_id ? "'$pengajuan_id'," : "NULL,") . "
-      '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', $jumlah, $harga, '$spesifikasi', '$tanggal_terima')");
+      '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', $jumlah, $harga, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "NULL") . ")");
     if ($q) {
       header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
       exit;
@@ -67,7 +78,7 @@ $jenis_list = [
   <div class="container-fluid">
     <div class="card">
       <div class="card-body">
-        <form method="post">
+  <form method="post" enctype="multipart/form-data">
           <div class="form-group">
             <label>Tanggal Terima</label>
             <input type="date" name="tanggal_terima" class="form-control" value="<?= date('Y-m-d') ?>" required>
@@ -145,6 +156,10 @@ $jenis_list = [
             <label>Keterangan</label>
             <textarea name="keterangan" class="form-control" rows="2"></textarea>
           </div>-->
+          <div class="form-group">
+            <label>Foto Barang</label>
+            <input type="file" name="foto" class="form-control" accept="image/*">
+          </div>
           <button type="submit" class="btn btn-primary">Simpan</button>
           <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>
         </form>
