@@ -1,9 +1,9 @@
 <?php
 $result = mysqli_query($config, "SELECT 
-    b.barang_id,
     b.nama_barang,
     b.jenis_barang,
     b.nomor_seri,
+    b.foto,
     b.ip_address,
     l.nama_lokasi,
     p.perbaikan_id,
@@ -15,10 +15,10 @@ $result = mysqli_query($config, "SELECT
     p.keterangan,
     p.tanggal_selesai,
     p.biaya_perbaikan
-FROM tb_barang b
+FROM tb_perbaikan_barang p
+JOIN tb_barang b ON p.barang_id = b.barang_id
 LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id
-LEFT JOIN tb_perbaikan_barang p ON b.barang_id = p.barang_id
-ORDER BY p.perbaikan_id DESC");
+ORDER BY b.barang_id, p.tanggal_lapor DESC");
 $n      = 1;
 ?>
 <section class="content-header">
@@ -118,6 +118,16 @@ $n      = 1;
                               <div class="modal-body">
                                    <div class="row">
                                         <div class="col-md-6">
+                                             <div class="form-group">
+                                                  <label><strong>Foto Barang:</strong></label>
+                                                  <?php if (!empty($detailRow['foto'])): ?>
+                                                  <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">
+                                                       <img src="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width:180px;max-height:180px;">
+                                                  </div>
+                                                  <?php else: ?>
+                                                  <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">-</div>
+                                                  <?php endif; ?>
+                                             </div>
                                              <div class="form-group">
                                                   <label><strong>Nama Barang:</strong></label>
                                                   <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nama_barang']) ?> </div>

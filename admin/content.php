@@ -24,6 +24,10 @@ else if ($_GET['unit'] == "cetak_pengajuan"){
 else if ($_GET['unit'] == "barang"){
   require_once("unit/barang/barang.php");
 }
+// Data Pengajuan Barang
+else if ($_GET['unit'] == "perbaikan"){
+  require_once("unit/perbaikan/perbaikan.php");
+}
 // Data Verifikasi Lembur staff
 else if ($_GET['unit'] == "lembur"){
   require_once("unit/lembur/lembur.php");

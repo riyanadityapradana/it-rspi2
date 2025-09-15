@@ -13,15 +13,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
   $harga          = isset($_POST['harga'])          ? mysqli_real_escape_string($config, $_POST['harga'])          : '';
   $spesifikasi    = isset($_POST['spesifikasi'])    ? mysqli_real_escape_string($config, $_POST['spesifikasi'])    : '';
   $tanggal_terima = isset($_POST['tanggal_terima']) ? mysqli_real_escape_string($config, $_POST['tanggal_terima']) : '';
-
-  $sql = "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima) VALUES (
-    '$pengajuan_id', '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', '$jumlah', '$harga', '$spesifikasi', '$tanggal_terima')";
+  $foto = '';
+  // Ambil jumlah pengajuan dari database
+  $jumlah_pengajuan = 0;
+  $q_jumlah = mysqli_query($config, "SELECT jumlah FROM tb_pengajuan WHERE pengajuan_id='$pengajuan_id'");
+  if ($row_jumlah = mysqli_fetch_assoc($q_jumlah)) {
+    $jumlah_pengajuan = intval($row_jumlah['jumlah']);
+  }
+  if ($jumlah_pengajuan <= 0) {
+    header('Location: dashboard_staff.php?unit=pengajuan&err=Stok pengajuan sudah habis, silakan tambah pengajuan baru!');
+    exit;
+  }
+  if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
+    $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+    $allowed = ['jpg','jpeg','png','gif'];
+    if (in_array($ext, $allowed)) {
+      $newName = 'barang_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+      $uploadDir = realpath(__DIR__ . '/../barang/foto-barang');
+      if ($uploadDir && is_writable($uploadDir)) {
+        $uploadPath = $uploadDir . DIRECTORY_SEPARATOR . $newName;
+        if (move_uploaded_file($_FILES['foto']['tmp_name'], $uploadPath)) {
+          $foto = $newName;
+        } else {
+          error_log('Gagal upload file: ' . $_FILES['foto']['name']);
+        }
+      } else {
+        error_log('Folder upload tidak ditemukan atau tidak bisa ditulis: ' . $uploadDir);
+      }
+    } else {
+      error_log('Ekstensi file tidak diizinkan: ' . $ext);
+    }
+  }
+  $sql = "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima, foto) VALUES (
+    '$pengajuan_id', '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', '1', '$harga', '$spesifikasi', '$tanggal_terima', '$foto')";
   if (mysqli_query($config, $sql)) {
+    // Kurangi jumlah pengajuan
+    $jumlah_baru = $jumlah_pengajuan - 1;
+    mysqli_query($config, "UPDATE tb_pengajuan SET jumlah='$jumlah_baru' WHERE pengajuan_id='$pengajuan_id'");
     header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
-      exit;
+    exit;
   } else {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Gagal menambah barang!');
-      exit;
+    exit;
   }
 }
 ?>
@@ -64,10 +97,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
           <tr>
             <th>No</th>
             <th>Nama Barang</th>
-            <th style="text-align: center;">Perkiraan Harga</th>
             <th>Status</th>
             <th style="text-align: center;">Tanggal Pengajuan</th>
-            <th style="text-align: center;">Aksi</th>
+            <th style="text-align: center;">Stok</th>
+            <th style="text-align: center; width: 250px;">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -78,12 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
           <tr>
             <td><?= $no++; ?></td>
             <td><?= htmlspecialchars($row['nama_barang']); ?></td>
-            <td>
-              <?php
-                $harga = is_numeric($row['perkiraan_harga']) ? 'Rp. ' . number_format($row['perkiraan_harga'], 0, ',', '.') : '-';
-                echo htmlspecialchars($harga);
-              ?>
-            </td>
             <td>
             <?php
             $status = $row['status'];
@@ -115,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                 echo $tgl;
               ?>
             </td>
+            <td style="text-align: center;"><?= intval($row['jumlah']); ?></td>
             <td>
             <button type="button" class="btn btn-info btn-sm" onclick="showDetailPengajuan('<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>')" data-toggle="modal" data-target="#modalDetailPengajuan"><i class="fa fa-eye"></i></button>
             <?php if ($row['status'] == 'diajukan'): ?>
@@ -132,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                   <button type="button" class="btn btn-primary btn-sm" onclick="setBarangData('<?= $row['pengajuan_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['jumlah']) ?>')" data-toggle="modal" data-target="#modalBarang"><i class="fa fa-plus"></i> Input Data Barang</button>
                 <?php
                 } else {
-                  echo '<span class="badge badge-info">Sudah di input ke data barang</span>';
+                  echo '<span class="badge badge-info">Sudah di input</span>';
                 }
               ?>
 
@@ -146,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
-              <form id="formBarang" method="post">
+              <form id="formBarang" method="post" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="insert_barang" value="1">
                     <input type="hidden" class="form-control" name="pengajuan_id" id="barangPengajuanId" readonly>
@@ -187,6 +215,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                     <div class="form-group">
                       <label>Tanggal Terima</label>
                       <input type="date" class="form-control" name="tanggal_terima" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <div class="form-group">
+                      <label>Foto Barang</label>
+                      <input type="file" class="form-control" name="foto" accept="image/*">
+                      <small class="form-text text-muted">Format: jpg, jpeg, png, gif. Maksimal 2MB.</small>
                     </div>
                   </div>
                   <div class="modal-footer">

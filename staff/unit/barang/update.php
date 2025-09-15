@@ -109,12 +109,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Harga</label>
                 <input type="number" name="harga" class="form-control" min="0" step="0.01" value="<?= htmlspecialchars($data['harga']) ?>" required>
               </div>
-            </div>
-            <div class="col-md-6">
               <div class="form-group">
                 <label>Spesifikasi</label>
                 <textarea name="spesifikasi" class="form-control" rows="2"><?= htmlspecialchars($data['spesifikasi']) ?></textarea>
               </div>
+            </div>
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Tanggal Terima</label>
                 <input type="date" name="tanggal_terima" class="form-control" value="<?= htmlspecialchars($data['tanggal_terima']) ?>" required>
@@ -145,7 +145,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Foto Barang</label>
                 <input type="file" name="foto" class="form-control" accept="image/*">
                 <?php if (!empty($data['foto'])): ?>
-                  <br><img src="foto-barang/<?= htmlspecialchars($data['foto']) ?>" alt="Foto Barang" style="max-width:120px;max-height:120px;">
+                  <br><img src="/it-rspi/staff/unit/barang/foto-barang/<?= htmlspecialchars($data['foto']) ?>" alt="Foto Barang" style="max-width:120px;max-height:120px;">
+                <?php else: ?>
+                  <br><span style="color: #888; font-style: italic;">Belum ada foto barang</span>
                 <?php endif; ?>
               </div>
             </div>

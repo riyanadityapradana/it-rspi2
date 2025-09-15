@@ -138,9 +138,38 @@
   </div>
   <div class="col-md-6">
     <div class="card">
-      <div class="card-header"><h5 class="card-title">Kalender</h5></div>
-      <div class="card-body">
-        <div id="calendar"></div>
+      <div class="card-header"><h5 class="card-title">Perbaikan Barang (Service Luar)</h5></div>
+      <div class="card-body" style="max-height:400px;overflow-y:auto;">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>Nama Barang</th>
+              <th>Tanggal Mulai</th>
+              <th>Tanggal Selesai</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            $sqlPerbaikan = "SELECT p.*, b.nama_barang FROM tb_perbaikan_barang p JOIN tb_barang b ON p.barang_id = b.barang_id WHERE p.tindakan_perbaikan = 'Service luar' AND p.status = 'diajukan' ORDER BY p.tanggal_lapor DESC LIMIT 10";
+            $resultPerbaikan = mysqli_query($config, $sqlPerbaikan);
+            if ($resultPerbaikan && mysqli_num_rows($resultPerbaikan) > 0):
+              while ($row = mysqli_fetch_assoc($resultPerbaikan)):
+            ?>
+            <tr>
+              <td><?= htmlspecialchars($row['nama_barang']) ?></td>
+              <td><?= htmlspecialchars(date('d-m-Y', strtotime($row['tanggal_lapor']))) ?></td>
+              <td><?= $row['tanggal_selesai'] ? htmlspecialchars(date('d-m-Y', strtotime($row['tanggal_selesai']))) : '<span class="badge bg-warning">Belum selesai</span>' ?></td>
+              <td><span class="badge bg-info"><?= htmlspecialchars(ucwords($row['status'])) ?></span></td>
+            </tr>
+            <?php
+              endwhile;
+            else:
+            ?>
+            <tr><td colspan="4" class="text-center text-muted">Tidak ada data perbaikan barang dengan service luar.</td></tr>
+            <?php endif; ?>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

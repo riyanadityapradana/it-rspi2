@@ -114,6 +114,10 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                                     <i class="nav-icon fas fa-box" style="color: white;"></i>
                                     <p style="font-size: 14px; color: white;">Data Barang</p>
                                 </a>
+                                <a href="dashboard_admin.php?unit=perbaikan" class="nav-link">
+                                    <i class="nav-icon fas fa-tools" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Perbaikan Barang</p>
+                                </a>
                             </li>
                         </ul>
                     </li>
