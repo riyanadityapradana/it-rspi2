@@ -154,11 +154,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
               </button>
             <?php elseif ($row['status'] == 'disetujui'): ?>
               <?php
-                $cek_barang = mysqli_query($config, "SELECT barang_id FROM tb_barang WHERE pengajuan_id='" . mysqli_real_escape_string($config, $row['pengajuan_id']) . "'");
-                if (mysqli_num_rows($cek_barang) == 0) {
-                ?>
+                $jumlah_stok = intval($row['jumlah']);
+                if ($jumlah_stok > 0) {
+                  ?>
                   <button type="button" class="btn btn-primary btn-sm" onclick="setBarangData('<?= $row['pengajuan_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['jumlah']) ?>')" data-toggle="modal" data-target="#modalBarang"><i class="fa fa-plus"></i> Input Data Barang</button>
-                <?php
+                  <?php
                 } else {
                   echo '<span class="badge badge-info">Sudah di input</span>';
                 }
