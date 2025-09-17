@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
     }
   }
-  $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE nomor_seri='$nomor_seri'");
+  $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE barang_id='$barang_id' AND nomor_seri='$nomor_seri'");
   if (mysqli_num_rows($cek) > 0) {
     header('Location: dashboard_staff.php?unit=barang&err=Barang sudah terdaftar!');
     exit;
