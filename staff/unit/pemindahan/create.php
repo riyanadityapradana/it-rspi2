@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Ambil daftar barang untuk dropdown
 // Ambil daftar barang
-$barang_list = mysqli_query($config, "SELECT barang_id, nama_barang FROM tb_barang ORDER BY nama_barang ASC");
+$barang_list = mysqli_query($config, "SELECT b.barang_id, b.nama_barang FROM tb_barang b INNER JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id WHERE l.nama_lokasi = 'IT' AND (b.kondisi = 'baru' OR b.kondisi = 'bekas') ORDER BY b.nama_barang ASC");
 // Ambil daftar lokasi
 $lokasi_list = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
 

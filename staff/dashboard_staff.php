@@ -269,31 +269,32 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
 </script>
 <script type="text/javascript">
 $(document).ready(function() {
+    // Inisialisasi DataTable dengan pengaturan custom
     $('#example1').DataTable({
-        "lengthChange": false,
-        "paging":true,
-        "pagingType":"numbers",
-        "scrollCollapse": true,
-        "ordering":true,
-        "info":true,
-        "language":{
-            "decimal":       "",
-            "sEmptyTable":   "Tidak ada data yang tersedia pada tabel ini",
-            "sProcessing":   "Sedang memproses...",
-            "sLengthMenu":   "Tampilkan _MENU_ entri",
-            "sZeroRecords":  "Tidak ditemukan data yang sesuai",
-            "sInfo":         "Showing _START_ to _END_ of _TOTAL_ entri",
-            "sInfoEmpty":    "Showing 0 to 0 of 0 entries",
-            "sInfoFiltered": "(disaring dari _MAX_ entri keseluruhan)",
-            "sInfoPostFix":  "",
-            "sSearch":       "",
-            "searchPlaceholder": "Cari Data..",
-            "sUrl":          "",
-            "oPaginate": {
-                "sFirst":    "Pertama",
-                "sPrevious": "Sebelumnya",
-                "sNext":     "Selanjutnya",
-                "sLast":     "Terakhir"
+        lengthChange: true,
+        paging: true,
+        pagingType: 'numbers',
+        scrollCollapse: true,
+        ordering: true,
+        info: true,
+        language: {
+            decimal: '',
+            emptyTable: 'Tidak ada data yang tersedia pada tabel ini',
+            processing: 'Sedang memproses...',
+            lengthMenu: 'Tampilkan _MENU_ entri',
+            zeroRecords: 'Tidak ditemukan data yang sesuai',
+            info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+            infoEmpty: 'Menampilkan 0 sampai 0 dari 0 entri',
+            infoFiltered: '(disaring dari _MAX_ entri keseluruhan)',
+            infoPostFix: '',
+            search: '',
+            searchPlaceholder: 'Cari Data..',
+            url: '',
+            paginate: {
+                first: 'Pertama',
+                previous: 'Sebelumnya',
+                next: 'Selanjutnya',
+                last: 'Terakhir'
             }
         }
     });

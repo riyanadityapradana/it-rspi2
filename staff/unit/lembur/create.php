@@ -42,7 +42,7 @@
 					<div class="card-body">
 						<div class="form-group">
 							<label>Tanggal Lembur</label>
-							<input type="text" class="form-control" value="<?= date('d-m-Y'); ?>" readonly>
+							<input type="text" class="form-control" value="<?= date('d-m-Y'); ?>">
 						</div>
 
 						<div class="form-group">
