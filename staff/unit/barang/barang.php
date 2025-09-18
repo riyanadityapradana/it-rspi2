@@ -312,23 +312,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
 </div>
 
 <script>
-document.getElementById('printType').addEventListener('change', function() {
-  const jenisGroup = document.getElementById('jenisBarangGroup');
-  const statusGroup = document.getElementById('statusBarangGroup');
-  
-  // Sembunyikan semua group terlebih dahulu
-  jenisGroup.style.display = 'none';
-  statusGroup.style.display = 'none';
-  
-  // Tampilkan group sesuai pilihan
-  if (this.value === 'jenis' || this.value === 'jenis_status') {
-    jenisGroup.style.display = '';
-  }
-  if (this.value === 'status' || this.value === 'jenis_status') {
-    statusGroup.style.display = '';
-  }
-});
-
 // Filter berdasarkan jenis barang dan status barang
 document.addEventListener('DOMContentLoaded', function() {
     const filterJenisSelect = document.getElementById('filterJenisBarang');
