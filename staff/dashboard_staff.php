@@ -270,33 +270,18 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
 <script type="text/javascript">
 $(document).ready(function() {
     // Inisialisasi DataTable dengan pengaturan custom
-    $('#example1').DataTable({
-        lengthChange: true,
-        paging: true,
-        pagingType: 'numbers',
-        scrollCollapse: true,
-        ordering: true,
-        info: true,
-        language: {
-            decimal: '',
-            emptyTable: 'Tidak ada data yang tersedia pada tabel ini',
-            processing: 'Sedang memproses...',
-            lengthMenu: 'Tampilkan _MENU_ entri',
-            zeroRecords: 'Tidak ditemukan data yang sesuai',
-            info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
-            infoEmpty: 'Menampilkan 0 sampai 0 dari 0 entri',
-            infoFiltered: '(disaring dari _MAX_ entri keseluruhan)',
-            infoPostFix: '',
-            search: '',
-            searchPlaceholder: 'Cari Data..',
-            url: '',
-            paginate: {
-                first: 'Pertama',
-                previous: 'Sebelumnya',
-                next: 'Selanjutnya',
-                last: 'Terakhir'
-            }
-        }
+    $("#example1").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,
+      "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
     });
     // Toastr notification
     <?php if(isset($_GET['msg'])): ?>

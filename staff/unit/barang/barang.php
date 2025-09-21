@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
             </select>
             <select id="filterStatusBarang" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;">
               <option value="">Semua Status</option>
-              <option value="Baru">Baik</option>
+              <option value="Baru">Baru</option>
               <option value="Bekas">Bekas</option>
               <option value="Rusak">Rusak</option>
               <option value="Dalam Perbaikan">Dalam Perbaikan</option>
