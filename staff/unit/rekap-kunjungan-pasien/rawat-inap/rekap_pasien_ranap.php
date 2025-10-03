@@ -133,7 +133,7 @@ foreach ($minggu as $i => $range) {
 </head>
 <body>
 <div class="top-bar">
-    <h2>REKAP KUNJUNGAN PASIEN HARIAN RAWAT INAP</h2>
+    <h2>REKAP KUNJUNGAN PASIEN RAWAT INAP</h2>
     <button class="btn-grafik" onclick="showModal()">Lihat Grafik Bulanan</button>
 </div>
 <table border="1" cellpadding="5" cellspacing="0">
@@ -184,6 +184,7 @@ foreach ($minggu as $i => $range) {
         </tr>
     </tfoot>
 </table>
+
 <!-- Modal Grafik Bulanan -->
 <div class="modal-bg" id="modalGrafik">
   <div class="modal-content">

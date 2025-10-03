@@ -3,12 +3,14 @@
 
 	// Proses Simpan
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-		$tanggal_lembur = date('Y-m-d');
+		$tanggal_lembur = $_POST['tanggal_lembur'];
+		$jam_mulai      = $_POST['jam_mulai'];
+		$jam_selesai    = $_POST['jam_selesai'];
 		$id_staff       = $_SESSION['id_user'];
 		$kegiatan_array = $_POST['kegiatan'];
 
 		// Simpan ke tb_lembur
-		$insertLembur = mysqli_query($config, "INSERT INTO tb_lembur (id_staff, tanggal_lembur) VALUES ('$id_staff', '$tanggal_lembur')");
+		$insertLembur = mysqli_query($config, "INSERT INTO tb_lembur (id_staff, tanggal_lembur, jam_mulai, jam_selesai) VALUES ('$id_staff', '$tanggal_lembur', '$jam_mulai', '$jam_selesai')");
 
 		if ($insertLembur) {
 			$id_lembur = mysqli_insert_id($config); // Dapatkan id lembur yang baru dibuat
@@ -19,10 +21,10 @@
 				}
 			}
 			header('Location: dashboard_staff.php?unit=lembur&msg=Data Lembur berhasil Diserahkan!');
-    		exit;
+			exit;
 		} else {
 			header('Location: dashboard_staff.php?unit=lembur&err=Gagal menyerahkan lembur!');
-    		exit;
+			exit;
 		}
 	}
 ?>
@@ -42,7 +44,17 @@
 					<div class="card-body">
 						<div class="form-group">
 							<label>Tanggal Lembur</label>
-							<input type="text" class="form-control" value="<?= date('d-m-Y'); ?>">
+							<input type="date" class="form-control" name="tanggal_lembur" value="<?= date('Y-m-d'); ?>">
+						</div>
+						<div class="form-row">
+							<div class="form-group col-md-6">
+								<label>Jam Mulai</label>
+								<input type="time" class="form-control" name="jam_mulai" required>
+							</div>
+							<div class="form-group col-md-6">
+								<label>Jam Selesai</label>
+								<input type="time" class="form-control" name="jam_selesai" required>
+							</div>
 						</div>
 
 						<div class="form-group">

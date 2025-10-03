@@ -55,7 +55,7 @@ class MYPDF extends TCPDF {
         $this->Cell(0, 5, 'RUMAH SAKIT PELITA INSANI MARTAPURA  ', 0, 1, 'C');
         $this->SetFont('helvetica', '', 12);
         $this->Cell(0, 5, 'Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya', 0, 1, 'C');
-        $this->Image('../../../assets/img/bintang.png', 160, 15 , 15); // posisi X:160, Y:18, width:5mm
+        $this->Image('../../../assets/img/bintang.png', 160, 13, 24); // posisi X:160, Y:12, width:22mm
         $this->SetFont('helvetica', '', 10);
         $this->Cell(0, 5, 'Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan', 0, 1, 'C');
         $html = '<span style="color:black;">Fax. (0511) 4722230, </span><span style="color:red;">Emergency Call (0511) 4722222</span> <span>Email: </span><span style="color:blue;">rs.pelitainsani@gmail.com</span>';
@@ -67,7 +67,7 @@ class MYPDF extends TCPDF {
     }
 }
 
-$pdf = new MYPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+$pdf = new MYPDF('P', 'mm', 'A5', true, 'UTF-8', false);
 $pdf->SetMargins(15, 50, 15);
 $pdf->AddPage();
 $pdf->SetFont('helvetica', '', 11);
@@ -87,6 +87,8 @@ $html .= '<table cellpadding="2">
 <tr><td width="120">Nama</td><td width="10">:</td><td>'.$staff['nama_lengkap'].'</td></tr>
 <tr><td>Jabatan</td><td>:</td><td>'.$staff['role'].'</td></tr>
 <tr><td>Hari / Tanggal</td><td>:</td><td>' . tgl_indo_hari($dataLembur['tanggal_lembur']) . '</td></tr>
+<tr><td>Jam Mulai</td><td>:</td><td>' . date('h:i A', strtotime($dataLembur['jam_mulai'])) . '</td></tr>
+<tr><td>Jam Selesai</td><td>:</td><td>' . date('h:i A', strtotime($dataLembur['jam_selesai'])) . '</td></tr>
 </table>';
 
 // Kegiatan

@@ -130,6 +130,9 @@ else if ($unit == "rekap_pasien_ranap"){
 else if ($unit == "rekap_px_usia_ralan"){
   require_once("unit/rekap-kunjungan-pasien/rawat-jalan/rekap_px_usia_ralan.php");
 }
+else if ($unit == "rekap_pasien_ranap_kabupaten"){
+  require_once("unit/rekap-kunjungan-pasien/rawat-inap/rekap_pasien_ranap_kabupaten.php");
+}
 // Picare
 else if ($unit == "daftar"){
   require_once("unit/pi-care/pi-care_daftar.php");

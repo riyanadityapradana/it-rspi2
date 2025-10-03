@@ -127,6 +127,10 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                                     <i class="nav-icon fas fa-user-injured" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Rkp px usia rawat jalan</p>
                                 </a>
+                                <a href="dashboard_staff.php?unit=rekap_pasien_ranap_kabupaten" class="nav-link">
+                                    <i class="nav-icon fas fa-user-injured" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Rkp px ranap per kabupaten</p>
+                                </a>
                             </li>
                         </ul>
                     </li>

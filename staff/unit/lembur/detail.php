@@ -63,6 +63,16 @@
 									<td><?= date('d-m-Y', strtotime($dataLembur['tanggal_lembur'])); ?></td>
 								</tr>
 								<tr>
+									<th>Jam Mulai</th>
+									<th>:</th>
+									<td><?= date('H:i', strtotime($dataLembur['jam_mulai'])); ?></td>
+								</tr>
+								<tr>
+									<th>Jam Selesai</th>
+									<th>:</th>
+									<td><?= date('H:i', strtotime($dataLembur['jam_selesai'])); ?></td>
+								</tr>
+								<tr>
 									<th>Status</th>
 									<th>:</th>
 									<td>
