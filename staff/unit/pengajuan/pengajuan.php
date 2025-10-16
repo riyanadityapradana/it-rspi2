@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
   $nomor_seri     = isset($_POST['nomor_seri'])     ? mysqli_real_escape_string($config, $_POST['nomor_seri'])     : '';
   $ip_address     = isset($_POST['ip_address'])     ? mysqli_real_escape_string($config, $_POST['ip_address'])     : '';
   $jumlah         = isset($_POST['jumlah'])         ? mysqli_real_escape_string($config, $_POST['jumlah'])         : '';
+  $jumlah_input_modal = isset($_POST['jumlah_input_modal']) ? mysqli_real_escape_string($config, $_POST['jumlah_input_modal']) : '1';
   $harga          = isset($_POST['harga'])          ? mysqli_real_escape_string($config, $_POST['harga'])          : '';
   $spesifikasi    = isset($_POST['spesifikasi'])    ? mysqli_real_escape_string($config, $_POST['spesifikasi'])    : '';
   $tanggal_terima = isset($_POST['tanggal_terima']) ? mysqli_real_escape_string($config, $_POST['tanggal_terima']) : '';
@@ -22,6 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
   }
   if ($jumlah_pengajuan <= 0) {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Stok pengajuan sudah habis, silakan tambah pengajuan baru!');
+    exit;
+  }
+
+  // Validasi jumlah input modal tidak melebihi stok pengajuan
+  $jumlah_input_val = intval($jumlah_input_modal);
+  if ($jumlah_input_val > $jumlah_pengajuan) {
+    header('Location: dashboard_staff.php?unit=pengajuan&err=Jumlah input melebihi stok tersedia!');
     exit;
   }
   if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
@@ -44,13 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
       error_log('Ekstensi file tidak diizinkan: ' . $ext);
     }
   }
+  // Gunakan jumlah_input_modal sebagai jumlah di field jumlah tb_barang
+  $jumlah_kurangi = intval($jumlah_input_modal);
+  if ($jumlah_kurangi > $jumlah_pengajuan) {
+    header('Location: dashboard_staff.php?unit=pengajuan&err=Jumlah input melebihi stok tersedia!');
+    exit;
+  }
+
   $sql = "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima, foto) VALUES (
-    '$pengajuan_id', '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', '1', '$harga', '$spesifikasi', '$tanggal_terima', '$foto')";
+    '$pengajuan_id', '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', '$jumlah_kurangi', '$harga', '$spesifikasi', '$tanggal_terima', '$foto')";
+
   if (mysqli_query($config, $sql)) {
-    // Kurangi jumlah pengajuan
-    $jumlah_baru = $jumlah_pengajuan - 1;
+    $jumlah_baru = $jumlah_pengajuan - $jumlah_kurangi;
     mysqli_query($config, "UPDATE tb_pengajuan SET jumlah='$jumlah_baru' WHERE pengajuan_id='$pengajuan_id'");
-    header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
+    header('Location: dashboard_staff.php?unit=barang&msg=Berhasil tambah ' . $jumlah_kurangi . ' barang!');
     exit;
   } else {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Gagal menambah barang!');
@@ -184,6 +199,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                       <input type="text" class="form-control" name="nama_barang" id="barangNama" readonly>
                     </div>
                     <div class="form-group">
+                      <label>Jumlah Stok yang Akan Diinput</label>
+                      <input type="number" class="form-control" name="jumlah_input_modal" id="jumlahInputModal"
+                             min="1" placeholder="Masukkan jumlah stok" required>
+                      <small class="form-text text-muted">Stok tersedia: <span id="stokTersediaModal"></span></small>
+                    </div>
+                    <div class="form-group">
                       <label>Jenis Barang</label>
                       <select class="form-control" name="jenis_barang" required>
                         <option value="">- Pilih Jenis Barang -</option>
@@ -236,6 +257,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                 document.getElementById('barangPengajuanId').value = id;
                 document.getElementById('barangNama').value = nama;
                 document.getElementById('barangJumlah').value = jumlah;
+                document.getElementById('stokTersediaModal').textContent = jumlah;
+                document.getElementById('jumlahInputModal').value = '1';
+                document.getElementById('jumlahInputModal').max = jumlah;
                 document.getElementById('ipAddressInput').value = '';
                 document.getElementById('ipAddressGroup').style.display = 'none';
                 document.querySelector('select[name="jenis_barang"]').value = '';
@@ -245,6 +269,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                 var jenisBarangSelect = document.querySelector('select[name="jenis_barang"]');
                 var ipAddressGroup = document.getElementById('ipAddressGroup');
                 var ipAddressInput = document.getElementById('ipAddressInput');
+                var jumlahInputModal = document.getElementById('jumlahInputModal');
+                var stokTersediaModal = document.getElementById('stokTersediaModal');
+
                 if (jenisBarangSelect) {
                   jenisBarangSelect.addEventListener('change', function() {
                     if (this.value === 'Komputer & Laptop') {
@@ -252,6 +279,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                     } else {
                       ipAddressGroup.style.display = 'none';
                       ipAddressInput.value = '';
+                    }
+                  });
+                }
+
+                // Validasi jumlah input modal
+                if (jumlahInputModal) {
+                  jumlahInputModal.addEventListener('input', function() {
+                    var inputVal = parseInt(this.value);
+                    var stokTersedia = parseInt(stokTersediaModal.textContent);
+
+                    if (inputVal > stokTersedia) {
+                      alert('Jumlah input tidak boleh melebihi stok tersedia (' + stokTersedia + ')!');
+                      this.value = stokTersedia;
+                    }
+
+                    if (inputVal < 1 || isNaN(inputVal)) {
+                      this.value = 1;
+                    }
+                  });
+
+                  jumlahInputModal.addEventListener('blur', function() {
+                    if (!this.value || this.value < 1) {
+                      this.value = 1;
                     }
                   });
                 }
@@ -401,4 +451,5 @@ document.addEventListener('DOMContentLoaded', function() {
         return false;
     };
 });
+
 </script>

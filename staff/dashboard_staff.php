@@ -80,7 +80,7 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                             <p>Dashboard</p>
                         </a>
                     </li>
-                    <?php if ($_SESSION['nip'] == '635.090125' || $_SESSION['nip'] == '12333'): ?> 
+                    <!-- <?php if ($_SESSION['nip'] == '635.090125' || $_SESSION['nip'] == '12333'): ?>  
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fab fa-whatsapp" style="color: green;"></i><p style="color: black;">Grafik Pi-Care<i class="fas fa-angle-left right" style="color: black;"></i></p>
@@ -103,7 +103,6 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                             </li>
                         </ul>
                     </li>
-                    <?php endif; ?>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-chart-bar" style="color: black;"></i>
@@ -134,6 +133,7 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                             </li>
                         </ul>
                     </li>
+                    <?php endif; ?>-->
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-folder" style="color: black;"></i>
