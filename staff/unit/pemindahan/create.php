@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Ambil daftar barang untuk dropdown
 // Ambil daftar barang
-$barang_list = mysqli_query($config, "SELECT b.barang_id, b.nama_barang FROM tb_barang b INNER JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id WHERE l.nama_lokasi = 'IT' AND (b.kondisi = 'baru' OR b.kondisi = 'bekas') ORDER BY b.nama_barang ASC");
+$barang_list = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.jumlah FROM tb_barang b INNER JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id WHERE l.nama_lokasi = 'IT' AND (b.kondisi = 'baru' OR b.kondisi = 'bekas') AND b.jumlah > 0 ORDER BY b.nama_barang ASC");
 // Ambil daftar lokasi
 $lokasi_list = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
 
@@ -81,7 +81,7 @@ $unit_list = [
             <select name="barang_id" class="form-control select2" required>
               <option value="">-- Pilih Barang --</option>
               <?php while ($barang = mysqli_fetch_assoc($barang_list)): ?>
-                <option value="<?= $barang['barang_id'] ?>"> <?= htmlspecialchars($barang['nama_barang']) ?> </option>
+                <option value="<?= $barang['barang_id'] ?>" <?php if ($barang['jumlah'] <= 0) echo 'disabled'; ?>><?= htmlspecialchars($barang['nama_barang']) ?> (Jumlah: <?= $barang['jumlah'] ?>)</option>
               <?php endwhile; ?>
             </select>
           </div>

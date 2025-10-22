@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 21, 2025 at 04:20 PM
+-- Generation Time: Oct 06, 2025 at 05:37 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -74,10 +74,18 @@ INSERT INTO `tb_barang` (`barang_id`, `pengajuan_id`, `nama_barang`, `jenis_bara
 (22, 13, 'Uninterruptible Power Systems (UPS)', 'Komponen Komputer & Laptop', '-', '', 1, 1.00, '-', '2025-05-07', 'baru', 1, 'Untuk Komputer Riyan IT', 'barang_68ca535099e9b.jpeg'),
 (23, NULL, 'PC Desktop (Unit CPU / PC Rakitan)', 'Komputer & Laptop', '-', '192.168.1.222', 1, 1.00, 'Intel® Core™ i5-14400F (16CPUs),~2.5 GHz\nRAM 16 GB, Stystem 64-bit, Sistem Operasi WIndows 11 Pro Education', '2023-01-01', 'baru', 10, 'Penempatan di Radiologi dalam samping Lab', 'barang_68cb8cb278b27.png'),
 (24, NULL, 'PC DELL Desktop (Unit CPU / PC Rakitan)', 'Komputer & Laptop', '-', '192.168.1.234', 1, 1.00, 'Merek : DELL\r\nIntel® Core™ i5-9500 CPU @ 3.00 GHz(6CPUs),~3.0 GHz\r\nRAM 8 GB, Stystem 64-bit, Sistem Operasi WIndows 11 Pro', '2023-01-01', 'baru', 10, 'Penempatan di Radiologi dalam samping Lab', 'barang_68cb8f31d69f2.png'),
-(25, NULL, 'PC Desktop (Unit CPU / PC Rakitan)', 'Komputer & Laptop', '-', '192.168.1.134', 1, 1.00, '12th Gen Intel® core™ i5-12400 (12 CPUs), ~2.5GHz\r\nRAM 16 GB, Stystem 64-bit, Sistem Operasi WIndows 11 Home', '2025-03-03', 'baru', 1, 'Penempatan di Ruang IT (PC UTAMA ALI)', 'barang_68cba80f33b7b.jpeg'),
+(25, NULL, 'PC Desktop (Unit CPU / PC Rakitan)', 'Komputer & Laptop', '-', '192.168.1.134', 1, 1.00, '12th Gen Intel® core™ i5-12400 (12 CPUs), ~2.5GHz\nRAM 16 GB, Stystem 64-bit, Sistem Operasi WIndows 11 Home', '2025-03-03', 'baru', 1, 'Penempatan di Ruang IT (PC UTAMA ALI)', 'barang_68cba80f33b7b.jpeg'),
 (26, 13, 'Uninterruptible Power Systems (UPS)', 'Komponen Komputer & Laptop', '-', '', 1, 1.00, '-', '2025-05-07', 'baru', 1, 'Untuk Komputer ALI IT', 'barang_1758177555_8886.png'),
 (27, NULL, 'Printer Epson L3210', 'Printer & Scanner', 'XAGKF68723', '', 1, 0.00, 'Epson L3210 adalah printer inkjet dengan teknologi EcoTank yang memungkinkan penggunaan tinta dalam jumlah besar. Resolusinya mencapai 5760 x 1440 dpi, jadi hasil cetaknya tajam, baik untuk dokumen hitam-putih maupun foto berwarna. Kecepatan cetaknya juga cukup oke, yaitu 10 ipm (halaman per menit) untuk hitam-putih dan 5 ipm untuk warna. Printer ini mendukung ukuran kertas A4, legal, hingga foto 4R, plus kompatibel dengan Windows dan Mac OS.\r\n\r\nBobotnya hanya 3,9 kg dengan dimensi 375 x 347 x 179 mm, jadi tidak makan tempat di meja kerja. Sayangnya, konektivitasnya masih mengandalkan USB 2.0, belum ada Wi-Fi seperti seri yang lebih tinggi.\r\n\r\nMeski begitu, untuk penggunaan sederhana, spesifikasi ini sudah cukup memadai. Dengan garansi hingga 2 tahun atau 30.000 cetakan, kamu juga bisa lebih tenang soal perawatan.', '2025-09-20', 'baru', 16, 'Diterima langsung oleh karu farmasi (Rollah), dan printer Epson L121 di tarik ke Unit IT', 'barang_68ce1c5fad7ca.jpeg'),
-(28, NULL, 'Printer Epson L121', 'Komponen Printer & Scanner', 'X9LU382924', '', 1, 1.00, '-', '2025-09-20', 'bekas', 1, 'Bekas dari Farmasi rawat inap, karna di farmasi ranap sudah ada yang baru', 'barang_68ce1d9813869.jpeg');
+(28, NULL, 'Printer Epson L121', 'Komponen Printer & Scanner', 'X9LU382924', '', 1, 1.00, '-', '2025-09-20', 'bekas', 1, 'Bekas dari Farmasi rawat inap, karna di farmasi ranap sudah ada yang baru', 'barang_68ce1d9813869.jpeg'),
+(29, NULL, 'Uninterruptible Power Systems (UPS)', 'Komponen Komputer & Laptop', '1B1QP2400866', '', 1, 0.00, 'Type : CE600D\r\nTegangan Input : 220 Vac\r\nFrekuensi Input : 50 Hz', '2025-09-09', 'baru', 5, 'Sudah di pasang dan di terima oleh karu kecubung, di pasang untuk kegunaan backup komputer & printer', 'barang_68db3563ed635.jpeg'),
+(30, NULL, 'PC Desktop (Unit CPU / PC Rakitan)', 'Komputer & Laptop', '-', '192.168.30.167', 1, 0.00, 'Intel® core™ i3-4170 CPU @ 3.70GHz (4 CPUs), ~3.7GHz\r\nRAM 16 GB, Stystem 64-bit, Sistem Operasi WIndows 11 Home', '2025-09-09', 'bekas', 5, 'Ini komputer Mas Malik dan diserahkan ke kecubung karna permintaan dari karu kecubung ingin penambahan 1 pc', 'barang_68db375e0d9e8.jpeg'),
+(31, NULL, 'Uninterruptible Power Systems (UPS)', 'Komponen Komputer & Laptop', '1B1QP2401638', '', 1, 0.00, 'Type : CE600D\nTegangan Input : 220 Vac\nFrekuensi Input : 50 Hz', '2025-09-09', 'baru', 6, 'Untuk membackup komputer dan printer dan diterima langsung oleh karu yakut c (bu atul) saat pemasangan', 'barang_68db46df7fcc5.jpeg'),
+(32, NULL, 'Uninterruptible Power Systems (UPS)', 'Komponen Komputer & Laptop', '1B1QP2401663', '', 1, 0.00, 'Type : CE600D\r\nTegangan Input : 220 Vac\r\nFrekuensi Input : 50 Hz', '2025-09-09', 'baru', 22, 'di pasang di komputer dokter IGD', 'barang_68dcdded1528a.jpeg'),
+(33, NULL, 'Uninterruptible Power Systems (UPS)', 'Komponen Komputer & Laptop', '1B1QP2400837', '', 1, 0.00, 'Type : CE600D\r\nTegangan Input : 220 Vac\r\nFrekuensi Input : 50 Hz', '2025-09-09', 'baru', 15, 'Sudah diserahkan oleh petugas farmasi ralan', 'barang_68dcde9fcd83d.jpeg'),
+(34, NULL, 'RAM 8 GB DDR 3 Merek VENOMRX', 'Komponen Komputer & Laptop', 'T2301835', '', 1, 0.00, 'Product Name 8GB PC 12800\r\nKategori Memory RAM Komputer\r\nBrand VenomRX\r\nTahun Rilis 2012\r\nHardware\r\nMemory Module DIMM\r\nCompatible Device Desktop\r\nMulti-Channel Dual Channel Channel\r\nMemory\r\nKapasitas Memori 8 GB\r\nFrekuensi 1600 MHz\r\nMemory Type DDR3', '2025-09-10', 'baru', 22, 'di pasang di komputer Dokter IGD karna yang dulu cuman 4 GB saja RAM nya', 'barang_68dce0d0ebe54.jpeg'),
+(35, NULL, 'Keyboard Logitech K120', 'Komponen Komputer & Laptop', '2320MR11CC48', '', 1, 1.00, 'https://www.logitech.com/en-hk/products/keyboards/k120-usb-standard-computer.920-002584.html', '2025-10-03', 'baru', 15, 'langsung di diganti karna yang lama rusak (info : mas hadi)', 'barang_68df263cd1fb7.jpeg'),
+(36, NULL, 'SSD ADATA SU650 128GB', 'Komponen Komputer & Laptop', '-', '', 1, 1.00, '-', '2025-10-01', 'bekas', 22, 'SSD Bekas punya Dito IT  dipasang di komputer dokter IGD karna permasalahan yang sebelumnya sering mati sendiri dan bluscreen', 'barang_68df29dd1bb2d.jpg');
 
 -- --------------------------------------------------------
 
@@ -138,13 +146,7 @@ CREATE TABLE `tb_kegiatan_lembur` (
 --
 
 INSERT INTO `tb_kegiatan_lembur` (`id_kegiatan`, `id_lembur`, `kegiatan`) VALUES
-(6, 4, 'Perbaikan Sever'),
-(7, 4, 'Menambah Jaringan'),
-(8, 5, 'Menjadi Petugas Presentasi'),
-(9, 6, 'fff'),
-(10, 6, 'aaa'),
-(11, 6, 'qqqq'),
-(17, 9, 'aaaa');
+(18, 10, 'printer yakut c habis tinta, terlanjur kosong sehingga harus di cleaning berkali-kali untuk menaikkan tinta ke dalam head printer');
 
 -- --------------------------------------------------------
 
@@ -156,6 +158,8 @@ CREATE TABLE `tb_lembur` (
   `id_lembur` int(11) NOT NULL,
   `id_staff` int(11) NOT NULL,
   `tanggal_lembur` date NOT NULL,
+  `jam_mulai` time NOT NULL,
+  `jam_selesai` time NOT NULL,
   `status_lembur` enum('Menunggu','Diterima','Ditolak') DEFAULT 'Menunggu',
   `id_pimpinan` int(11) DEFAULT NULL,
   `waktu_input` timestamp NOT NULL DEFAULT current_timestamp()
@@ -165,11 +169,8 @@ CREATE TABLE `tb_lembur` (
 -- Dumping data for table `tb_lembur`
 --
 
-INSERT INTO `tb_lembur` (`id_lembur`, `id_staff`, `tanggal_lembur`, `status_lembur`, `id_pimpinan`, `waktu_input`) VALUES
-(4, 2, '2025-05-31', 'Ditolak', 1, '2025-05-31 03:08:03'),
-(5, 5, '2025-05-31', 'Diterima', 1, '2025-05-31 03:11:46'),
-(6, 2, '2025-09-03', 'Diterima', 1, '2025-06-07 04:11:00'),
-(9, 5, '2025-07-14', 'Menunggu', NULL, '2025-07-14 14:52:01');
+INSERT INTO `tb_lembur` (`id_lembur`, `id_staff`, `tanggal_lembur`, `jam_mulai`, `jam_selesai`, `status_lembur`, `id_pimpinan`, `waktu_input`) VALUES
+(10, 3, '2025-10-02', '00:00:00', '00:00:00', 'Menunggu', NULL, '2025-10-02 07:59:55');
 
 -- --------------------------------------------------------
 
@@ -191,7 +192,12 @@ CREATE TABLE `tb_logbook` (
 --
 
 INSERT INTO `tb_logbook` (`id_log`, `id_user`, `tanggal_log`, `judul_log`, `deskripsi_log`, `catatan_log`) VALUES
-(11, 5, '2025-09-11', 'fsef', 'wd', 'wdwd');
+(12, 3, '2025-10-02', 'IT Support', 'Mouse Komputer Farmasi Ralan error klik', 'Restart Windows'),
+(13, 3, '2025-10-02', 'IT Support', 'komputer Manajemen Elita sharing printer', 'belum dihidupkan dan kabel belum terpasang'),
+(14, 3, '2025-10-01', 'IT Support', 'Bantu perbaiki CCTV mati, modem Akses Point dapur bawah direstart', 'cabut pasang adaptor listrik'),
+(15, 3, '2025-10-01', 'IT Support', 'Backup dan install ulang windows komputer manajemen Elita', 'Manufaktur motherboard jadul susah terintegrasi antara ssd dan windows'),
+(16, 3, '2025-10-03', 'IT Support', 'keyboard farmasi ralan error', 'ganti keyboard'),
+(17, 3, '2025-10-03', 'IT Support', 'Printer Poli Mata tidak bisa dihidupkan', 'dibulak-balik kabel listrik');
 
 -- --------------------------------------------------------
 
@@ -213,7 +219,7 @@ INSERT INTO `tb_lokasi` (`lokasi_id`, `nama_lokasi`, `keterangan`) VALUES
 (1, 'IT', 'Unit IT dan Komputer'),
 (2, 'Keuangan', 'Unit Keuangan'),
 (3, 'FO Ralan', 'Front Office atau Pendaftaran Rawat Jalan'),
-(4, 'FO Ranap', 'Front Office atau Pendaftaran Rawat Inap (IGD)'),
+(4, 'FO Ranap (IGD)', 'Front Office atau Pendaftaran Rawat Inap (IGD)'),
 (5, 'Kecubung', 'Counter Kecubung'),
 (6, 'Yakut C', 'Counter Yakut C'),
 (7, 'Counter Lt.3', 'Counter Rawat Inap Lt.3'),
@@ -230,7 +236,8 @@ INSERT INTO `tb_lokasi` (`lokasi_id`, `nama_lokasi`, `keterangan`) VALUES
 (18, 'Gizi', 'Ruang Gizi'),
 (19, 'Farmasi', 'Farmasi Tengah/ditempat Karu Farmasi'),
 (20, 'PONEK', 'PONEK Lt.1'),
-(21, 'Kasir', 'Kasir Lt.1');
+(21, 'Kasir', 'Kasir Lt.1'),
+(22, 'IGD', 'Ini tempat nya bisa di dokter IGD atau Perawat IGD');
 
 -- --------------------------------------------------------
 
@@ -321,7 +328,8 @@ INSERT INTO `tb_pengajuan` (`pengajuan_id`, `id_user`, `nama_barang`, `unit`, `j
 (9, 5, 'RAM 8 GB DDR 4 Merek KingSton dan V-Gen', 'Unit IT', 0, 250000.00, 'Upgrade PC Desktop (Unit CPU / PC Rakitan) punya riyan it', 'disetujui', '2025-06-17', '2025-06-20'),
 (10, 5, 'V-GeN SSD 128 GB', 'Unit IT', 0, 160000.00, 'Upgrade PC Desktop (Unit CPU / PC Rakitan) punya riyan it', 'disetujui', '2025-06-17', '2025-06-20'),
 (11, 5, 'Webcame Logitech C270 HD 720p', 'Unit IT', 0, 320000.00, 'Untuk penunjang Akreditasi dan kegiatan rapat-rapat ketika Zoom', 'disetujui', '2025-02-18', '2025-02-24'),
-(13, 5, 'Uninterruptible Power Systems (UPS)', 'Unit IT', 3, 1.00, 'Untuk semua komputer unit staff IT', 'disetujui', '2025-04-16', '2025-04-28');
+(13, 5, 'Uninterruptible Power Systems (UPS)', 'Unit IT', 3, 1.00, 'Untuk semua komputer unit staff IT', 'disetujui', '2025-04-16', '2025-04-28'),
+(15, 5, 'Kabel Duct TC5  Protector Pelindung Kabel', 'Unit IT', 8, 25000.00, 'Untuk merapikan kabel lan di counter lt 3 dan aula', 'disetujui', '2025-09-23', '2025-09-24');
 
 -- --------------------------------------------------------
 
@@ -376,7 +384,7 @@ CREATE TABLE `tb_remote` (
 --
 
 INSERT INTO `tb_remote` (`id_remote`, `ip_add`, `password`, `nama_desktop`) VALUES
-(3, '1 529 038 096', 'riyanap210896', 'AndyDesk Laptop Riyan'),
+(3, '631 825 847', 'riyanap210896', 'AndyDesk Laptop Riyan'),
 (5, '1204420211', 'unitit2025', 'Lpt Thinkpad'),
 (6, '1489744944', 'unitit2025', 'Ltp Assus Silver'),
 (7, '323572946', 'unitit2025', 'Komp IGD Dr'),
@@ -576,7 +584,7 @@ ALTER TABLE `tb_bahasa`
 -- AUTO_INCREMENT for table `tb_barang`
 --
 ALTER TABLE `tb_barang`
-  MODIFY `barang_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `barang_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `tb_calon`
@@ -594,25 +602,25 @@ ALTER TABLE `tb_keahlian`
 -- AUTO_INCREMENT for table `tb_kegiatan_lembur`
 --
 ALTER TABLE `tb_kegiatan_lembur`
-  MODIFY `id_kegiatan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id_kegiatan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `tb_lembur`
 --
 ALTER TABLE `tb_lembur`
-  MODIFY `id_lembur` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_lembur` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `tb_logbook`
 --
 ALTER TABLE `tb_logbook`
-  MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `tb_lokasi`
 --
 ALTER TABLE `tb_lokasi`
-  MODIFY `lokasi_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `lokasi_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `tb_mutasi_barang`
@@ -636,7 +644,7 @@ ALTER TABLE `tb_pendidikan`
 -- AUTO_INCREMENT for table `tb_pengajuan`
 --
 ALTER TABLE `tb_pengajuan`
-  MODIFY `pengajuan_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `pengajuan_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `tb_pengalaman`
