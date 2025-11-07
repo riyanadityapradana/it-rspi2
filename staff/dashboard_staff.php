@@ -157,14 +157,6 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                                     <i class="nav-icon fas fa-laptop" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Remote Desktop</p>
                                 </a>
-                                <a href="http://192.168.1.66/pmkp" class="nav-link">
-                                    <i class="nav-icon fas fa-folder" style="color: black;"></i>
-                                    <p style="font-size: 12px; color: black; white-space: normal; word-break: break-word; line-height: 1.2; margin-bottom: 0;">Backup Dokumen IT</p>
-                                </a>
-                                <a href="http://192.168.1.66/invent-barang" class="nav-link">
-                                    <i class="nav-icon fas fa-folder" style="color: black;"></i>
-                                    <p style="font-size: 13px; color: black; white-space: normal; word-break: break-word; line-height: 1.2; margin-bottom: 0;">Inventaris Barang IT</p>
-                                </a>
                             </li>
                         </ul>
                     </li>
