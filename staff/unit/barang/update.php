@@ -18,6 +18,7 @@ $jenis_list = [
   'Komponen Komputer & Laptop',
   'Printer & Scanner',
   'Komponen Printer & Scanner',
+  'Kamera & Aksesoris',
   'Komponen Network'
 ];
 // Pilihan lokasi
