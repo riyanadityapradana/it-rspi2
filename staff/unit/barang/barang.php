@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
           </div>
 			</div>
             <div class="card-body">
-                <table id="example1" class="table table-bordered table-striped">
+                <table id="example2" class="table table-bordered table-striped">
                 <thead style="background:rgb(129, 2, 0, 1); color:white;">
                     <tr>
                     <th style="width: 50px; text-align: center;">No</th>
