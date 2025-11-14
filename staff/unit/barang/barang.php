@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
               <option value="Komponen Komputer & Laptop">Komponen Komputer & Laptop</option>
               <option value="Printer & Scanner">Printer & Scanner</option>
               <option value="Komponen Printer & Scanner">Komponen Printer & Scanner</option>
+              <option value="Kamera & Aksesoris">Kamera & Aksesoris</option>
               <option value="Komponen Network">Komponen Network</option>
             </select>
             <select id="filterStatusBarang" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;">
