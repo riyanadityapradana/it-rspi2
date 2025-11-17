@@ -47,30 +47,30 @@ function tgl_indo_hari($tanggal) {
 // Mulai PDF
 class MYPDF extends TCPDF {
     public function Header() {
-        // Logo dan header
-        $this->Image('../../../assets/img/logo.jpg', 8, 5, 32); // Ganti logo sesuai file kamu
-        $this->SetFont('helvetica', 'B', 14);
-        $this->Cell(0, 10, 'PT. PELITA INSANI MULIA', 0, 1, 'C');
-        $this->SetFont('helvetica', '', 12);
-        $this->Cell(0, 5, 'RUMAH SAKIT PELITA INSANI MARTAPURA  ', 0, 1, 'C');
-        $this->SetFont('helvetica', '', 12);
-        $this->Cell(0, 5, 'Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya', 0, 1, 'C');
-        $this->Image('../../../assets/img/bintang.png', 160, 13, 24); // posisi X:160, Y:12, width:22mm
-        $this->SetFont('helvetica', '', 10);
-        $this->Cell(0, 5, 'Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan', 0, 1, 'C');
+        // Logo dan header - disesuaikan untuk A5
+        $this->Image('../../../assets/img/logo.jpg', 7, 5, 23); // Logo lebih kecil, posisi X:10
+        $this->SetFont('helvetica', 'B', 10);
+        $this->Cell(0, 7, 'PT. PELITA INSANI MULIA', 0, 1, 'C');
+        $this->SetFont('helvetica', '', 9);
+        $this->Cell(0, 4, 'RUMAH SAKIT PELITA INSANI MARTAPURA', 0, 1, 'C');
+        $this->SetFont('helvetica', '', 8);
+        $this->Cell(0, 4, 'Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya', 0, 1, 'C');
+        $this->Image('../../../assets/img/bintang.png', 114, 10, 17); // Posisi X:115 agar sesuai lebar A5 (148mm), ukuran lebih kecil
+        $this->SetFont('helvetica', '', 7);
+        $this->Cell(0, 4, 'Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan', 0, 1, 'C');
         $html = '<span style="color:black;">Fax. (0511) 4722230, </span><span style="color:red;">Emergency Call (0511) 4722222</span> <span>Email: </span><span style="color:blue;">rs.pelitainsani@gmail.com</span>';
-        $this->writeHTMLCell(0, 5, '', '', $html, 0, 1, false, true, 'C', true);
-        $this->Cell(0, 5, 'Website: www.pelitainsani.com', 0, 1, 'C');
-        $this->Ln(4);
-        $this->Line(10, 40, 200, 40);
+        $this->writeHTMLCell(0, 4, '', '', $html, 0, 1, false, true, 'C', true);
+        $this->Cell(0, 4, 'Website: www.pelitainsani.com', 0, 1, 'C');
+        $this->Ln(3);
+        $this->Line(7, 30, 138, 30); // Garis disesuaikan untuk lebar A5 (margin 10-138)
         $this->Ln(5);
     }
 }
 
 $pdf = new MYPDF('P', 'mm', 'A5', true, 'UTF-8', false);
-$pdf->SetMargins(15, 50, 15);
+$pdf->SetMargins(10, 35, 5); // Margin disesuaikan untuk A5
 $pdf->AddPage();
-$pdf->SetFont('helvetica', '', 11);
+$pdf->SetFont('helvetica', '', 9);
 
 // Judul
 $html = '<h3 style="text-align:center;">SURAT PERINTAH LEMBUR "ON CALL"</h3><br>';
@@ -78,8 +78,14 @@ $html = '<h3 style="text-align:center;">SURAT PERINTAH LEMBUR "ON CALL"</h3><br>
 // Info pemberi tugas
 $html .= '<p>Dengan ini Saya:</p>';
 $html .= '<table cellpadding="2">
-<tr><td width="120">Nama</td><td width="10">:</td><td>'.$pimpinan['nama_lengkap'].'</td></tr>
-<tr><td>Bagian / Jabatan</td><td>:</td><td>'.$pimpinan['role'].'</td></tr>
+<tr>
+    <td width="120">Nama</td>
+    <td width="10">:</td><td>'.$pimpinan['nama_lengkap'].'</td>
+</tr>
+<tr>
+<td>Bagian / Jabatan</td><td>:</td>
+<td>'.$pimpinan['role'].'</td>
+</tr>
 </table>';
 
 $html .= '<p>Memberikan Perintah Lembur "On Call" Kepada:</p>';
@@ -87,8 +93,7 @@ $html .= '<table cellpadding="2">
 <tr><td width="120">Nama</td><td width="10">:</td><td>'.$staff['nama_lengkap'].'</td></tr>
 <tr><td>Jabatan</td><td>:</td><td>'.$staff['role'].'</td></tr>
 <tr><td>Hari / Tanggal</td><td>:</td><td>' . tgl_indo_hari($dataLembur['tanggal_lembur']) . '</td></tr>
-<tr><td>Jam Mulai</td><td>:</td><td>' . date('h:i A', strtotime($dataLembur['jam_mulai'])) . '</td></tr>
-<tr><td>Jam Selesai</td><td>:</td><td>' . date('h:i A', strtotime($dataLembur['jam_selesai'])) . '</td></tr>
+<tr><td>Jam</td><td>:</td><td>' . date('h:i A', strtotime($dataLembur['jam_mulai'])) . ' - ' . date('h:i A', strtotime($dataLembur['jam_selesai'])) . '</td></tr>
 </table>';
 
 // Kegiatan
