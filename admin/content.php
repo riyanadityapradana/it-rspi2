@@ -32,6 +32,10 @@ else if ($_GET['unit'] == "perbaikan"){
 else if ($_GET['unit'] == "lembur"){
   require_once("unit/lembur/lembur.php");
 }
+// Data Logbook
+else if ($_GET['unit'] == "logbook"){
+  require_once("unit/logbook/logbook.php");
+}
 // Picare
 else if ($unit == "daftar"){
   require_once("unit/pi-care/pi-care_daftar.php");
