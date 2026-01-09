@@ -1,18 +1,54 @@
 <?php
 require_once("../config/koneksi.php");
 // Proses update penyerahan barang
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset($_POST['lokasi_id']) && isset($_POST['kondisi'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset($_POST['lokasi_id'])) {
   $barang_id = intval($_POST['barang_id']);
-  $lokasi_id = intval($_POST['lokasi_id']);
-  $kondisi = trim($_POST['kondisi']);
-  $keterangan = isset($_POST['keterangan']) ? trim($_POST['keterangan']) : '';
-  $update = mysqli_query($config, "UPDATE tb_barang SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE barang_id='$barang_id'");
-    if ($update) {
-    header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil Diserahkan!');
+  $lokasi_id = intval($_POST['lokasi_id'][0]);
+  $kondisi = trim($_POST['kondisi'][0]);
+  $keterangan = isset($_POST['keterangan_unit'][0]) ? trim($_POST['keterangan_unit'][0]) : '';
+  $unit_index = isset($_POST['unit_index']) ? intval($_POST['unit_index']) : 0;
+
+  // Ambil jumlah dari tb_barang
+  $q_jumlah = mysqli_query($config, "SELECT jumlah FROM tb_barang WHERE barang_id='$barang_id'");
+  $row_jumlah = mysqli_fetch_assoc($q_jumlah);
+  $jumlah = $row_jumlah['jumlah'];
+
+  // Cek jumlah penyerahan sudah ada
+  $q_penyerahan_count = mysqli_query($config, "SELECT COUNT(*) as count FROM tb_penyerahan WHERE barang_id='$barang_id'");
+  $row_count = mysqli_fetch_assoc($q_penyerahan_count);
+  $jumlah_penyerahan_current = $row_count['count'];
+
+  if ($jumlah_penyerahan_current >= $jumlah) {
+    header('Location: dashboard_staff.php?unit=barang&err=Semua unit sudah diserahkan!');
     exit;
+  }
+
+  if ($jumlah > 1) {
+    // Insert satu per satu ke tb_penyerahan
+    $insert = mysqli_query($config, "INSERT INTO tb_penyerahan (barang_id, lokasi_id, kondisi, keterangan) VALUES ('$barang_id', '$lokasi_id', '$kondisi', '$keterangan')");
+    if ($insert) {
+      $next_unit = $unit_index + 1;
+      if ($next_unit < $jumlah) {
+        header('Location: dashboard_staff.php?unit=barang&msg=Unit ' . ($unit_index+1) . ' berhasil diserahkan, lanjut unit ' . ($next_unit+1) . '&continue_barang_id=' . $barang_id . '&next_unit=' . $next_unit);
+        exit;
+      } else {
+        header('Location: dashboard_staff.php?unit=barang&msg=Semua unit berhasil diserahkan!');
+        exit;
+      }
+    } else {
+      header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan unit ' . ($unit_index+1) . ': ' . mysqli_error($config));
+      exit;
+    }
   } else {
-    header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan barang!');
-    exit;
+    // Update tb_barang
+    $update = mysqli_query($config, "UPDATE tb_barang SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE barang_id='$barang_id'");
+    if ($update) {
+      header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil Diserahkan!');
+      exit;
+    } else {
+      header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan barang: ' . mysqli_error($config));
+      exit;
+    }
   }
 }
 ?>
@@ -89,15 +125,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     while ($row = mysqli_fetch_assoc($lokasi_q)) {
                       $lokasi_list[] = $row;
                     }
-                    $q = mysqli_query($config, "SELECT b.*, l.nama_lokasi FROM tb_barang b LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id ORDER BY b.barang_id ASC");
+                    $q = mysqli_query($config, "SELECT b.*,
+                       CASE
+                         WHEN b.jumlah > 1 THEN (
+                           SELECT GROUP_CONCAT(CONCAT('<span class=\"badge badge-', IF(p.kondisi='baru','success',IF(p.kondisi='bekas','info',IF(p.kondisi='rusak','danger','warning'))), '\">', l.nama_lokasi, ' (', p.kondisi, ')</span>') SEPARATOR ', ')
+                           FROM tb_penyerahan p
+                           LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id
+                           WHERE p.barang_id = b.barang_id
+                         )
+                         ELSE l.nama_lokasi
+                       END AS nama_lokasi_gabung,
+                       (SELECT COUNT(*) FROM tb_penyerahan WHERE barang_id = b.barang_id) AS jumlah_penyerahan
+                    FROM tb_barang b LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id ORDER BY b.barang_id ASC");
                     while ($row = mysqli_fetch_assoc($q)) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
                         <td><?= htmlspecialchars($row['nama_barang']); ?></td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
-                        <td><?= htmlspecialchars($row['nama_lokasi']); ?></td>
+                        <td><?php if ($row['jumlah'] > 1) { echo $row['nama_lokasi_gabung']; } else { echo htmlspecialchars($row['nama_lokasi_gabung']); } ?></td>
                         <td class="text-center">
-                          <?php if (!empty($row['kondisi'])): ?>
+                          <?php if ($row['jumlah'] > 1): ?>
+                            <?php if ($row['jumlah_penyerahan'] >= $row['jumlah']): ?>
+                              <span class="badge badge-success">Completed</span>
+                            <?php else: ?>
+                              <span class="badge badge-primary">In Progress (<?= $row['jumlah_penyerahan'] ?>/<?= $row['jumlah'] ?>)</span>
+                            <?php endif; ?>
+                          <?php elseif (!empty($row['kondisi'])): ?>
                             <span class="badge badge-<?= $row['kondisi'] == 'baru' ? 'success' : ($row['kondisi'] == 'bekas' ? 'info' : ($row['kondisi'] == 'rusak' ? 'danger' : 'warning')) ?>">
                               <?= htmlspecialchars(ucwords($row['kondisi'])); ?>
                             </span>
@@ -110,9 +163,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetailBarang<?= $row['barang_id'] ?>">
                             <i class="fa fa-eye"></i> Detail
                           </button>
-                          <?php if ($row['kondisi'] == '-'): ?>
-                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['kondisi']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= $row['lokasi_id'] ?>')">
-                              <i class="fa fa-handshake"></i> Penyerahan
+                          <?php if ($row['jumlah_penyerahan'] < $row['jumlah']): ?>
+                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['kondisi']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= $row['lokasi_id'] ?>', '<?= $row['jumlah'] ?>')">
+                              <i class="fa fa-handshake"></i> Penyerahan (<?= $row['jumlah_penyerahan'] ?>/<?= $row['jumlah'] ?>)
                             </button>
                             <a href="dashboard_staff.php?unit=delete_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus barang ini?')"><i class="fa fa-trash"></i> Hapus</a>
                           <?php else: ?>
@@ -133,29 +186,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       <form id="formUpdateLokasi" method="POST" action="">
                             <div class="modal-body">
                               <input type="hidden" name="barang_id" id="updateBarangId">
+                              <input type="hidden" name="unit_index" id="unitIndex">
                               <div class="form-group">
                                 <label>Nama Barang:</label>
                                 <input type="text" class="form-control" id="updateNamaBarang" readonly>
                               </div>
                               <div class="form-group">
-                                <label>Lokasi:</label>
-                                <select class="form-control select2" name="lokasi_id" id="updateLokasiId" required>
+                                <label id="unitLabel">Lokasi:</label>
+                                <select class="form-control select2" name="lokasi_id[]" required>
                                   <option value="">-- Pilih Lokasi --</option>
                                   <?php foreach ($lokasi_list as $lokasi): ?>
-                                    <option value="<?= $lokasi['lokasi_id'] ?>" <?= $row['lokasi_id']==$lokasi['lokasi_id']?'selected':'' ?>><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
+                                    <option value="<?= $lokasi['lokasi_id'] ?>"><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
                                   <?php endforeach; ?>
                                 </select>
                               </div>
                               <div class="form-group">
                                 <label>Kondisi:</label>
-                                <select class="form-control select2" name="kondisi" id="updateKondisi" required>
-                                  <option value="baru" <?= $row['kondisi']=='baru'?'selected':'' ?>>Baru</option>
-                                  <option value="bekas" <?= $row['kondisi']=='bekas'?'selected':'' ?>>Bekas</option>
+                                <select class="form-control select2" name="kondisi[]" required>
+                                  <option value="baru">Baru</option>
+                                  <option value="bekas">Bekas</option>
                                 </select>
                               </div>
                               <div class="form-group">
                                 <label>Keterangan:</label>
-                                <textarea class="form-control" name="keterangan" id="updateKeterangan" rows="2"></textarea>
+                                <textarea class="form-control" name="keterangan_unit[]" rows="2"></textarea>
                               </div>
                             </div>
                             <div class="modal-footer">
@@ -167,12 +221,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       </div>
                     </div>
                     <script>
-                      function setUpdateLokasiData(barangId, namaBarang, kondisi, keterangan, lokasiId) {
+                      function setUpdateLokasiData(barangId, namaBarang, kondisi, keterangan, lokasiId, jumlah) {
                         document.getElementById('updateBarangId').value = barangId;
                         document.getElementById('updateNamaBarang').value = namaBarang;
-                        document.getElementById('updateKondisi').value = kondisi;
-                        document.getElementById('updateKeterangan').value = keterangan;
-                        document.getElementById('updateLokasiId').value = lokasiId;
+                        var unit_index = 0;
+                        var urlParams = new URLSearchParams(window.location.search);
+                        if (urlParams.get('continue_barang_id') == barangId) {
+                          unit_index = parseInt(urlParams.get('next_unit')) || 0;
+                        }
+                        document.getElementById('unitIndex').value = unit_index;
+                        document.getElementById('unitLabel').textContent = 'Unit ' + (unit_index + 1) + ' dari ' + jumlah + ' - Lokasi:';
+                        if (unit_index == 0) {
+                          document.querySelector('select[name="lokasi_id[]"]').value = lokasiId;
+                          document.querySelector('select[name="kondisi[]"]').value = kondisi;
+                          document.querySelector('textarea[name="keterangan_unit[]"]').value = keterangan;
+                        }
+                        // Jika continue, auto show modal
+                        if (unit_index > 0) {
+                          $('#modalUpdateLokasi').modal('show');
+                        }
                       }
                     </script>
                 </tr>
@@ -225,10 +292,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           <label><strong>Jumlah:</strong></label>
                           <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['jumlah']) ?> </div>
                         </div>
-                        <div class="form-group">
-                          <label><strong>Harga:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> Rp. <?= number_format($detailRow['harga'],0,',','.') ?> </div>
-                        </div>
                       </div>
                       <div class="col-md-4">
                         <div class="form-group">
@@ -241,7 +304,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         </div>
                         <div class="form-group">
                           <label><strong>Lokasi:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nama_lokasi']) ?> </div>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;">
+                            <?php
+                            if ($detailRow['jumlah'] > 1) {
+                              $q_penyerahan = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}'");
+                              while ($p = mysqli_fetch_assoc($q_penyerahan)) {
+                                $badge_class = $p['kondisi'] == 'baru' ? 'success' : ($p['kondisi'] == 'bekas' ? 'info' : ($p['kondisi'] == 'rusak' ? 'danger' : 'warning'));
+                                echo '<span class="badge badge-' . $badge_class . '">' . htmlspecialchars($p['nama_lokasi']) . ' (' . htmlspecialchars($p['kondisi']) . ')</span> ';
+                              }
+                            } else {
+                              echo htmlspecialchars($detailRow['nama_lokasi']);
+                            }
+                            ?>
+                          </div>
                         </div>
                         <div class="form-group">
                           <label><strong>Spesifikasi:</strong></label>
@@ -356,3 +431,18 @@ document.addEventListener('DOMContentLoaded', function() {
     filterStatusSelect.addEventListener('change', filterTable);
 });
 </script>
+<?php
+if (isset($_GET['continue_barang_id'])) {
+  $continue_barang_id = intval($_GET['continue_barang_id']);
+  $next_unit = intval($_GET['next_unit']);
+  $q_continue = mysqli_query($config, "SELECT * FROM tb_barang WHERE barang_id='$continue_barang_id'");
+  $row_continue = mysqli_fetch_assoc($q_continue);
+  if ($row_continue) {
+    echo "<script>
+      $(document).ready(function() {
+        setUpdateLokasiData('{$row_continue['barang_id']}', '" . addslashes($row_continue['nama_barang']) . "', '{$row_continue['kondisi']}', '{$row_continue['keterangan']}', '{$row_continue['lokasi_id']}', '{$row_continue['jumlah']}');
+      });
+    </script>";
+  }
+}
+?>

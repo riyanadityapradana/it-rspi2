@@ -12,6 +12,14 @@ if (!$data) {
   header('Location: dashboard_staff.php?unit=barang&err=Barang tidak ditemukan!');
   exit;
 }
+// Ambil data penyerahan jika jumlah >1
+$penyerahan_list = [];
+if ($data['jumlah'] > 1) {
+  $penyerahan_q = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='$barang_id'");
+  while ($row = mysqli_fetch_assoc($penyerahan_q)) {
+    $penyerahan_list[] = $row;
+  }
+}
 // Pilihan jenis barang
 $jenis_list = [
   'Komputer & Laptop',
@@ -28,38 +36,52 @@ while ($row = mysqli_fetch_assoc($lokasi_q)) {
 }
 // Proses update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $nama_barang   = trim($_POST['nama_barang']);
-  $jenis_barang  = trim($_POST['jenis_barang']);
-  $nomor_seri    = trim($_POST['nomor_seri']);
-  $ip_address    = trim($_POST['ip_address']);
-  $jumlah        = intval($_POST['jumlah']);
-  $spesifikasi   = trim($_POST['spesifikasi']);
-  $tanggal_terima= trim($_POST['tanggal_terima']);
-  $kondisi       = trim($_POST['kondisi']);
-  $lokasi_id     = intval($_POST['lokasi_id']);
-  $keterangan    = trim($_POST['keterangan']);
-  // Proses upload foto
-  $foto_nama = $data['foto'];
-  if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
-    $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
-    $allowed = ['jpg','jpeg','png','gif','webp'];
-    if (in_array($ext, $allowed)) {
-      // Hapus foto lama jika ada
-      if (!empty($data['foto']) && file_exists(__DIR__ . '/foto-barang/' . $data['foto'])) {
-        unlink(__DIR__ . '/foto-barang/' . $data['foto']);
-      }
-      $foto_nama = uniqid('barang_') . '.' . $ext;
-      $tujuan = __DIR__ . '/foto-barang/' . $foto_nama;
-      move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
+  if (isset($_POST['penyerahan_id'])) {
+    // Update penyerahan
+    for ($i = 0; $i < count($_POST['penyerahan_id']); $i++) {
+      $penyerahan_id = intval($_POST['penyerahan_id'][$i]);
+      $lokasi_id = intval($_POST['lokasi_id'][$i]);
+      $kondisi = trim($_POST['kondisi'][$i]);
+      $keterangan = trim($_POST['keterangan_unit'][$i]);
+      mysqli_query($config, "UPDATE tb_penyerahan SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE penyerahan_id='$penyerahan_id'");
     }
-  }
-  $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', jumlah=$jumlah, spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', kondisi='$kondisi', lokasi_id=$lokasi_id, keterangan='$keterangan', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
-  if ($q) {
-    header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
+    header('Location: dashboard_staff.php?unit=barang&msg=Penyerahan berhasil diupdate!');
     exit;
   } else {
-    header('Location: dashboard_staff.php?unit=barang&err=Gagal update barang!');
-    exit;
+    // Update barang
+    $nama_barang   = trim($_POST['nama_barang']);
+    $jenis_barang  = trim($_POST['jenis_barang']);
+    $nomor_seri    = trim($_POST['nomor_seri']);
+    $ip_address    = trim($_POST['ip_address']);
+    $jumlah        = intval($_POST['jumlah']);
+    $spesifikasi   = trim($_POST['spesifikasi']);
+    $tanggal_terima= trim($_POST['tanggal_terima']);
+    $kondisi       = trim($_POST['kondisi']);
+    $lokasi_id     = intval($_POST['lokasi_id']);
+    $keterangan    = trim($_POST['keterangan']);
+    // Proses upload foto
+    $foto_nama = $data['foto'];
+    if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
+      $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+      $allowed = ['jpg','jpeg','png','gif','webp'];
+      if (in_array($ext, $allowed)) {
+        // Hapus foto lama jika ada
+        if (!empty($data['foto']) && file_exists(__DIR__ . '/foto-barang/' . $data['foto'])) {
+          unlink(__DIR__ . '/foto-barang/' . $data['foto']);
+        }
+        $foto_nama = uniqid('barang_') . '.' . $ext;
+        $tujuan = __DIR__ . '/foto-barang/' . $foto_nama;
+        move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
+      }
+    }
+    $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', jumlah=$jumlah, spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', kondisi='$kondisi', lokasi_id=$lokasi_id, keterangan='$keterangan', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
+    if ($q) {
+      header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
+      exit;
+    } else {
+      header('Location: dashboard_staff.php?unit=barang&err=Gagal update barang!');
+      exit;
+    }
   }
 }
 ?>
@@ -67,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0">Edit Barang</h1>
+        <h1 class="m-0"><?php echo !empty($penyerahan_list) ? 'Edit Penyerahan Barang' : 'Edit Barang'; ?></h1>
       </div>
     </div>
   </div>
@@ -77,6 +99,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="card">
       <div class="card-body">
   <form method="post" enctype="multipart/form-data">
+    <?php if (!empty($penyerahan_list)): ?>
+      <input type="hidden" name="barang_id" value="<?= $barang_id ?>">
+      <h4>Update Penyerahan Barang</h4>
+      <?php foreach ($penyerahan_list as $index => $p): ?>
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="card-title">Unit <?= $index + 1 ?> - Saat Ini: <?= htmlspecialchars($p['nama_lokasi']) ?> (<?= htmlspecialchars($p['kondisi']) ?>)</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Lokasi Baru:</label>
+                  <select name="lokasi_id[]" class="form-control select2" required>
+                    <option value="">-- Pilih Lokasi --</option>
+                    <?php foreach ($lokasi_list as $lokasi): ?>
+                      <option value="<?= $lokasi['lokasi_id'] ?>" <?= $p['lokasi_id']==$lokasi['lokasi_id']?'selected':'' ?>><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Kondisi:</label>
+                  <select name="kondisi[]" class="form-control" required>
+                    <option value="baru" <?= $p['kondisi']=='baru'?'selected':'' ?>>Baru</option>
+                    <option value="bekas" <?= $p['kondisi']=='bekas'?'selected':'' ?>>Bekas</option>
+                    <option value="rusak" <?= $p['kondisi']=='rusak'?'selected':'' ?>>Rusak</option>
+                    <option value="dalam perbaikan" <?= $p['kondisi']=='dalam perbaikan'?'selected':'' ?>>Dalam Perbaikan</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Keterangan:</label>
+                  <textarea name="keterangan_unit[]" class="form-control" rows="4"><?= htmlspecialchars($p['keterangan']) ?></textarea>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" name="penyerahan_id[]" value="<?= $p['penyerahan_id'] ?>">
+          </div>
+        </div>
+      <?php endforeach; ?>
+      <button type="submit" class="btn btn-primary">Update Penyerahan</button>
+    <?php else: ?>
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -148,6 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
           </div>
           <button type="submit" class="btn btn-primary">Update</button>
+    <?php endif; ?>
           <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>
         </form>
       </div>
