@@ -25,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ip_address = '';
   }
   $jumlah = intval($_POST['jumlah']);
-  $harga = floatval($_POST['harga']);
   $spesifikasi = trim($_POST['spesifikasi']);
   $tanggal_terima = trim($_POST['tanggal_terima']);
   // Proses upload foto
@@ -39,14 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
     }
   }
-  $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE barang_id='$barang_id' AND nomor_seri='$nomor_seri'");
+  $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE nomor_seri='$nomor_seri'");
   if (mysqli_num_rows($cek) > 0) {
     header('Location: dashboard_staff.php?unit=barang&err=Barang sudah terdaftar!');
     exit;
   } else {
-    $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima, foto) VALUES (
+    $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, spesifikasi, tanggal_terima, foto) VALUES (
       " . ($pengajuan_id ? "'$pengajuan_id'," : "NULL,") . "
-      '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', $jumlah, $harga, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "NULL") . ")");
+      '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', $jumlah, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "''") . ")");
     if ($q) {
       header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
       exit;
@@ -62,7 +61,6 @@ $jenis_list = [
     'Komponen Komputer & Laptop',
     'Printer & Scanner',
     'Komponen Printer & Scanner',
-    'Kamera & Aksesoris',
     'Komponen Network'
 ];
 ?>
@@ -126,10 +124,6 @@ $jenis_list = [
           <div class="form-group">
             <label>Jumlah</label>
             <input type="number" name="jumlah" class="form-control" min="1" required>
-          </div>
-          <div class="form-group">
-            <label>Harga</label>
-            <input type="number" name="harga" class="form-control" min="0" step="0.01" required>
           </div>
           <div class="form-group">
             <label>Spesifikasi</label>

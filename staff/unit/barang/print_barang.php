@@ -151,7 +151,6 @@ $result = mysqli_query($config, $query);
                     <th style="color: #000000ff;">Jenis Barang</th>
                     <th style="color: #000000ff;">Nomor Seri</th>
                     <th style="color: #000000ff;">Jumlah</th>
-                    <th style="color: #000000ff;">Harga</th>
                     <th style="color: #000000ff;">Spesifikasi</th>
                     <th style="color: #000000ff;">Tanggal Terima</th>
                     <th style="color: #000000ff;">Kondisi</th>
@@ -170,7 +169,6 @@ $result = mysqli_query($config, $query);
                     <td><?= htmlspecialchars($row['jenis_barang']) ?></td>
                     <td><?= htmlspecialchars($row['nomor_seri']) ?></td>
                     <td><?= htmlspecialchars($row['jumlah']) ?></td>
-                    <td>Rp. <?= number_format($row['harga'],0,',','.') ?></td>
                     <td><?= htmlspecialchars($row['spesifikasi']) ?></td>
                     <td><?= !empty($row['tanggal_terima']) ? date('d/m/Y', strtotime($row['tanggal_terima'])) : '-' ?></td>
                     <td class="<?= $row['kondisi'] == 'baru' ? 'status-baik' : ($row['kondisi'] == 'rusak' ? 'status-rusak' : '') ?>">

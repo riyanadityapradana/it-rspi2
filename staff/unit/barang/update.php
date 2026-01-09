@@ -18,7 +18,6 @@ $jenis_list = [
   'Komponen Komputer & Laptop',
   'Printer & Scanner',
   'Komponen Printer & Scanner',
-  'Kamera & Aksesoris',
   'Komponen Network'
 ];
 // Pilihan lokasi
@@ -34,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $nomor_seri    = trim($_POST['nomor_seri']);
   $ip_address    = trim($_POST['ip_address']);
   $jumlah        = intval($_POST['jumlah']);
-  $harga         = floatval($_POST['harga']);
   $spesifikasi   = trim($_POST['spesifikasi']);
   $tanggal_terima= trim($_POST['tanggal_terima']);
   $kondisi       = trim($_POST['kondisi']);
@@ -55,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
     }
   }
-  $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', jumlah=$jumlah, harga=$harga, spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', kondisi='$kondisi', lokasi_id=$lokasi_id, keterangan='$keterangan', foto=" . ($foto_nama ? "'$foto_nama'" : "NULL") . " WHERE barang_id='$barang_id'");
+  $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', jumlah=$jumlah, spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', kondisi='$kondisi', lokasi_id=$lokasi_id, keterangan='$keterangan', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
   if ($q) {
     header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
     exit;
@@ -105,10 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <div class="form-group">
                 <label>Jumlah</label>
                 <input type="number" name="jumlah" class="form-control" min="1" value="<?= htmlspecialchars($data['jumlah']) ?>" required>
-              </div>
-              <div class="form-group">
-                <label>Harga</label>
-                <input type="number" name="harga" class="form-control" min="0" step="0.01" value="<?= htmlspecialchars($data['harga']) ?>" required>
               </div>
               <div class="form-group">
                 <label>Spesifikasi</label>
