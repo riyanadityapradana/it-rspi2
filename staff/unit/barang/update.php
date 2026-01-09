@@ -1,4 +1,4 @@
-  <?php
+<?php
 require_once("../config/koneksi.php");
 if (!isset($_GET['id'])) {
   header('Location: dashboard_staff.php?unit=barang&err=Barang tidak ditemukan!');
@@ -12,22 +12,12 @@ if (!$data) {
   header('Location: dashboard_staff.php?unit=barang&err=Barang tidak ditemukan!');
   exit;
 }
-// Ambil data penyerahan jika jumlah >1
+// Ambil data penyerahan
 $penyerahan_list = [];
-if ($data['jumlah'] > 1) {
-  $penyerahan_q = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='$barang_id'");
-  while ($row = mysqli_fetch_assoc($penyerahan_q)) {
-    $penyerahan_list[] = $row;
-  }
+$penyerahan_q = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='$barang_id' ORDER BY p.penyerahan_id ASC");
+while ($row = mysqli_fetch_assoc($penyerahan_q)) {
+  $penyerahan_list[] = $row;
 }
-// Pilihan jenis barang
-$jenis_list = [
-  'Komputer & Laptop',
-  'Komponen Komputer & Laptop',
-  'Printer & Scanner',
-  'Komponen Printer & Scanner',
-  'Komponen Network'
-];
 // Pilihan lokasi
 $lokasi_q = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
 $lokasi_list = [];
@@ -37,7 +27,7 @@ while ($row = mysqli_fetch_assoc($lokasi_q)) {
 // Proses update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (isset($_POST['penyerahan_id'])) {
-    // Update penyerahan
+    // Update existing penyerahan
     for ($i = 0; $i < count($_POST['penyerahan_id']); $i++) {
       $penyerahan_id = intval($_POST['penyerahan_id'][$i]);
       $lokasi_id = intval($_POST['lokasi_id'][$i]);
@@ -47,41 +37,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     header('Location: dashboard_staff.php?unit=barang&msg=Penyerahan berhasil diupdate!');
     exit;
-  } elseif (isset($_POST['nama_barang'])) {
-    // Update barang
-    $nama_barang   = trim($_POST['nama_barang']);
-    $jenis_barang  = trim($_POST['jenis_barang']);
-    $nomor_seri    = trim($_POST['nomor_seri']);
-    $ip_address    = trim($_POST['ip_address']);
-    $spesifikasi   = trim($_POST['spesifikasi']);
-    $tanggal_terima= trim($_POST['tanggal_terima']);
-    // Proses upload foto
-    $foto_nama = $data['foto'];
-    if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
-      $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
-      $allowed = ['jpg','jpeg','png','gif','webp'];
-      if (in_array($ext, $allowed)) {
-        // Hapus foto lama jika ada
-        if (!empty($data['foto']) && file_exists(__DIR__ . '/foto-barang/' . $data['foto'])) {
-          unlink(__DIR__ . '/foto-barang/' . $data['foto']);
-        }
-        $foto_nama = uniqid('barang_') . '.' . $ext;
-        $tujuan = __DIR__ . '/foto-barang/' . $foto_nama;
-        move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
-      }
-    }
-    $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
-    if ($q) {
-      header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
+  } else {
+    // Insert new penyerahan for unit 1
+    $lokasi_id = intval($_POST['lokasi_id'][0]);
+    $kondisi = trim($_POST['kondisi'][0]);
+    $keterangan = trim($_POST['keterangan_unit'][0]);
+    $query = mysqli_query($config, "INSERT INTO tb_penyerahan (barang_id, lokasi_id, kondisi, keterangan) VALUES ('$barang_id', '$lokasi_id', '$kondisi', '$keterangan')");
+    if ($query) {
+      header('Location: dashboard_staff.php?unit=barang&msg=Unit 1 berhasil diserahkan!');
       exit;
     } else {
-      $error = mysqli_error($config);
-      header('Location: dashboard_staff.php?unit=barang&err=Gagal update barang: ' . urlencode($error));
+      header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan unit 1: ' . mysqli_error($config));
       exit;
     }
-  } else {
-    header('Location: dashboard_staff.php?unit=barang&err=Permintaan tidak valid!');
-    exit;
   }
 }
 ?>
@@ -89,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0"><?php echo !empty($penyerahan_list) ? 'Edit Penyerahan Barang' : 'Edit Barang'; ?></h1>
+        <h1 class="m-0">Edit Penyerahan Barang</h1>
       </div>
     </div>
   </div>
@@ -98,190 +66,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="container-fluid">
     <div class="card">
       <div class="card-body">
-  <?php if (!empty($penyerahan_list)): ?>
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-      <li class="nav-item">
-        <a class="nav-link active" id="penyerahan-tab" data-toggle="tab" href="#penyerahan" role="tab" aria-controls="penyerahan" aria-selected="true">Edit Penyerahan</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" id="barang-tab" data-toggle="tab" href="#barang" role="tab" aria-controls="barang" aria-selected="false">Edit Info Barang</a>
-      </li>
-    </ul>
-    <div class="tab-content" id="myTabContent">
-      <div class="tab-pane fade show active" id="penyerahan" role="tabpanel" aria-labelledby="penyerahan-tab">
         <form method="post" enctype="multipart/form-data">
           <input type="hidden" name="barang_id" value="<?= $barang_id ?>">
-          <h4>Update Penyerahan Barang</h4>
-          <?php foreach ($penyerahan_list as $index => $p): ?>
+          <h4>Edit Penyerahan Barang</h4>
+          <?php if (!empty($penyerahan_list)): ?>
+            <?php foreach ($penyerahan_list as $index => $p): ?>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h5 class="card-title">Unit <?= $index + 1 ?> - Saat Ini: <?= htmlspecialchars($p['nama_lokasi']) ?> (<?= htmlspecialchars($p['kondisi']) ?>)</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Lokasi Baru:</label>
+                        <select name="lokasi_id[]" class="form-control select2" required>
+                          <option value="">-- Pilih Lokasi --</option>
+                          <?php foreach ($lokasi_list as $lokasi): ?>
+                            <option value="<?= $lokasi['lokasi_id'] ?>" <?= $p['lokasi_id']==$lokasi['lokasi_id']?'selected':'' ?>><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
+                          <?php endforeach; ?>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Kondisi:</label>
+                        <select name="kondisi[]" class="form-control" required>
+                          <option value="baru" <?= $p['kondisi']=='baru'?'selected':'' ?>>Baru</option>
+                          <option value="bekas" <?= $p['kondisi']=='bekas'?'selected':'' ?>>Bekas</option>
+                          <option value="rusak" <?= $p['kondisi']=='rusak'?'selected':'' ?>>Rusak</option>
+                          <option value="dalam perbaikan" <?= $p['kondisi']=='dalam perbaikan'?'selected':'' ?>>Dalam Perbaikan</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Keterangan:</label>
+                        <textarea name="keterangan_unit[]" class="form-control" rows="4"><?= htmlspecialchars($p['keterangan']) ?></textarea>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="hidden" name="penyerahan_id[]" value="<?= $p['penyerahan_id'] ?>">
+                </div>
+              </div>
+            <?php endforeach; ?>
+          <?php else: ?>
             <div class="card mb-3">
               <div class="card-header">
-                <h5 class="card-title">Unit <?= $index + 1 ?> - Saat Ini: <?= htmlspecialchars($p['nama_lokasi']) ?> (<?= htmlspecialchars($p['kondisi']) ?>)</h5>
+                <h5 class="card-title">Unit 1 - Belum Diserahkan</h5>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label>Lokasi Baru:</label>
+                      <label>Lokasi:</label>
                       <select name="lokasi_id[]" class="form-control select2" required>
                         <option value="">-- Pilih Lokasi --</option>
                         <?php foreach ($lokasi_list as $lokasi): ?>
-                          <option value="<?= $lokasi['lokasi_id'] ?>" <?= $p['lokasi_id']==$lokasi['lokasi_id']?'selected':'' ?>><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
+                          <option value="<?= $lokasi['lokasi_id'] ?>"><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
                         <?php endforeach; ?>
                       </select>
                     </div>
                     <div class="form-group">
                       <label>Kondisi:</label>
                       <select name="kondisi[]" class="form-control" required>
-                        <option value="baru" <?= $p['kondisi']=='baru'?'selected':'' ?>>Baru</option>
-                        <option value="bekas" <?= $p['kondisi']=='bekas'?'selected':'' ?>>Bekas</option>
-                        <option value="rusak" <?= $p['kondisi']=='rusak'?'selected':'' ?>>Rusak</option>
-                        <option value="dalam perbaikan" <?= $p['kondisi']=='dalam perbaikan'?'selected':'' ?>>Dalam Perbaikan</option>
+                        <option value="baru">Baru</option>
+                        <option value="bekas">Bekas</option>
+                        <option value="rusak">Rusak</option>
+                        <option value="dalam perbaikan">Dalam Perbaikan</option>
                       </select>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label>Keterangan:</label>
-                      <textarea name="keterangan_unit[]" class="form-control" rows="4"><?= htmlspecialchars($p['keterangan']) ?></textarea>
+                      <textarea name="keterangan_unit[]" class="form-control" rows="4"></textarea>
                     </div>
                   </div>
                 </div>
-                <input type="hidden" name="penyerahan_id[]" value="<?= $p['penyerahan_id'] ?>">
               </div>
             </div>
-          <?php endforeach; ?>
+          <?php endif; ?>
           <button type="submit" class="btn btn-primary">Update Penyerahan</button>
-        </form>
-      </div>
-      <div class="tab-pane fade" id="barang" role="tabpanel" aria-labelledby="barang-tab">
-        <form method="post" enctype="multipart/form-data">
-          <h4>Edit Info Barang</h4>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Nama Barang</label>
-                <input type="text" name="nama_barang" class="form-control" value="<?= htmlspecialchars($data['nama_barang']) ?>" required maxlength="150">
-              </div>
-              <div class="form-group">
-                <label>Jenis Barang</label>
-                <select name="jenis_barang" class="form-control select2" required>
-                  <option value="">-- Pilih Jenis --</option>
-                  <?php foreach ($jenis_list as $jenis): ?>
-                    <option value="<?= htmlspecialchars($jenis) ?>" <?= $data['jenis_barang'] == $jenis ? 'selected' : '' ?>><?= htmlspecialchars($jenis) ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Nomor Seri</label>
-                <input type="text" name="nomor_seri" class="form-control" value="<?= htmlspecialchars($data['nomor_seri']) ?>" maxlength="150">
-              </div>
-              <div class="form-group">
-                <label>IP Address</label>
-                <input type="text" name="ip_address" class="form-control" value="<?= htmlspecialchars($data['ip_address']) ?>" maxlength="50">
-              </div>
-              <div class="form-group">
-                <label>Jumlah</label>
-                <input type="number" name="jumlah" class="form-control" value="<?= htmlspecialchars($data['jumlah']) ?>" readonly>
-              </div>
-              <div class="form-group">
-                <label>Spesifikasi</label>
-                <textarea name="spesifikasi" class="form-control" rows="2"><?= htmlspecialchars($data['spesifikasi']) ?></textarea>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tanggal Terima</label>
-                <input type="date" name="tanggal_terima" class="form-control" value="<?= htmlspecialchars($data['tanggal_terima']) ?>" required>
-              </div>
-              <div class="form-group">
-                <label>Foto Barang</label>
-                <input type="file" name="foto" class="form-control" accept="image/*">
-                <?php if (!empty($data['foto'])): ?>
-                  <br><img src="/it-rspi/staff/unit/barang/foto-barang/<?= htmlspecialchars($data['foto']) ?>" alt="Foto Barang" style="max-width:120px;max-height:120px;">
-                <?php else: ?>
-                  <br><span style="color: #888; font-style: italic;">Belum ada foto barang</span>
-                <?php endif; ?>
-              </div>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary">Update Barang</button>
-        </form>
-      </div>
-    </div>
-  <?php else: ?>
-    <form method="post" enctype="multipart/form-data">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Nama Barang</label>
-                <input type="text" name="nama_barang" class="form-control" value="<?= htmlspecialchars($data['nama_barang']) ?>" required maxlength="150">
-              </div>
-              <div class="form-group">
-                <label>Jenis Barang</label>
-                <select name="jenis_barang" class="form-control select2" required>
-                  <option value="">-- Pilih Jenis --</option>
-                  <?php foreach ($jenis_list as $jenis): ?>
-                    <option value="<?= htmlspecialchars($jenis) ?>" <?= $data['jenis_barang'] == $jenis ? 'selected' : '' ?>><?= htmlspecialchars($jenis) ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Nomor Seri</label>
-                <input type="text" name="nomor_seri" class="form-control" value="<?= htmlspecialchars($data['nomor_seri']) ?>" maxlength="150">
-              </div>
-              <div class="form-group">
-                <label>IP Address</label>
-                <input type="text" name="ip_address" class="form-control" value="<?= htmlspecialchars($data['ip_address']) ?>" maxlength="50">
-              </div>
-              <div class="form-group">
-                <label>Jumlah</label>
-                <input type="number" name="jumlah" class="form-control" min="1" value="<?= htmlspecialchars($data['jumlah']) ?>" required>
-              </div>
-              <div class="form-group">
-                <label>Spesifikasi</label>
-                <textarea name="spesifikasi" class="form-control" rows="2"><?= htmlspecialchars($data['spesifikasi']) ?></textarea>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Tanggal Terima</label>
-                <input type="date" name="tanggal_terima" class="form-control" value="<?= htmlspecialchars($data['tanggal_terima']) ?>" required>
-              </div>
-              <div class="form-group">
-                <label>Kondisi</label>
-                <select name="kondisi" class="form-control" required>
-                  <option value="baru" <?= $data['kondisi']=='baru'?'selected':'' ?>>Baru</option>
-                  <option value="bekas" <?= $data['kondisi']=='bekas'?'selected':'' ?>>Bekas</option>
-                  <option value="rusak" <?= $data['kondisi']=='rusak'?'selected':'' ?>>Rusak</option>
-                  <option value="dalam perbaikan" <?= $data['kondisi']=='dalam perbaikan'?'selected':'' ?>>Dalam Perbaikan</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Lokasi</label>
-                <select name="lokasi_id" class="form-control select2" required>
-                  <option value="">-- Pilih Lokasi --</option>
-                  <?php foreach ($lokasi_list as $lokasi): ?>
-                    <option value="<?= $lokasi['lokasi_id'] ?>" <?= $data['lokasi_id']==$lokasi['lokasi_id']?'selected':'' ?>><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Keterangan</label>
-                <textarea name="keterangan" class="form-control" rows="3"><?= htmlspecialchars($data['keterangan']) ?></textarea>
-              </div>
-              <div class="form-group">
-                <label>Foto Barang</label>
-                <input type="file" name="foto" class="form-control" accept="image/*">
-                <?php if (!empty($data['foto'])): ?>
-                  <br><img src="/it-rspi/staff/unit/barang/foto-barang/<?= htmlspecialchars($data['foto']) ?>" alt="Foto Barang" style="max-width:120px;max-height:120px;">
-                <?php else: ?>
-                  <br><span style="color: #888; font-style: italic;">Belum ada foto barang</span>
-                <?php endif; ?>
-              </div>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary">Update</button>
-    <?php endif; ?>
           <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>
         </form>
       </div>

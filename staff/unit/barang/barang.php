@@ -23,32 +23,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
     exit;
   }
 
-  if ($jumlah > 1) {
-    // Insert satu per satu ke tb_penyerahan
-    $insert = mysqli_query($config, "INSERT INTO tb_penyerahan (barang_id, lokasi_id, kondisi, keterangan) VALUES ('$barang_id', '$lokasi_id', '$kondisi', '$keterangan')");
-    if ($insert) {
-      $next_unit = $unit_index + 1;
-      if ($next_unit < $jumlah) {
-        header('Location: dashboard_staff.php?unit=barang&msg=Unit ' . ($unit_index+1) . ' berhasil diserahkan, lanjut unit ' . ($next_unit+1) . '&continue_barang_id=' . $barang_id . '&next_unit=' . $next_unit);
-        exit;
-      } else {
-        header('Location: dashboard_staff.php?unit=barang&msg=Semua unit berhasil diserahkan!');
-        exit;
-      }
+  // Get existing penyerahan ids
+  $penyerahan_ids = [];
+  $q_ids = mysqli_query($config, "SELECT penyerahan_id FROM tb_penyerahan WHERE barang_id='$barang_id' ORDER BY penyerahan_id ASC");
+  while ($r = mysqli_fetch_assoc($q_ids)) {
+    $penyerahan_ids[] = $r['penyerahan_id'];
+  }
+  $target_id = isset($penyerahan_ids[$unit_index]) ? $penyerahan_ids[$unit_index] : null;
+  if ($target_id) {
+    $query = mysqli_query($config, "UPDATE tb_penyerahan SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE penyerahan_id='$target_id'");
+  } else {
+    $query = mysqli_query($config, "INSERT INTO tb_penyerahan (barang_id, lokasi_id, kondisi, keterangan) VALUES ('$barang_id', '$lokasi_id', '$kondisi', '$keterangan')");
+  }
+  if ($query) {
+    $next_unit = $unit_index + 1;
+    if ($next_unit < $jumlah) {
+      header('Location: dashboard_staff.php?unit=barang&msg=Unit ' . ($unit_index+1) . ' berhasil diserahkan, lanjut unit ' . ($next_unit+1) . '&continue_barang_id=' . $barang_id . '&next_unit=' . $next_unit);
+      exit;
     } else {
-      header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan unit ' . ($unit_index+1) . ': ' . mysqli_error($config));
+      header('Location: dashboard_staff.php?unit=barang&msg=Semua unit berhasil diserahkan!');
       exit;
     }
   } else {
-    // Update tb_barang
-    $update = mysqli_query($config, "UPDATE tb_barang SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE barang_id='$barang_id'");
-    if ($update) {
-      header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil Diserahkan!');
-      exit;
-    } else {
-      header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan barang: ' . mysqli_error($config));
-      exit;
-    }
+    header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan unit ' . ($unit_index+1) . ': ' . mysqli_error($config));
+    exit;
   }
 }
 ?>
@@ -125,37 +123,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     while ($row = mysqli_fetch_assoc($lokasi_q)) {
                       $lokasi_list[] = $row;
                     }
-                    $q = mysqli_query($config, "SELECT b.*,
+                    $q = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.jenis_barang, b.nomor_seri, b.ip_address, b.jumlah, b.spesifikasi, b.tanggal_terima, b.foto,
                        CASE
-                         WHEN b.jumlah > 1 THEN (
-                           SELECT GROUP_CONCAT(CONCAT('<span class=\"badge badge-', IF(p.kondisi='baru','success',IF(p.kondisi='bekas','info',IF(p.kondisi='rusak','danger','warning'))), '\">', l.nama_lokasi, ' (', p.kondisi, ')</span>') SEPARATOR ', ')
+                         WHEN b.jumlah >= 1 THEN (
+                           SELECT GROUP_CONCAT(CONCAT('<span class=\"badge badge-', IF(p.kondisi='baru','success',IF(p.kondisi='bekas','info',IF(p.kondisi='rusak','danger','warning'))), '\">', REPLACE(REPLACE(l.nama_lokasi, '<', '&lt;'), '>', '&gt;'), ' (', REPLACE(REPLACE(p.kondisi, '<', '&lt;'), '>', '&gt;'), ')</span>') SEPARATOR ', ')
                            FROM tb_penyerahan p
                            LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id
                            WHERE p.barang_id = b.barang_id
                          )
-                         ELSE l.nama_lokasi
+                         ELSE '-'
                        END AS nama_lokasi_gabung,
                        (SELECT COUNT(*) FROM tb_penyerahan WHERE barang_id = b.barang_id) AS jumlah_penyerahan
-                    FROM tb_barang b LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id ORDER BY b.barang_id ASC");
+                    FROM tb_barang b ORDER BY b.barang_id ASC");
                     while ($row = mysqli_fetch_assoc($q)) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
                         <td><?= htmlspecialchars($row['nama_barang']); ?></td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
-                        <td><?php if ($row['jumlah'] > 1) { echo $row['nama_lokasi_gabung']; } else { echo htmlspecialchars($row['nama_lokasi_gabung']); } ?></td>
+                        <td><?php echo $row['nama_lokasi_gabung']; ?></td>
                         <td class="text-center">
-                          <?php if ($row['jumlah'] > 1): ?>
-                            <?php if ($row['jumlah_penyerahan'] >= $row['jumlah']): ?>
-                              <span class="badge badge-success">Completed</span>
-                            <?php else: ?>
-                              <span class="badge badge-primary">In Progress (<?= $row['jumlah_penyerahan'] ?>/<?= $row['jumlah'] ?>)</span>
-                            <?php endif; ?>
-                          <?php elseif (!empty($row['kondisi'])): ?>
-                            <span class="badge badge-<?= $row['kondisi'] == 'baru' ? 'success' : ($row['kondisi'] == 'bekas' ? 'info' : ($row['kondisi'] == 'rusak' ? 'danger' : 'warning')) ?>">
-                              <?= htmlspecialchars(ucwords($row['kondisi'])); ?>
-                            </span>
+                          <?php if ($row['jumlah_penyerahan'] >= $row['jumlah']): ?>
+                            <span class="badge badge-success">Completed</span>
+                          <?php elseif ($row['jumlah_penyerahan'] > 0): ?>
+                            <span class="badge badge-primary">In Progress (<?= $row['jumlah_penyerahan'] ?>/<?= $row['jumlah'] ?>)</span>
                           <?php else: ?>
-                            <span class="badge badge-secondary">-</span>
+                            <span class="badge badge-secondary">Belum Diserahkan</span>
                           <?php endif; ?>
                         </td>
                         <td>
@@ -164,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                             <i class="fa fa-eye"></i> Detail
                           </button>
                           <?php if ($row['jumlah_penyerahan'] < $row['jumlah']): ?>
-                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= htmlspecialchars($row['kondisi']) ?>', '<?= htmlspecialchars($row['keterangan']) ?>', '<?= $row['lokasi_id'] ?>', '<?= $row['jumlah'] ?>')">
+                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '', '', '', '<?= $row['jumlah'] ?>')">
                               <i class="fa fa-handshake"></i> Penyerahan (<?= $row['jumlah_penyerahan'] ?>/<?= $row['jumlah'] ?>)
                             </button>
                             <a href="dashboard_staff.php?unit=delete_barang&id=<?= urlencode($row['barang_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus barang ini?')"><i class="fa fa-trash"></i> Hapus</a>
@@ -299,21 +291,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?> </div>
                         </div>
                         <div class="form-group">
-                          <label><strong>Kondisi:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars(ucwords($detailRow['kondisi'])) ?> </div>
-                        </div>
-                        <div class="form-group">
                           <label><strong>Lokasi:</strong></label>
                           <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;">
                             <?php
-                            if ($detailRow['jumlah'] > 1) {
-                              $q_penyerahan = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}'");
+                            $q_penyerahan = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}'");
+                            if (mysqli_num_rows($q_penyerahan) > 0) {
                               while ($p = mysqli_fetch_assoc($q_penyerahan)) {
                                 $badge_class = $p['kondisi'] == 'baru' ? 'success' : ($p['kondisi'] == 'bekas' ? 'info' : ($p['kondisi'] == 'rusak' ? 'danger' : 'warning'));
                                 echo '<span class="badge badge-' . $badge_class . '">' . htmlspecialchars($p['nama_lokasi']) . ' (' . htmlspecialchars($p['kondisi']) . ')</span> ';
                               }
                             } else {
-                              echo htmlspecialchars($detailRow['nama_lokasi']);
+                              echo 'Belum diserahkan';
                             }
                             ?>
                           </div>
@@ -321,10 +309,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         <div class="form-group">
                           <label><strong>Spesifikasi:</strong></label>
                           <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= nl2br(htmlspecialchars($detailRow['spesifikasi'])) ?> </div>
-                        </div>
-                        <div class="form-group">
-                          <label><strong>Keterangan:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['keterangan']) ?> </div>
                         </div>
                       </div>
                     </div>
