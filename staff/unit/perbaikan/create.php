@@ -2,47 +2,62 @@
 // Cek jika form disubmit
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $barang_id            = $_POST['barang_id'];
+  $penyerahan_id        = $_POST['penyerahan_id'];
   $tanggal_lapor        = $_POST['tanggal_lapor'];
   $deskripsi_kerusakan  = $_POST['deskripsi_kerusakan'];
   $tindakan_perbaikan   = $_POST['tindakan_perbaikan'];
-  $tanggal_selesai      = isset($_POST['tanggal_selesai']) ? $_POST['tanggal_selesai'] : NULL;
-  $biaya_perbaikan      = isset($_POST['biaya_perbaikan']) ? $_POST['biaya_perbaikan'] : NULL;
   $teknisi              = isset($_POST['teknisi']) ? $_POST['teknisi'] : NULL;
+  $unit_pelapor         = isset($_POST['unit_pelapor']) ? $_POST['unit_pelapor'] : NULL;
   $keterangan           = $_POST['keterangan'];
-  // Validasi barang_id
-  if (empty($barang_id)) {
-    echo '<div class="alert alert-danger">Barang harus dipilih!</div>';
+  // Validasi barang_id dan penyerahan_id
+  if (empty($barang_id) || empty($penyerahan_id)) {
+    echo '<div class="alert alert-danger">Barang dan penyerahan harus dipilih!</div>';
   } else {
     // Cek barang_id valid
     $cek_barang = mysqli_query($config, "SELECT barang_id FROM tb_barang WHERE barang_id='$barang_id'");
     if (mysqli_num_rows($cek_barang) == 0) {
       echo '<div class="alert alert-danger">Barang tidak ditemukan di database!</div>';
     } else {
-      // Logika insert sesuai pilihan tindakan_perbaikan
-      if ($tindakan_perbaikan == 'Service luar') {
-        $teknisi = NULL;
-        $query = "INSERT INTO tb_perbaikan_barang (barang_id, tanggal_lapor, deskripsi_kerusakan, tindakan_perbaikan, tanggal_selesai, biaya_perbaikan, teknisi, status, keterangan) VALUES ('$barang_id', '$tanggal_lapor', '$deskripsi_kerusakan', '$tindakan_perbaikan', " . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", " . ($biaya_perbaikan ? "'$biaya_perbaikan'" : "NULL") . ", NULL, 'diajukan', '$keterangan')";
-      } else if ($tindakan_perbaikan == 'Service sendiri') {
-        $tanggal_selesai = NULL;
-        $biaya_perbaikan = NULL;
-        $query = "INSERT INTO tb_perbaikan_barang (barang_id, tanggal_lapor, deskripsi_kerusakan, tindakan_perbaikan, tanggal_selesai, biaya_perbaikan, teknisi, status, keterangan) VALUES ('$barang_id', '$tanggal_lapor', '$deskripsi_kerusakan', '$tindakan_perbaikan', NULL, NULL, " . ($teknisi ? "'$teknisi'" : "NULL") . ", 'diajukan', '$keterangan')";
+      // Cek penyerahan_id dan ambil lokasi_id sebagai unit_melapor
+      $cek_penyerahan = mysqli_query($config, "SELECT lokasi_id FROM tb_penyerahan WHERE penyerahan_id='$penyerahan_id'");
+      if (mysqli_num_rows($cek_penyerahan) == 0) {
+        echo '<div class="alert alert-danger">Penyerahan tidak ditemukan di database!</div>';
       } else {
-        // fallback jika tidak dipilih
-        $query = "INSERT INTO tb_perbaikan_barang (barang_id, tanggal_lapor, deskripsi_kerusakan, tindakan_perbaikan, status, keterangan) VALUES ('$barang_id', '$tanggal_lapor', '$deskripsi_kerusakan', '', 'diajukan', '$keterangan')";
-      }
-      $input = mysqli_query($config, $query);
-      if ($input) {
-        header('Location: dashboard_staff.php?unit=perbaikan&msg=Data perbaikan berhasil ditambahkan!');
-        exit;
-      } else {
-        header('Location: dashboard_staff.php?unit=perbaikan&err=Gagal menambah data perbaikan!');
-        exit;
+        $lokasi = mysqli_fetch_assoc($cek_penyerahan);
+        // lokasi_id dari penyerahan sebagai unit default
+        $unit_melapor = $lokasi['lokasi_id'];
+        // gunakan nilai unit_pelapor dari form jika tersedia (otomatis diisi saat pilih barang)
+        if (empty($unit_pelapor)) {
+          $unit_pelapor = $unit_melapor;
+        }
+
+        // Logika insert sesuai pilihan tindakan_perbaikan
+        if ($tindakan_perbaikan == 'Service luar') {
+          $teknisi = NULL;
+          $query = "INSERT INTO tb_perbaikan_barang (barang_id, penyerahan_id, tanggal_lapor, deskripsi_kerusakan, tindakan_perbaikan, teknisi, status, keterangan, unit_melapor) VALUES ('$barang_id', '$penyerahan_id', '$tanggal_lapor', '$deskripsi_kerusakan', '$tindakan_perbaikan', NULL, 'diajukan', '$keterangan', " . ($unit_pelapor ? "'$unit_pelapor'" : "NULL") . ")";
+        } else if ($tindakan_perbaikan == 'Service sendiri') {
+          $query = "INSERT INTO tb_perbaikan_barang (barang_id, penyerahan_id, tanggal_lapor, deskripsi_kerusakan, tindakan_perbaikan, teknisi, status, keterangan, unit_melapor) VALUES ('$barang_id', '$penyerahan_id', '$tanggal_lapor', '$deskripsi_kerusakan', '$tindakan_perbaikan', " . ($teknisi ? "'$teknisi'" : "NULL") . ", 'diajukan', '$keterangan', " . ($unit_pelapor ? "'$unit_pelapor'" : "NULL") . ")";
+        } else {
+          // fallback jika tidak dipilih
+          $query = "INSERT INTO tb_perbaikan_barang (barang_id, penyerahan_id, tanggal_lapor, deskripsi_kerusakan, tindakan_perbaikan, status, keterangan, unit_melapor) VALUES ('$barang_id', '$penyerahan_id', '$tanggal_lapor', '$deskripsi_kerusakan', '', 'diajukan', '$keterangan', " . ($unit_pelapor ? "'$unit_pelapor'" : "NULL") . ")";
+        }
+        $input = mysqli_query($config, $query);
+        if ($input) {
+          header('Location: dashboard_staff.php?unit=perbaikan&msg=Data perbaikan berhasil ditambahkan!');
+          exit;
+        } else {
+          header('Location: dashboard_staff.php?unit=perbaikan&err=Gagal menambah data perbaikan!');
+          exit;
+        }
       }
     }
   }
 }
-// Ambil daftar barang
-$barang_list = mysqli_query($config, "SELECT barang_id, nama_barang FROM tb_barang WHERE kondisi = 'rusak' ORDER BY nama_barang ASC");
+// Ambil daftar barang dengan penyerahan untuk modal
+$barang_penyerahan_list = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.jenis_barang, p.penyerahan_id, p.lokasi_id, l.nama_lokasi, p.kondisi FROM tb_barang b JOIN tb_penyerahan p ON b.barang_id = p.barang_id LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.kondisi = 'rusak' ORDER BY b.nama_barang ASC");
+
+// Ambil daftar lokasi untuk unit terkait
+$lokasi_list = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
 ?>
 <!-- HTML Form -->
 <section class="content-header">
@@ -57,13 +72,22 @@ $barang_list = mysqli_query($config, "SELECT barang_id, nama_barang FROM tb_bara
       <form method="post" enctype="multipart/form-data">
         <div class="card-body">
           <div class="form-group">
-            <label>Nama Barang </label>
-            <select name="barang_id" class="form-control select2" required>
-              <option value="">-- Pilih Barang --</option>
-              <?php while ($barang = mysqli_fetch_assoc($barang_list)): ?>
-                <option value="<?= $barang['barang_id'] ?>"> <?= htmlspecialchars($barang['nama_barang']) ?> </option>
-              <?php endwhile; ?>
-            </select>
+            <label>Nama Barang</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="nama_barang" readonly required placeholder="Pilih Barang">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalPilihBarang">
+                  <i class="fas fa-search"></i> Pilih
+                </button>
+              </div>
+            </div>
+            <input type="hidden" name="barang_id" id="barang_id" required>
+            <input type="hidden" name="penyerahan_id" id="penyerahan_id" required>
+            <div class="form-group">
+              <label>Unit Melapor</label>
+              <input type="text" class="form-control" id="unit_melapor_display" readonly placeholder="Unit melapor">
+              <input type="hidden" name="unit_pelapor" id="unit_pelapor">
+            </div>
           </div>
           <div class="form-group">
             <label>Tanggal Lapor</label>
@@ -81,17 +105,9 @@ $barang_list = mysqli_query($config, "SELECT barang_id, nama_barang FROM tb_bara
               <option value="Service sendiri">Service sendiri</option>
             </select>
           </div>
-          <div class="form-group" id="field_tanggal_selesai" style="display:none;">
-            <label>Tanggal Selesai</label>
-            <input type="date" class="form-control" name="tanggal_selesai">
-          </div>
-          <div class="form-group" id="field_biaya_perbaikan" style="display:none;">
-            <label>Biaya Perbaikan</label>
-            <input type="number" step="0.01" class="form-control" name="biaya_perbaikan" value="0">
-          </div>
           <div class="form-group" id="field_teknisi" style="display:none;">
             <label>Nama Teknisi</label>
-            <input type="text" class="form-control" name="teknisi">
+            <input type="text" class="form-control" name="teknisi" value="<?= isset($_SESSION['nama_lengkap']) ? htmlspecialchars($_SESSION['nama_lengkap']) : '' ?>" readonly>
           </div>
           <div class="form-group">
             <label>Keterangan</label>
@@ -107,12 +123,65 @@ $barang_list = mysqli_query($config, "SELECT barang_id, nama_barang FROM tb_bara
           </button>
         </div>
       </form>
+      <!-- Modal Pilih Barang -->
+      <div class="modal fade" id="modalPilihBarang" tabindex="-1" role="dialog" aria-labelledby="modalPilihBarangLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalPilihBarangLabel">Pilih Barang</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Nama Barang</th>
+                    <th>Jenis</th>
+                    <th>Lokasi</th>
+                    <th>Kondisi</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php $no = 1; while ($bp = mysqli_fetch_assoc($barang_penyerahan_list)): ?>
+                  <tr>
+                    <td><?= $no++ ?></td>
+                    <td><?= htmlspecialchars($bp['nama_barang']) ?></td>
+                    <td><?= htmlspecialchars($bp['jenis_barang']) ?></td>
+                    <td><?= htmlspecialchars($bp['nama_lokasi'] ?? '-') ?></td>
+                    <td><?= htmlspecialchars($bp['kondisi'] ?? '-') ?></td>
+                    <td>
+                      <button type="button" class="btn btn-success btn-sm" onclick="pilihBarang('<?= addslashes($bp['barang_id']) ?>', '<?= addslashes($bp['penyerahan_id']) ?>', '<?= addslashes($bp['nama_barang']) ?>', '<?= addslashes($bp['lokasi_id'] ?? '') ?>', '<?= addslashes($bp['nama_lokasi'] ?? '-') ?>')">Pilih</button>
+                    </td>
+                  </tr>
+                  <?php endwhile; ?>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <script>
       function togglePerbaikanFields() {
         var tindakan = document.getElementById('tindakan_perbaikan').value;
-        document.getElementById('field_tanggal_selesai').style.display = (tindakan === 'Service luar') ? 'block' : 'none';
-        document.getElementById('field_biaya_perbaikan').style.display = (tindakan === 'Service luar') ? 'block' : 'none';
         document.getElementById('field_teknisi').style.display = (tindakan === 'Service sendiri') ? 'block' : 'none';
+      }
+      function pilihBarang(barang_id, penyerahan_id, nama_barang, lokasi_id, nama_lokasi) {
+        document.getElementById('barang_id').value = barang_id;
+        document.getElementById('penyerahan_id').value = penyerahan_id;
+        document.getElementById('nama_barang').value = nama_barang;
+        // isi unit pelapor (hidden) dan tampilan nama lokasi
+        var unitHidden = document.getElementById('unit_pelapor');
+        if (unitHidden) unitHidden.value = lokasi_id;
+        var unitDisplay = document.getElementById('unit_melapor_display');
+        if (unitDisplay) unitDisplay.value = nama_lokasi;
+        $('#modalPilihBarang').modal('hide');
       }
       </script>
     </div>

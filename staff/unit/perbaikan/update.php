@@ -4,6 +4,17 @@ $r = mysqli_fetch_array($query);
 // Ambil daftar barang rusak
 $barang_list = mysqli_query($config, "SELECT barang_id, nama_barang FROM tb_barang WHERE kondisi = 'rusak' ORDER BY nama_barang ASC");
 
+// Ambil nama barang saat ini dan nama unit melapor
+$current_barang = mysqli_fetch_assoc(mysqli_query($config, "SELECT nama_barang FROM tb_barang WHERE barang_id='" . $r['barang_id'] . "'"));
+$current_unit = null;
+if (!empty($r['unit_melapor'])) {
+  $unit_q = mysqli_query($config, "SELECT nama_lokasi FROM tb_lokasi WHERE lokasi_id='" . $r['unit_melapor'] . "'");
+  if ($unit_q && mysqli_num_rows($unit_q) > 0) {
+    $unit_row = mysqli_fetch_assoc($unit_q);
+    $current_unit = $unit_row['nama_lokasi'];
+  }
+}
+
 // Cek jika form disubmit
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $id                  = $_POST['id'];
@@ -12,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $deskripsi_kerusakan = $_POST['deskripsi_kerusakan'];
   $tindakan_perbaikan  = $_POST['tindakan_perbaikan'];
   $tanggal_selesai     = isset($_POST['tanggal_selesai']) ? $_POST['tanggal_selesai'] : NULL;
-  $biaya_perbaikan     = isset($_POST['biaya_perbaikan']) ? $_POST['biaya_perbaikan'] : NULL;
   $teknisi             = isset($_POST['teknisi']) ? $_POST['teknisi'] : NULL;
   $keterangan          = $_POST['keterangan'];
 
@@ -27,13 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       // Logika update sesuai tindakan_perbaikan
       if ($tindakan_perbaikan == 'Service luar') {
         $teknisi = NULL;
-        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='$tindakan_perbaikan', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", biaya_perbaikan=" . ($biaya_perbaikan ? "'$biaya_perbaikan'" : "NULL") . ", teknisi=NULL, status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
+        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='$tindakan_perbaikan', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", teknisi=NULL, status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
       } else if ($tindakan_perbaikan == 'Service sendiri') {
-        $tanggal_selesai = NULL;
-        $biaya_perbaikan = NULL;
-        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='$tindakan_perbaikan', tanggal_selesai=NULL, biaya_perbaikan=NULL, teknisi=" . ($teknisi ? "'$teknisi'" : "NULL") . ", status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
+        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='$tindakan_perbaikan', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", teknisi=" . ($teknisi ? "'$teknisi'" : "NULL") . ", status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
       } else {
-        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='', status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
+        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
       }
       $query = mysqli_query($config, $edit);
       if ($query) {
@@ -62,12 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="card-body">
           <div class="form-group">
             <label>Nama Barang </label>
-            <select name="barang_id" class="form-control select2" required>
-              <option value="">-- Pilih Barang --</option>
-              <?php while ($barang = mysqli_fetch_assoc($barang_list)): ?>
-                <option value="<?= $barang['barang_id'] ?>" <?= ($barang['barang_id'] == $r['barang_id']) ? 'selected' : '' ?>> <?= htmlspecialchars($barang['nama_barang']) ?> </option>
-              <?php endwhile; ?>
-            </select>
+            <div class="input-group">
+              <input type="text" class="form-control" id="nama_barang" readonly value="<?= htmlspecialchars($current_barang['nama_barang'] ?? '-') ?>">
+            </div>
+            <input type="hidden" name="barang_id" id="barang_id" value="<?= htmlspecialchars($r['barang_id']) ?>" required>
+            <input type="hidden" name="penyerahan_id" id="penyerahan_id" value="<?= htmlspecialchars($r['penyerahan_id'] ?? '') ?>">
           </div>
           <div class="form-group">
             <label>Tanggal Lapor</label>
@@ -85,17 +92,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               <option value="Service sendiri" <?php if($r['tindakan_perbaikan']=='Service sendiri') echo 'selected'; ?>>Service sendiri</option>
             </select>
           </div>
-          <div class="form-group" id="field_tanggal_selesai" style="display:<?= ($r['tindakan_perbaikan']=='Service luar') ? 'block' : 'none' ?>;">
+          <div class="form-group">
             <label>Tanggal Selesai</label>
-            <input type="date" class="form-control" name="tanggal_selesai" value="<?php echo $r['tanggal_selesai'] ?>">
-          </div>
-          <div class="form-group" id="field_biaya_perbaikan" style="display:<?= ($r['tindakan_perbaikan']=='Service luar') ? 'block' : 'none' ?>;">
-            <label>Biaya Perbaikan</label>
-            <input type="number" step="0.01" class="form-control" name="biaya_perbaikan" value="<?php echo $r['biaya_perbaikan'] ?>">
+            <input type="datetime-local" class="form-control" name="tanggal_selesai" value="<?php echo str_replace(' ', 'T', $r['tanggal_selesai']); ?>">
           </div>
           <div class="form-group" id="field_teknisi" style="display:<?= ($r['tindakan_perbaikan']=='Service sendiri') ? 'block' : 'none' ?>;">
             <label>Nama Teknisi</label>
-            <input type="text" class="form-control" name="teknisi" value="<?php echo $r['teknisi'] ?>">
+            <input type="text" class="form-control" name="teknisi" value="<?php echo $r['teknisi'] ?>" readonly>
+          </div>
+          <div class="form-group">
+            <label>Unit Melapor</label>
+            <input type="text" class="form-control" id="unit_melapor_display" readonly value="<?= htmlspecialchars($current_unit ?? $r['unit_melapor'] ?? '-') ?>">
+            <input type="hidden" name="unit_melapor" id="unit_melapor" value="<?= htmlspecialchars($r['unit_melapor'] ?? '') ?>">
           </div>
           <div class="form-group">
             <label>Keterangan</label>
@@ -115,7 +123,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       function togglePerbaikanFields() {
         var tindakan = document.getElementById('tindakan_perbaikan').value;
         document.getElementById('field_tanggal_selesai').style.display = (tindakan === 'Service luar') ? 'block' : 'none';
-        document.getElementById('field_biaya_perbaikan').style.display = (tindakan === 'Service luar') ? 'block' : 'none';
         document.getElementById('field_teknisi').style.display = (tindakan === 'Service sendiri') ? 'block' : 'none';
       }
       </script>

@@ -1,23 +1,47 @@
 <?php
-$result = mysqli_query($config, "SELECT 
-    b.nama_barang,
-    b.jenis_barang,
-    b.nomor_seri,
-    b.foto,
-    b.ip_address,
-    l.nama_lokasi,
-    p.perbaikan_id,
-    p.deskripsi_kerusakan,
-    p.tindakan_perbaikan,
-    p.status,
-    p.tanggal_lapor,
-    p.teknisi,
-    p.keterangan,
-    p.tanggal_selesai,
-    p.biaya_perbaikan
+// Handle Set Selesai form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'set_selesai') {
+  $perbaikan_id = isset($_POST['perbaikan_id']) ? $_POST['perbaikan_id'] : '';
+  $tanggal_selesai = isset($_POST['tanggal_selesai']) ? $_POST['tanggal_selesai'] : '';
+  $jam_selesai = isset($_POST['jam_selesai']) ? $_POST['jam_selesai'] : '';
+  
+  if (!empty($perbaikan_id) && !empty($tanggal_selesai) && !empty($jam_selesai)) {
+    $datetime_selesai = $tanggal_selesai . ' ' . $jam_selesai;
+    // Update tanggal_selesai dengan status selesai
+    $update_query = "UPDATE tb_perbaikan_barang SET tanggal_selesai = '$datetime_selesai', status = 'selesai' WHERE perbaikan_id = '$perbaikan_id'";
+    $update_result = mysqli_query($config, $update_query);
+    if ($update_result) {
+      header('Location: dashboard_staff.php?unit=perbaikan&msg=Tanggal selesai berhasil disimpan!');
+      exit;
+    } else {
+      header('Location: dashboard_staff.php?unit=perbaikan&err=Gagal menyimpan tanggal selesai!');
+      exit;
+    }
+  }
+}
+
+ $result = mysqli_query($config, "SELECT 
+     b.nama_barang,
+     b.jenis_barang,
+     b.nomor_seri,
+     b.foto,
+     b.ip_address,
+     l.nama_lokasi AS lokasi_barang,
+     p.perbaikan_id,
+     p.deskripsi_kerusakan,
+     p.tindakan_perbaikan,
+     p.status,
+     p.tanggal_lapor,
+     p.teknisi,
+     p.keterangan,
+     p.unit_melapor,
+     u.nama_lokasi AS unit_melapor_nama,
+     p.tanggal_selesai
 FROM tb_perbaikan_barang p
 JOIN tb_barang b ON p.barang_id = b.barang_id
+JOIN tb_penyerahan pen ON p.penyerahan_id = pen.penyerahan_id
 LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id
+LEFT JOIN tb_lokasi u ON p.unit_melapor = u.lokasi_id
 ORDER BY b.barang_id, p.tanggal_lapor DESC");
 $n      = 1;
 ?>
@@ -58,8 +82,10 @@ $n      = 1;
 						<tr>
 							<th style="text-align: center; color: white;">No</th>
                                    <th style="text-align: center; color: white;">Tanggal Lapor</th>
+                                   <th style="text-align: center; color: white;">Unit Melapor</th>
 							<th style="text-align: center; color: white;">Nama Barang</th>
 							<th style="text-align: center; color: white;">Status</th>
+                                   <th style="text-align: center; color: white;">Tindakan</th>
 							<th style="text-align: center; color: white;">Tanggal Selesai</th>
 							<th style="text-align: center; color: white;">Aksi</th>
 						</tr>
@@ -69,7 +95,8 @@ $n      = 1;
 						<tr>
 							<td><?= $n++; ?></td>
 							<td><?= htmlspecialchars($row['tanggal_lapor']); ?></td>
-							<td><?= htmlspecialchars($row['nama_barang']); ?></td>
+                                   <td><?= htmlspecialchars($row['unit_melapor_nama'] ?? $row['unit_melapor']); ?></td>
+                                   <td><?= htmlspecialchars($row['nama_barang']); ?></td>
 							<td style="text-align:center;">
 								<?php
 									$status = $row['status'];
@@ -93,7 +120,18 @@ $n      = 1;
 									echo $badge;
 								?>
 							</td>
-							<td><?= htmlspecialchars($row['tanggal_selesai']); ?></td>
+                                   <td><?= htmlspecialchars($row['tindakan_perbaikan']); ?></td>
+							<td style="text-align:center;">
+								<?php if (empty($row['tanggal_selesai'])): ?>
+									<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modalSetSelesai<?= $row['perbaikan_id'] ?>">
+										<i class="fa fa-clock"></i> Set Selesai
+									</button>
+								<?php else: ?>
+									<span style="background: #28a745; color: #fff; padding: 4px 12px; border-radius: 10px; font-weight: bold;">
+										<?= htmlspecialchars(date('d-m-Y H:i', strtotime($row['tanggal_selesai']))); ?>
+									</span>
+								<?php endif; ?>
+							</td>
 							<td>
 								<a href="dashboard_staff.php?unit=update_perbaikan&id=<?= urlencode($row['perbaikan_id']); ?>" class="btn btn-warning btn-sm">Edit</a>
 								<a href="dashboard_staff.php?unit=delete_perbaikan&id=<?= urlencode($row['perbaikan_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus data?')">Hapus</a>
@@ -165,14 +203,6 @@ $n      = 1;
                                                   <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['tindakan_perbaikan']) ?> </div>
                                              </div>
                                              <div class="form-group">
-                                                  <label><strong>Tanggal Selesai:</strong></label>
-                                                  <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= !empty($detailRow['tanggal_selesai']) ? date('d-m-Y', strtotime($detailRow['tanggal_selesai'])) : '-' ?> </div>
-                                             </div>
-                                             <div class="form-group">
-                                                  <label><strong>Biaya Perbaikan:</strong></label>
-                                                  <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= nl2br(htmlspecialchars($detailRow['biaya_perbaikan'])) ?> </div>
-                                             </div>
-                                             <div class="form-group">
                                                   <label><strong>Teknisi:</strong></label><br>
                                                   <label><small>Noted : Jika Barang dapat diperbaiki oleh unit IT</small></label>
                                                   <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['teknisi']) ?> </div>
@@ -187,6 +217,37 @@ $n      = 1;
                               <div class="modal-footer" style="background: #e3f2fd; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                               </div>
+                              </div>
+                         </div>
+                         </div>
+                         <!-- Modal Set Selesai -->
+                         <div class="modal fade" id="modalSetSelesai<?= $detailRow['perbaikan_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalSetSelesaiLabel<?= $detailRow['perbaikan_id'] ?>" aria-hidden="true">
+                         <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                              <div class="modal-header" style="background: #28a745; color: white;">
+                                   <h5 class="modal-title" id="modalSetSelesaiLabel<?= $detailRow['perbaikan_id'] ?>"><i class="fa fa-check-circle"></i> Set Tanggal Selesai Perbaikan</h5>
+                                   <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+                                   <span aria-hidden="true">&times;</span>
+                                   </button>
+                              </div>
+                              <form method="post" action="">
+                                   <div class="modal-body">
+                                        <input type="hidden" name="perbaikan_id" value="<?= $detailRow['perbaikan_id'] ?>">
+                                        <input type="hidden" name="action" value="set_selesai">
+                                        <div class="form-group">
+                                             <label>Tanggal Selesai</label>
+                                             <input type="date" class="form-control" name="tanggal_selesai" value="<?= !empty($detailRow['tanggal_selesai']) ? date('Y-m-d', strtotime($detailRow['tanggal_selesai'])) : date('Y-m-d') ?>" required>
+                                        </div>
+                                        <div class="form-group">
+                                             <label>Jam Selesai</label>
+                                             <input type="time" class="form-control" name="jam_selesai" value="<?= !empty($detailRow['tanggal_selesai']) ? date('H:i', strtotime($detailRow['tanggal_selesai'])) : '12:00' ?>" required>
+                                        </div>
+                                   </div>
+                                   <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-success">Simpan Tanggal Selesai</button>
+                                   </div>
+                              </form>
                               </div>
                          </div>
                          </div>
