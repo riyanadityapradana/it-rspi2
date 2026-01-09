@@ -307,6 +307,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           </div>
                         </div>
                         <div class="form-group">
+                          <label><strong>Keterangan:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;">
+                            <?php
+                            if (mysqli_num_rows($q_penyerahan) > 0) {
+                              mysqli_data_seek($q_penyerahan, 0); // Reset pointer
+                              while ($p = mysqli_fetch_assoc($q_penyerahan)) {
+                                echo '<strong>' . htmlspecialchars($p['nama_lokasi']) . ':</strong> ' . htmlspecialchars($p['keterangan']) . '<br>';
+                              }
+                            } else {
+                              echo '-';
+                            }
+                            ?>
+                          </div>
+                        </div>
+                        <div class="form-group">
                           <label><strong>Spesifikasi:</strong></label>
                           <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= nl2br(htmlspecialchars($detailRow['spesifikasi'])) ?> </div>
                         </div>
@@ -415,18 +430,3 @@ document.addEventListener('DOMContentLoaded', function() {
     filterStatusSelect.addEventListener('change', filterTable);
 });
 </script>
-<?php
-if (isset($_GET['continue_barang_id'])) {
-  $continue_barang_id = intval($_GET['continue_barang_id']);
-  $next_unit = intval($_GET['next_unit']);
-  $q_continue = mysqli_query($config, "SELECT * FROM tb_barang WHERE barang_id='$continue_barang_id'");
-  $row_continue = mysqli_fetch_assoc($q_continue);
-  if ($row_continue) {
-    echo "<script>
-      $(document).ready(function() {
-        setUpdateLokasiData('{$row_continue['barang_id']}', '" . addslashes($row_continue['nama_barang']) . "', '{$row_continue['kondisi']}', '{$row_continue['keterangan']}', '{$row_continue['lokasi_id']}', '{$row_continue['jumlah']}');
-      });
-    </script>";
-  }
-}
-?>
