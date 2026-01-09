@@ -45,6 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       }
       $query = mysqli_query($config, $edit);
       if ($query) {
+        // Update kondisi penyerahan menjadi 'dalam perbaikan'
+        $update_penyerahan = "UPDATE tb_penyerahan SET kondisi = 'dalam perbaikan' WHERE penyerahan_id = '" . $r['penyerahan_id'] . "'";
+        mysqli_query($config, $update_penyerahan);
         header('Location: dashboard_staff.php?unit=perbaikan&msg=Data perbaikan berhasil diupdate!');
         exit;
       } else {
@@ -78,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           </div>
           <div class="form-group">
             <label>Tanggal Lapor</label>
-            <input type="date" class="form-control" name="tanggal_lapor" value="<?php echo $r['tanggal_lapor'] ?>" required>
+            <input type="datetime-local" class="form-control" name="tanggal_lapor" value="<?php echo str_replace(' ', 'T', $r['tanggal_lapor']); ?>" required>
           </div>
           <div class="form-group">
             <label>Deskripsi Kerusakan</label>

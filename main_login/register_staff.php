@@ -4,74 +4,68 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nip = isset($_POST['nip']) ? trim($_POST['nip']) : '';
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $nama_lengkap = isset($_POST['nama_lengkap']) ? trim($_POST['nama_lengkap']) : '';
-    $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+    $nip = isset($_POST['nip']) ? mysqli_real_escape_string($config, trim($_POST['nip'])) : '';
+    $email = isset($_POST['email']) ? mysqli_real_escape_string($config, trim($_POST['email'])) : '';
+    $nama_lengkap = isset($_POST['nama_lengkap']) ? mysqli_real_escape_string($config, trim($_POST['nama_lengkap'])) : '';
+    $username = isset($_POST['username']) ? mysqli_real_escape_string($config, trim($_POST['username'])) : '';
     $password = isset($_POST['password']) ? trim($_POST['password']) : '';
+    $no_hp = isset($_POST['no_hp']) ? mysqli_real_escape_string($config, trim($_POST['no_hp'])) : '';
     $role = 'Staff';
-    $status = 'nonaktif';
-    $foto = '';
-    $no_hp = '';
-    $created_at = date('Y-m-d H:i:s');
-    $updated_at = $created_at;
 
     // Validasi field wajib
     if ($nip === '' || $email === '' || $nama_lengkap === '' || $username === '' || $password === '') {
         $error = 'Semua field wajib diisi!';
     } else {
-        // Cek username sudah ada atau belum
-        $stmt = $config->prepare('SELECT COUNT(*) FROM tb_user WHERE username = ?');
-        $stmt->bind_param('s', $username);
-        $stmt->execute();
-        $stmt->bind_result($count);
-        $stmt->fetch();
-        $stmt->close();
-        if ($count > 0) {
-            $error = 'Username sudah digunakan, silakan pilih username lain!';
+        // Cek NIP sudah ada atau belum
+        $cek_nip = mysqli_query($config, "SELECT * FROM tb_user WHERE nip='$nip'");
+        if (mysqli_num_rows($cek_nip) > 0) {
+            $error = 'NIP sudah digunakan, silakan pilih NIP lain!';
         } else {
-            // Cek email sudah ada atau belum
-            $stmt = $config->prepare('SELECT COUNT(*) FROM tb_user WHERE email = ?');
-            $stmt->bind_param('s', $email);
-            $stmt->execute();
-            $stmt->bind_result($count_email);
-            $stmt->fetch();
-            $stmt->close();
-            if ($count_email > 0) {
-                $error = 'Email sudah digunakan, silakan pilih email lain!';
+            // Cek username sudah ada atau belum
+            $cek_username = mysqli_query($config, "SELECT * FROM tb_user WHERE username='$username'");
+            if (mysqli_num_rows($cek_username) > 0) {
+                $error = 'Username sudah digunakan, silakan pilih username lain!';
             } else {
-                // Cek NIP sudah ada atau belum
-                $stmt = $config->prepare('SELECT COUNT(*) FROM tb_user WHERE nip = ?');
-                $stmt->bind_param('s', $nip);
-                $stmt->execute();
-                $stmt->bind_result($count_nip);
-                $stmt->fetch();
-                $stmt->close();
-                if ($count_nip > 0) {
-                    $error = 'NIP sudah digunakan, silakan pilih NIP lain!';
+                // Cek email sudah ada atau belum
+                $cek_email = mysqli_query($config, "SELECT * FROM tb_user WHERE email='$email'");
+                if (mysqli_num_rows($cek_email) > 0) {
+                    $error = 'Email sudah digunakan, silakan pilih email lain!';
                 } else {
-                    // Upload foto jika ada
-                    if (isset($_FILES['foto']) && $_FILES['foto']['error'] === 0) {
-                        $allowed = array('jpg', 'jpeg', 'png', 'gif');
-                        $filename = $_FILES['foto']['name'];
-                        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                        if (in_array($ext, $allowed)) {
-                            $newname = time() . '_' . $filename;
-                            $destination = '../assets/upload/' . $newname;
-                            if (move_uploaded_file($_FILES['foto']['tmp_name'], $destination)) {
-                                $foto = $newname;
+                    // Handle upload foto
+                    $foto = null;
+                    if (!empty($_FILES['foto']['name'])) {
+                        $upload_dir = "../assets/upload/";
+                        $file_name = basename($_FILES['foto']['name']);
+                        $target_file = $upload_dir . time() . "_" . $file_name;
+                        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+                        
+                        // Validasi tipe file
+                        $allowed_types = array("jpg", "jpeg", "png", "gif");
+                        if (in_array($imageFileType, $allowed_types)) {
+                            if (move_uploaded_file($_FILES['foto']['tmp_name'], $target_file)) {
+                                $foto = $target_file;
+                            } else {
+                                $error = 'Gagal mengupload foto!';
                             }
+                        } else {
+                            $error = 'Tipe file foto tidak valid (hanya JPG, JPEG, PNG, GIF)!';
                         }
                     }
-                    // Simpan ke database
-                    $stmt = $config->prepare('INSERT INTO tb_user (nip, username, password, nama_lengkap, email, no_hp, role, foto, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                    $stmt->bind_param('sssssssssss', $nip, $username, $password, $nama_lengkap, $email, $no_hp, $role, $foto, $status, $created_at, $updated_at);
-                    if ($stmt->execute()) {
-                        $success = 'Akun berhasil dibuat! Silakan tunggu konfirmasi admin.';
-                    } else {
-                        $error = 'Gagal mendaftar. Silakan coba lagi.';
+                    
+                    if ($error === '') {
+                        // Hash password sebelum disimpan
+                        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                        
+                        // Simpan ke database
+                        $query = "INSERT INTO tb_user (nip, nama_lengkap, username, password, email, no_hp, role, foto, status) 
+                                  VALUES ('$nip', '$nama_lengkap', '$username', '$hashed_password', '$email', '$no_hp', '$role', '$foto', 'nonaktif')";
+                        
+                        if (mysqli_query($config, $query)) {
+                            $success = 'Akun berhasil dibuat! Silakan tunggu konfirmasi admin.';
+                        } else {
+                            $error = 'Gagal mendaftar. Silakan coba lagi.';
+                        }
                     }
-                    $stmt->close();
                 }
             }
         }

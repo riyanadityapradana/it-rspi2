@@ -47,7 +47,7 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
             <li class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#"><i class="far fa-user"></i></a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <a href="dashboard_staff.php?unit=user" class="dropdown-item"><i class="fas fa-user mr-2"></i> Data User</a>
+                        <!-- <a href="dashboard_staff.php?unit=user" class="dropdown-item"><i class="fas fa-user mr-2"></i> Data User</a> -->
                         <div class="dropdown-divider"></div>
                         <a href="../main_login/form_login.php" class="dropdown-item"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
                     </div>
@@ -186,10 +186,10 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item menu-open">
-                        <a href="dashboard_staff.php?unit=rsp-obat-update" class="nav-link active">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>Resep Obat Update</p>
+                    <li class="nav-item">
+                        <a href="dashboard_staff.php?unit=update_profile" class="nav-link">
+                            <i class="nav-icon fas fa-user-edit" style="color: black;"></i>
+                            <p style="font-size: 14px; color: black;">Update Profil</p>
                         </a>
                     </li>
                 </ul>

@@ -3,14 +3,25 @@
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'set_selesai') {
   $perbaikan_id = isset($_POST['perbaikan_id']) ? $_POST['perbaikan_id'] : '';
   $tanggal_selesai = isset($_POST['tanggal_selesai']) ? $_POST['tanggal_selesai'] : '';
-  $jam_selesai = isset($_POST['jam_selesai']) ? $_POST['jam_selesai'] : '';
   
-  if (!empty($perbaikan_id) && !empty($tanggal_selesai) && !empty($jam_selesai)) {
-    $datetime_selesai = $tanggal_selesai . ' ' . $jam_selesai;
+  if (!empty($perbaikan_id) && !empty($tanggal_selesai)) {
+    // Format datetime dari datetime-local input
+    $datetime_selesai = str_replace('T', ' ', $tanggal_selesai);
+    
+    // Get penyerahan_id dari perbaikan record
+    $perbaikan_q = mysqli_query($config, "SELECT penyerahan_id FROM tb_perbaikan_barang WHERE perbaikan_id = '$perbaikan_id'");
+    $perbaikan_r = mysqli_fetch_assoc($perbaikan_q);
+    $penyerahan_id = $perbaikan_r['penyerahan_id'];
+    
     // Update tanggal_selesai dengan status selesai
     $update_query = "UPDATE tb_perbaikan_barang SET tanggal_selesai = '$datetime_selesai', status = 'selesai' WHERE perbaikan_id = '$perbaikan_id'";
     $update_result = mysqli_query($config, $update_query);
+    
     if ($update_result) {
+      // Update kondisi penyerahan menjadi 'bekas'
+      $update_penyerahan = "UPDATE tb_penyerahan SET kondisi = 'bekas' WHERE penyerahan_id = '$penyerahan_id'";
+      mysqli_query($config, $update_penyerahan);
+      
       header('Location: dashboard_staff.php?unit=perbaikan&msg=Tanggal selesai berhasil disimpan!');
       exit;
     } else {

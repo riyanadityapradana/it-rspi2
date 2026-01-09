@@ -1,6 +1,4 @@
 <?php
-require_once("../config/koneksi.php");
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_user = $_POST['id_user'];
     $nip = mysqli_real_escape_string($config, $_POST['nip']);
@@ -8,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = mysqli_real_escape_string($config, $_POST['username']);
     $email = mysqli_real_escape_string($config, $_POST['email']);
     $no_hp = mysqli_real_escape_string($config, $_POST['no_hp']);
-    $password = $_POST['password'];
+    $password = mysqli_real_escape_string($config, $_POST['password']);
     $foto = '';
     $update_foto = '';
 
@@ -25,8 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle password
     $update_password = '';
     if (!empty($password)) {
-        $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $update_password = ", password='$password_hash'";
+        // Hash password sebelum disimpan
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $update_password = ", password='$hashed_password'";
     }
 
     $sql = "UPDATE tb_user SET nip='$nip', nama_lengkap='$nama_lengkap', username='$username', email='$email', no_hp='$no_hp' $update_password $update_foto WHERE id_user='$id_user'";

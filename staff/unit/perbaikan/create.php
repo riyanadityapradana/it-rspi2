@@ -43,6 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $input = mysqli_query($config, $query);
         if ($input) {
+          // Update kondisi penyerahan menjadi 'dalam perbaikan'
+          $update_penyerahan = "UPDATE tb_penyerahan SET kondisi = 'dalam perbaikan' WHERE penyerahan_id = '$penyerahan_id'";
+          mysqli_query($config, $update_penyerahan);
           header('Location: dashboard_staff.php?unit=perbaikan&msg=Data perbaikan berhasil ditambahkan!');
           exit;
         } else {
@@ -53,8 +56,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
   }
 }
+// Pagination untuk modal barang
+$items_per_page = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $items_per_page;
+
+// Hitung total barang
+$total_query = mysqli_query($config, "SELECT COUNT(*) as total FROM tb_barang b JOIN tb_penyerahan p ON b.barang_id = p.barang_id");
+$total_result = mysqli_fetch_assoc($total_query);
+$total_items = $total_result['total'];
+$total_pages = ceil($total_items / $items_per_page);
+
 // Ambil daftar barang dengan penyerahan untuk modal
-$barang_penyerahan_list = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.jenis_barang, p.penyerahan_id, p.lokasi_id, l.nama_lokasi, p.kondisi FROM tb_barang b JOIN tb_penyerahan p ON b.barang_id = p.barang_id LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.kondisi = 'rusak' ORDER BY b.nama_barang ASC");
+$barang_penyerahan_list = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.jenis_barang, p.penyerahan_id, p.lokasi_id, l.nama_lokasi, p.kondisi FROM tb_barang b JOIN tb_penyerahan p ON b.barang_id = p.barang_id LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id ORDER BY b.nama_barang ASC LIMIT $offset, $items_per_page");
 
 // Ambil daftar lokasi untuk unit terkait
 $lokasi_list = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
@@ -91,7 +106,7 @@ $lokasi_list = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_loka
           </div>
           <div class="form-group">
             <label>Tanggal Lapor</label>
-            <input type="date" class="form-control" name="tanggal_lapor" value="<?= date('Y-m-d'); ?>" required>
+            <input type="datetime-local" class="form-control" name="tanggal_lapor" value="<?= date('Y-m-d\TH:i'); ?>" required>
           </div>
           <div class="form-group">
             <label>Deskripsi Kerusakan</label>
@@ -134,15 +149,18 @@ $lokasi_list = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_loka
               </button>
             </div>
             <div class="modal-body">
-              <table class="table table-bordered">
-                <thead>
+              <div class="form-group">
+                <input type="text" class="form-control" id="searchBarang" placeholder="Cari barang..." onkeyup="filterTable()">
+              </div>
+              <table class="table table-bordered" id="tabelBarang">
+                <thead style="background:rgb(129, 2, 0, 1)">
                   <tr>
-                    <th>No</th>
-                    <th>Nama Barang</th>
-                    <th>Jenis</th>
-                    <th>Lokasi</th>
-                    <th>Kondisi</th>
-                    <th>Aksi</th>
+                    <th style="color: white;">No</th>
+                    <th style="color: white;">Nama Barang</th>
+                    <th style="color: white;">Jenis</th>
+                    <th style="color: white;">Lokasi</th>
+                    <th style="color: white;">Kondisi</th>
+                    <th style="color: white;">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,7 +180,22 @@ $lokasi_list = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_loka
               </table>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+              <div class="mr-auto">
+                <?php 
+                  $start = ($page - 1) * $items_per_page + 1;
+                  $end = min($page * $items_per_page, $total_items);
+                  echo "Showing " . $start . " to " . $end . " of " . $total_items . " entries";
+                ?>
+              </div>
+              <div>
+                <?php if ($page > 1): ?>
+                  <button type="button" class="btn btn-secondary" onclick="goToPage(<?= $page - 1 ?>)">Previous</button>
+                <?php endif; ?>
+                <?php if ($page < $total_pages): ?>
+                  <button type="button" class="btn btn-secondary" onclick="goToPage(<?= $page + 1 ?>)">Next</button>
+                <?php endif; ?>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+              </div>
             </div>
           </div>
         </div>
@@ -182,6 +215,22 @@ $lokasi_list = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_loka
         var unitDisplay = document.getElementById('unit_melapor_display');
         if (unitDisplay) unitDisplay.value = nama_lokasi;
         $('#modalPilihBarang').modal('hide');
+      }
+      function filterTable() {
+        var searchValue = document.getElementById('searchBarang').value.toLowerCase();
+        var table = document.getElementById('tabelBarang');
+        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        
+        for (var i = 0; i < rows.length; i++) {
+          var row = rows[i];
+          var text = row.textContent.toLowerCase();
+          row.style.display = text.includes(searchValue) ? '' : 'none';
+        }
+      }
+      function goToPage(pageNum) {
+        var url = new URL(window.location);
+        url.searchParams.set('page', pageNum);
+        window.location = url.toString();
       }
       </script>
     </div>

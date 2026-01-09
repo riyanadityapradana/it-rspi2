@@ -150,4 +150,8 @@ else if ($unit == "alasan"){
 else if ($unit == "rsp-obat-update"){
   require_once("unit/rsp-obat-update/rsp-obat-update.php");
 }
+// Update Profile
+else if ($unit == "update_profile"){
+  require_once("unit/user/update_profile.php");
+}
 ?>
