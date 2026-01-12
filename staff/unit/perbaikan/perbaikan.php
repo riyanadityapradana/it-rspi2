@@ -88,10 +88,10 @@ $n      = 1;
                     </div>
 			</div>
 			<div class="card-body">
-				<table id="example" class="table table-bordered table-striped">
+				<table id="example1" class="table table-bordered table-striped">
 					<thead style="background:rgb(129, 2, 0, 1)">
 						<tr>
-							<th style="font-size: 14px; color: white;" width="120" responsive>No</th>
+							<th style="font-size: 14px; color: white;" width="40" responsive>No</th>
                                    <th style="font-size: 14px; color: white;" width="120" responsive>Tanggal Lapor</th>
                                    <th style="font-size: 14px; color: white;" width="120" responsive>Unit Melapor</th>
 							<th style="font-size: 14px; color: white;" width="120" responsive>Nama Barang</th>
@@ -99,7 +99,7 @@ $n      = 1;
 							<th style="font-size: 14px; color: white;" width="120" responsive>Status</th>
                                    <th style="font-size: 14px; color: white;" width="120" responsive>Tindakan</th>
 							<th style="font-size: 14px; color: white;" width="120" responsive>Tanggal Selesai</th>
-							<th style="font-size: 14px; color: white;" width="140" responsive>Aksi</th>
+							<th style="font-size: 14px; color: white;" width="200" responsive>Aksi</th>
 						</tr>
 					</thead>
 					<tbody>
