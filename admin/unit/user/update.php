@@ -38,24 +38,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $allowed = array('jpg', 'jpeg', 'png', 'gif');
         $filename = $_FILES['foto']['name'];
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        if (in_array($ext, $allowed)) {
-            $newname = time() . '_' . $filename;
-            $destination = $upload_dir . $newname;
-            if (move_uploaded_file($_FILES['foto']['tmp_name'], $destination)) {
-                // Hapus foto lama jika ada
-                if ($foto && file_exists($upload_dir . $foto)) {
-                    @unlink($upload_dir . $foto);
-                }
-                $foto = $newname;
-                $foto_baru = true;
+        $file_size = $_FILES['foto']['size'];
+        $max_size = 5 * 1024 * 1024; // 5MB
+        
+        if (!in_array($ext, $allowed)) {
+            header('Location:../dashboard_admin.php?unit=user&error=Format file tidak didukung. Gunakan JPG, JPEG, PNG, atau GIF');
+            exit;
+        }
+        
+        if ($file_size > $max_size) {
+            header('Location:../dashboard_admin.php?unit=user&error=Ukuran file terlalu besar. Maksimal 5MB');
+            exit;
+        }
+        
+        $newname = uniqid('user_' . $id_user . '_') . '.' . $ext;
+        $destination = $upload_dir . $newname;
+        
+        if (move_uploaded_file($_FILES['foto']['tmp_name'], $destination)) {
+            // Hapus foto lama jika ada
+            if ($foto && file_exists($upload_dir . $foto)) {
+                @unlink($upload_dir . $foto);
             }
+            $foto = $newname;
+            $foto_baru = true;
+        } else {
+            header('Location:../dashboard_admin.php?unit=user&error=Gagal upload foto');
+            exit;
         }
     }
 
-    // Update data
+    // Hash password jika ada
+    $password_hashed = null;
     if ($password !== '') {
+        if (strlen($password) < 5) {
+            header('Location:../dashboard_admin.php?unit=user&error=Password minimal 5 karakter');
+            exit;
+        }
+        $password_hashed = password_hash($password, PASSWORD_BCRYPT);
+    }
+
+    // Update data
+    if ($password_hashed !== null) {
         $stmt = $config->prepare('UPDATE tb_user SET nip=?, nama_lengkap=?, username=?, email=?, no_hp=?, role=?, status=?, foto=?, password=?, updated_at=? WHERE id_user=?');
-        $stmt->bind_param('ssssssssssi', $nip, $nama_lengkap, $username, $email, $no_hp, $role, $status, $foto, $password, $updated_at, $id_user);
+        $stmt->bind_param('ssssssssssi', $nip, $nama_lengkap, $username, $email, $no_hp, $role, $status, $foto, $password_hashed, $updated_at, $id_user);
     } else {
         $stmt = $config->prepare('UPDATE tb_user SET nip=?, nama_lengkap=?, username=?, email=?, no_hp=?, role=?, status=?, foto=?, updated_at=? WHERE id_user=?');
         $stmt->bind_param('sssssssssi', $nip, $nama_lengkap, $username, $email, $no_hp, $role, $status, $foto, $updated_at, $id_user);
@@ -125,18 +150,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="form-group">
             <label>Foto</label><br>
             <?php if ($user['foto']): ?>
-              <img src="../../../assets/img/<?= htmlspecialchars($user['foto']) ?>" alt="Foto User" style="max-width:100px;max-height:100px;margin-bottom:10px;"><br>
+              <img src="../../../assets/img/<?= htmlspecialchars($user['foto']) ?>" alt="Foto User" style="max-width:100px;max-height:100px;margin-bottom:10px;border-radius:5px;"><br>
             <?php endif; ?>
             <input type="file" class="form-control" name="foto" accept="image/*">
-            <small class="form-text text-muted">Kosongkan jika tidak ingin mengganti foto.</small>
+            <small class="form-text text-muted">Format: JPG, JPEG, PNG, GIF. Max 5MB. Kosongkan jika tidak ingin mengganti foto.</small>
           </div>
           <div class="form-group">
             <label>Password</label>
             <input type="password" class="form-control" name="password" placeholder="Kosongkan jika tidak ingin mengganti password">
+            <small class="form-text text-muted">Min 8 karakter. Password akan dienkripsi dengan BCRYPT.</small>
           </div>
         </div>
         <div class="card-footer">
-          <a class="btn btn-app bg-warning float-left" href="../../dashboard_admin.php?unit=user">
+          <a class="btn btn-app bg-warning float-left" href="../dashboard_admin.php?unit=user">
             <i class="fas fa-reply"></i> Back
           </a>
           <button class="btn btn-app bg-success float-right" type="submit">

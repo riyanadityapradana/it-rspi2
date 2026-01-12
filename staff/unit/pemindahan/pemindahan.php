@@ -53,7 +53,7 @@ require_once("../config/koneksi.php");
                 <tbody>
                     <?php
                     $no = 1;
-                    $q = mysqli_query($config, "SELECT m.*, b.nama_barang, l1.nama_lokasi AS lokasi_asal_nama, l2.nama_lokasi AS lokasi_tujuan_nama, u.nama_lengkap as nama_staff 
+                    $q = mysqli_query($config, "SELECT m.*, b.nama_barang, l1.nama_lokasi AS lokasi_asal_nama, l2.nama_lokasi AS lokasi_tujuan_nama, u.nama_lengkap as nama_staff, (SELECT penyerahan_id FROM tb_penyerahan WHERE barang_id = m.barang_id ORDER BY penyerahan_id DESC LIMIT 1) as penyerahan_id 
                       FROM tb_mutasi_barang m 
                       LEFT JOIN tb_barang b ON m.barang_id = b.barang_id 
                       LEFT JOIN tb_lokasi l1 ON m.lokasi_asal = l1.lokasi_id 
@@ -69,8 +69,8 @@ require_once("../config/koneksi.php");
                       <td><?= !empty($row['tanggal_mutasi']) ? date('d/m/Y', strtotime($row['tanggal_mutasi'])) : '-'; ?></td>
                       <td><?= htmlspecialchars($row['nama_staff']); ?></td>
                       <td>
-                      <a href="dashboard_staff.php?unit=update_pemindahan&id=<?= urlencode($row['mutasi_id']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
-                      <a href="dashboard_staff.php?unit=delete_pemindahan&id=<?= urlencode($row['mutasi_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus data mutasi ini?')"><i class="fa fa-trash"></i> Hapus</a>
+                      <a href="dashboard_staff.php?unit=update_pemindahan&id=<?= urlencode($row['mutasi_id']); ?>&barang_id=<?= urlencode($row['barang_id']); ?>&penyerahan_id=<?= urlencode($row['penyerahan_id']); ?>" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Edit</a>
+                      <a href="dashboard_staff.php?unit=delete_pemindahan&id=<?= urlencode($row['mutasi_id']); ?>&barang_id=<?= urlencode($row['barang_id']); ?>&penyerahan_id=<?= urlencode($row['penyerahan_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus data mutasi ini?')"><i class="fa fa-trash"></i> Hapus</a>
                       <a href="?unit=detail_pemindahan&id=<?= $row['mutasi_id'] ?>" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Detail</a>
                       </td>
                     </tr>
