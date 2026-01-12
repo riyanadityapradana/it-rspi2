@@ -109,7 +109,7 @@ $n      = 1;
 							<td><?= htmlspecialchars($row['tanggal_lapor']); ?></td>
                                    <td><?= htmlspecialchars($row['unit_melapor_nama'] ?? $row['unit_melapor']); ?></td>
                                    <td><?= htmlspecialchars($row['nama_barang']); ?></td>
-                                   <td><?= htmlspecialchars($row['no_seri']); ?></td>
+                                   <td><?= htmlspecialchars($row['nomor_seri']); ?></td>
 							<td style="text-align:center;">
 								<?php
 									$status = $row['status'];
