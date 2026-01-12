@@ -92,14 +92,14 @@ $n      = 1;
 					<thead style="background:rgb(129, 2, 0, 1)">
 						<tr>
 							<th style="text-align: center; color: white;">No</th>
-                                   <th style="text-align: center; color: white;">Tanggal Lapor</th>
-                                   <th style="text-align: center; color: white;">Unit Melapor</th>
-							<th style="text-align: center; color: white;">Nama Barang</th>
-                                   <th style="text-align: center; color: white;">No.Seri/SN</th>
-							<th style="text-align: center; color: white;">Status</th>
-                                   <th style="text-align: center; color: white;">Tindakan</th>
-							<th style="text-align: center; color: white;">Tanggal Selesai</th>
-							<th style="text-align: center; color: white;">Aksi</th>
+                                   <th style="font-size: 14px; color: white;" width="120" responsive>Tanggal Lapor</th>
+                                   <th style="font-size: 14px; color: white;" width="120" responsive>Unit Melapor</th>
+							<th style="font-size: 14px; color: white;" width="120" responsive>Nama Barang</th>
+                                   <th style="font-size: 14px; color: white;" width="120" responsive>No.Seri/SN</th>
+							<th style="font-size: 14px; color: white;" width="120" responsive>Status</th>
+                                   <th style="font-size: 14px; color: white;" width="120" responsive>Tindakan</th>
+							<th style="font-size: 14px; color: white;" width="120" responsive>Tanggal Selesai</th>
+							<th style="font-size: 14px; color: white;" width="120" responsive>Aksi</th>
 						</tr>
 					</thead>
 					<tbody>
