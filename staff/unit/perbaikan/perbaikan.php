@@ -92,7 +92,7 @@ $n      = 1;
 					<thead style="background:rgb(129, 2, 0, 1)">
 						<tr>
 							<th style="text-align: center; color: white;">No</th>
-                                   <th style="font-size: 14px; color: white;" width="90" responsive>Tanggal Lapor</th>
+                                   <th style="font-size: 14px; color: white;" width="50" responsive>Tanggal Lapor</th>
                                    <th style="font-size: 14px; color: white;" width="120" responsive>Unit Melapor</th>
 							<th style="font-size: 14px; color: white;" width="120" responsive>Nama Barang</th>
                                    <th style="font-size: 14px; color: white;" width="120" responsive>No.Seri/SN</th>
