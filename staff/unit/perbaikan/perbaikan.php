@@ -95,6 +95,7 @@ $n      = 1;
                                    <th style="text-align: center; color: white;">Tanggal Lapor</th>
                                    <th style="text-align: center; color: white;">Unit Melapor</th>
 							<th style="text-align: center; color: white;">Nama Barang</th>
+                                   <th style="text-align: center; color: white;">No.Seri/SN</th>
 							<th style="text-align: center; color: white;">Status</th>
                                    <th style="text-align: center; color: white;">Tindakan</th>
 							<th style="text-align: center; color: white;">Tanggal Selesai</th>
@@ -108,6 +109,7 @@ $n      = 1;
 							<td><?= htmlspecialchars($row['tanggal_lapor']); ?></td>
                                    <td><?= htmlspecialchars($row['unit_melapor_nama'] ?? $row['unit_melapor']); ?></td>
                                    <td><?= htmlspecialchars($row['nama_barang']); ?></td>
+                                   <td><?= htmlspecialchars($row['no_seri']); ?></td>
 							<td style="text-align:center;">
 								<?php
 									$status = $row['status'];
