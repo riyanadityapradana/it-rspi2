@@ -103,6 +103,8 @@
 					$status = $data['status_log'] ?? 'Belum';
 					if ($status == 'Selesai') {
 						$badge = 'badge-success';
+					} elseif ($status == 'Dalam Proses / Berjalan') {
+						$badge = 'badge-info';
 					} elseif ($status == 'Pending') {
 						$badge = 'badge-warning';
 					} else {

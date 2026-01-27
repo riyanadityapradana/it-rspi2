@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <label>Status</label>
             <select class="form-control" name="status" required>
               <option value="Belum">Belum</option>
+              <option value="Dalam Proses / Berjalan">Dalam Proses / Berjalan</option>
               <option value="Pending">Pending</option>
               <option value="Selesai">Selesai</option>
             </select>

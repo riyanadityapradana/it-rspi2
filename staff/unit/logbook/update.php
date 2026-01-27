@@ -91,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <label>Status</label>
             <select class="form-control" name="status" required>
               <option value="Belum" <?php echo ($r['status_log'] == 'Belum') ? 'selected' : ''; ?>>Belum</option>
+              <option value="Dalam Proses / Berjalan" <?php echo ($r['status_log'] == 'Dalam Proses / Berjalan') ? 'selected' : ''; ?>>Dalam Proses / Berjalan</option>
               <option value="Pending" <?php echo ($r['status_log'] == 'Pending') ? 'selected' : ''; ?>>Pending</option>
               <option value="Selesai" <?php echo ($r['status_log'] == 'Selesai') ? 'selected' : ''; ?>>Selesai</option>
             </select>
