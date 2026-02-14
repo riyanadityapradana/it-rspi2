@@ -15,6 +15,7 @@ while ($row = mysqli_fetch_assoc($lokasi_q)) {
 // Proses simpan
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $pengajuan_id = isset($_POST['pengajuan_id']) ? intval($_POST['pengajuan_id']) : NULL;
+  $kode_inventaris = trim($_POST['kode_inventaris']);
   $nama_barang = trim($_POST['nama_barang']);
   $jenis_barang = trim($_POST['jenis_barang']);
   $nomor_seri = trim($_POST['nomor_seri']);
@@ -43,9 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: dashboard_staff.php?unit=barang&err=Barang sudah terdaftar!');
     exit;
   } else {
-    $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, spesifikasi, tanggal_terima, foto) VALUES (
+    $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, kode_inventaris, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, spesifikasi, tanggal_terima, foto) VALUES (
       " . ($pengajuan_id ? "'$pengajuan_id'," : "NULL,") . "
-      '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', $jumlah, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "''") . ")");
+      '$kode_inventaris', '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', $jumlah, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "''") . ")");
     if ($q) {
       header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
       exit;
@@ -81,6 +82,10 @@ $jenis_list = [
           <div class="form-group">
             <label>Tanggal Terima</label>
             <input type="date" name="tanggal_terima" class="form-control" value="<?= date('Y-m-d') ?>" required>
+          </div>
+          <div class="form-group">
+            <label>Kode Inventaris</label>
+            <input type="text" name="kode_inventaris" class="form-control" required maxlength="50" placeholder="Contoh: INV-2026-001">
           </div>
           <div class="form-group">
             <label>Nama Barang</label>

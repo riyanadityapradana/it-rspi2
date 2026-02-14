@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     while ($row = mysqli_fetch_assoc($lokasi_q)) {
                       $lokasi_list[] = $row;
                     }
-                    $q = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.jenis_barang, b.nomor_seri, b.ip_address, b.jumlah, b.spesifikasi, b.tanggal_terima, b.foto,
+                    $q = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.kode_inventaris, b.jenis_barang, b.nomor_seri, b.ip_address, b.jumlah, b.spesifikasi, b.tanggal_terima, b.foto,
                        CASE
                          WHEN b.jumlah >= 1 THEN (
                            SELECT GROUP_CONCAT(CONCAT('<span class=\"badge badge-', IF(p.kondisi='baru','success',IF(p.kondisi='bekas','info',IF(p.kondisi='rusak','danger','warning'))), '\">', REPLACE(REPLACE(l.nama_lokasi, '<', '&lt;'), '>', '&gt;'), ' (', REPLACE(REPLACE(p.kondisi, '<', '&lt;'), '>', '&gt;'), ')</span>') SEPARATOR ', ')
@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     while ($row = mysqli_fetch_assoc($q)) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
-                        <td><?= htmlspecialchars($row['nama_barang']); ?></td>
+                        <td><?= htmlspecialchars($row['nama_barang']); ?><br><small style="color: #666;">Kode Inventaris :<b><?= htmlspecialchars($row['kode_inventaris']); ?></b></small></td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
                         <td><?php echo $row['nama_lokasi_gabung']; ?></td>
                         <td class="text-center">
@@ -265,6 +265,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         <div class="form-group">
                           <label><strong>Nama Barang:</strong></label>
                           <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nama_barang']) ?> </div>
+                        </div>
+                        <div class="form-group">
+                          <label><strong>Kode Inventaris:</strong></label>
+                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['kode_inventaris']) ?> </div>
                         </div>
                         <div class="form-group">
                           <label><strong>Jenis Barang:</strong></label>

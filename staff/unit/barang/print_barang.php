@@ -8,7 +8,14 @@ $lokasi_filter = $_GET['lokasi_filter'] ?? 'unit_it';
 $tahun = $_GET['tahun'] ?? date('Y');
 
 $kondisi_db = strtolower($kondisi) == 'baik' ? 'baru' : (strtolower($kondisi) == 'rusak' ? 'rusak' : $kondisi);
-$where = "WHERE YEAR(b.tanggal_terima) = '$tahun' AND b.kondisi = '$kondisi_db'";
+
+// Build WHERE clause
+$where_conditions = ["YEAR(b.tanggal_terima) = '$tahun'"];
+
+// Filter kondisi dari tb_penyerahan
+$where_conditions[] = "p.kondisi = '$kondisi_db'";
+
+// Filter lokasi
 if ($lokasi_filter == 'unit_it') {
     $lokasiIT = [];
     $lokasiQ = mysqli_query($config, "SELECT lokasi_id FROM tb_lokasi WHERE LOWER(nama_lokasi) LIKE '%it%'");
@@ -16,10 +23,18 @@ if ($lokasi_filter == 'unit_it') {
         $lokasiIT[] = $rowLokasi['lokasi_id'];
     }
     if (!empty($lokasiIT)) {
-        $where .= " AND b.lokasi_id IN (" . implode(',', $lokasiIT) . ")";
+        $where_conditions[] = "p.lokasi_id IN (" . implode(',', $lokasiIT) . ")";
     }
 }
-$query = "SELECT b.*, l.nama_lokasi FROM tb_barang b LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id $where ORDER BY b.barang_id ASC";
+
+$where = "WHERE " . implode(" AND ", $where_conditions);
+
+$query = "SELECT DISTINCT b.barang_id, b.kode_inventaris, b.nama_barang, b.jenis_barang, b.nomor_seri, b.jumlah, b.spesifikasi, b.tanggal_terima, p.kondisi, l.nama_lokasi, p.keterangan 
+FROM tb_barang b 
+LEFT JOIN tb_penyerahan p ON b.barang_id = p.barang_id 
+LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id 
+$where 
+ORDER BY b.barang_id ASC";
 $result = mysqli_query($config, $query);
 
 // Hapus pengambilan data ke array agar tidak menghabiskan hasil query
@@ -147,6 +162,7 @@ $result = mysqli_query($config, $query);
             <thead>
                 <tr>
                     <th style="color: #000000ff;">No</th>
+                    <th style="color: #000000ff;">Kode Inventaris</th>
                     <th style="color: #000000ff;">Nama Barang</th>
                     <th style="color: #000000ff;">Jenis Barang</th>
                     <th style="color: #000000ff;">Nomor Seri</th>
@@ -165,6 +181,7 @@ $result = mysqli_query($config, $query);
                 ?>
                 <tr>
                     <td><?= $no++ ?></td>
+                    <td><?= htmlspecialchars($row['kode_inventaris']) ?></td>
                     <td><?= htmlspecialchars($row['nama_barang']) ?></td>
                     <td><?= htmlspecialchars($row['jenis_barang']) ?></td>
                     <td><?= htmlspecialchars($row['nomor_seri']) ?></td>

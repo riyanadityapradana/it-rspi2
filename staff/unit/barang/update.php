@@ -49,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   } elseif (isset($_POST['nama_barang'])) {
     // Update barang
+    $kode_inventaris = trim($_POST['kode_inventaris']);
     $nama_barang   = trim($_POST['nama_barang']);
     $jenis_barang  = trim($_POST['jenis_barang']);
     $nomor_seri    = trim($_POST['nomor_seri']);
@@ -70,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
       }
     }
-    $q = mysqli_query($config, "UPDATE tb_barang SET nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
+    $q = mysqli_query($config, "UPDATE tb_barang SET kode_inventaris='$kode_inventaris', nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
     if ($q) {
       header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
       exit;
@@ -213,6 +214,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <h4>Edit Info Barang</h4>
               <div class="row">
                 <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Kode Inventaris</label>
+                    <input type="text" name="kode_inventaris" class="form-control" value="<?= htmlspecialchars($data['kode_inventaris']) ?>" required maxlength="50">
+                  </div>
                   <div class="form-group">
                     <label>Nama Barang</label>
                     <input type="text" name="nama_barang" class="form-control" value="<?= htmlspecialchars($data['nama_barang']) ?>" required maxlength="150">
