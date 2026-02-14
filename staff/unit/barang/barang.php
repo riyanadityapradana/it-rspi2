@@ -1,5 +1,44 @@
 <?php
 require_once("../config/koneksi.php");
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+
+// Proses simpan pemindahan barang (action=pindah)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'pindah') {
+  $barang_id = isset($_POST['barang_id']) ? intval($_POST['barang_id']) : 0;
+  $lokasi_asal = isset($_POST['lokasi_asal']) ? intval($_POST['lokasi_asal']) : 0;
+  $lokasi_tujuan = isset($_POST['lokasi_tujuan']) ? intval($_POST['lokasi_tujuan']) : 0;
+  $tanggal_mutasi = isset($_POST['tanggal_mutasi']) ? mysqli_real_escape_string($config, $_POST['tanggal_mutasi']) : date('Y-m-d');
+  $keterangan = isset($_POST['keterangan']) ? mysqli_real_escape_string($config, trim($_POST['keterangan'])) : '';
+  $id_user = isset($_SESSION['id_user']) ? intval($_SESSION['id_user']) : 0;
+
+  if ($barang_id <= 0 || $lokasi_tujuan <= 0) {
+    header('Location: dashboard_staff.php?unit=barang&err=Data pemindahan tidak lengkap');
+    exit;
+  }
+
+  // if user id not available, insert NULL to avoid FK constraint error
+  $id_user_sql = $id_user > 0 ? "'{$id_user}'" : "NULL";
+
+  // gunakan transaksi agar insert mutasi dan update lokasi barang berjalan atomik
+  mysqli_begin_transaction($config);
+  $ins = mysqli_query($config, "INSERT INTO tb_mutasi_barang (barang_id, lokasi_asal, lokasi_tujuan, tanggal_mutasi, id_user, keterangan) VALUES ('{$barang_id}', '{$lokasi_asal}', '{$lokasi_tujuan}', '{$tanggal_mutasi}', {$id_user_sql}, '{$keterangan}')");
+  if ($ins) {
+    $upd = mysqli_query($config, "UPDATE tb_barang SET lokasi_id='{$lokasi_tujuan}' WHERE barang_id='{$barang_id}'");
+    if ($upd) {
+      mysqli_commit($config);
+      header('Location: dashboard_staff.php?unit=barang&msg=Pemindahan barang berhasil disimpan');
+      exit;
+    } else {
+      mysqli_rollback($config);
+      header('Location: dashboard_staff.php?unit=barang&err=Gagal update lokasi barang: ' . mysqli_error($config));
+      exit;
+    }
+  } else {
+    mysqli_rollback($config);
+    header('Location: dashboard_staff.php?unit=barang&err=Gagal menyimpan pemindahan: ' . mysqli_error($config));
+    exit;
+  }
+}
 // Proses update penyerahan barang
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset($_POST['lokasi_id'])) {
   $barang_id = intval($_POST['barang_id']);
@@ -123,8 +162,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     while ($row = mysqli_fetch_assoc($lokasi_q)) {
                       $lokasi_list[] = $row;
                     }
-                    $q = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.kode_inventaris, b.jenis_barang, b.nomor_seri, b.ip_address, b.jumlah, b.spesifikasi, b.tanggal_terima, b.foto,
-                       CASE
+                      $q = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.kode_inventaris, b.jenis_barang, b.nomor_seri, b.ip_address, b.jumlah, b.spesifikasi, b.tanggal_terima, b.foto,
+                        (SELECT nama_lokasi FROM tb_lokasi WHERE lokasi_id = b.lokasi_id) AS lokasi_saat_ini,
+                        CASE
                          WHEN b.jumlah >= 1 THEN (
                            SELECT GROUP_CONCAT(CONCAT('<span class=\"badge badge-', IF(p.kondisi='baru','success',IF(p.kondisi='bekas','info',IF(p.kondisi='rusak','danger','warning'))), '\">', REPLACE(REPLACE(l.nama_lokasi, '<', '&lt;'), '>', '&gt;'), ' (', REPLACE(REPLACE(p.kondisi, '<', '&lt;'), '>', '&gt;'), ')</span>') SEPARATOR ', ')
                            FROM tb_penyerahan p
@@ -140,7 +180,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         <td><?= $no++; ?></td>
                         <td><?= htmlspecialchars($row['nama_barang']); ?><br><small style="color: #666;">Kode Inventaris :<b><?= htmlspecialchars($row['kode_inventaris']); ?></b></small></td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
-                        <td><?php echo $row['nama_lokasi_gabung']; ?></td>
+                        <td>
+                          <?php
+                          if (!empty($row['lokasi_saat_ini'])) {
+                            echo '<span class="badge badge-info">' . htmlspecialchars($row['lokasi_saat_ini']) . '</span>';
+                            if (!empty($row['nama_lokasi_gabung']) && $row['nama_lokasi_gabung'] != '-') {
+                              echo ' ' . $row['nama_lokasi_gabung'];
+                            }
+                          } else {
+                            echo $row['nama_lokasi_gabung'];
+                          }
+                          ?>
+                        </td>
                         <td class="text-center">
                           <?php if ($row['jumlah_penyerahan'] >= $row['jumlah']): ?>
                             <span class="badge badge-success">Completed</span>
@@ -155,6 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetailBarang<?= $row['barang_id'] ?>">
                             <i class="fa fa-eye"></i> Detail
                           </button>
+                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalPindah" onclick="setPindahData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['kode_inventaris']) ?>', '<?= htmlspecialchars($row['nama_barang']) ?>')">
+                              <i class="fa fa-exchange-alt"></i> Pindah
+                            </button>
                           <?php if ($row['jumlah_penyerahan'] < $row['jumlah']): ?>
                             <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '', '', '', '<?= $row['jumlah'] ?>')">
                               <i class="fa fa-handshake"></i> Penyerahan (<?= $row['jumlah_penyerahan'] ?>/<?= $row['jumlah'] ?>)
@@ -236,6 +290,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     </script>
                 </tr>
                 <?php endwhile; ?>
+            <!-- Modal Pindah Barang -->
+            <div class="modal fade" id="modalPindah" tabindex="-1" role="dialog" aria-labelledby="modalPindahLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalPindahLabel">Pemindahan Barang</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <form method="post" action="">
+                    <input type="hidden" name="action" value="pindah">
+                    <div class="modal-body">
+                      <input type="hidden" name="barang_id" id="pindahBarangId">
+                      <div class="form-group">
+                        <label>Nama Barang</label>
+                        <input type="text" id="pindahNamaBarang" class="form-control" readonly>
+                      </div>
+                      <div class="form-group">
+                        <label>Kode Inventaris</label>
+                        <input type="text" id="pindahKodeInventaris" class="form-control" readonly>
+                      </div>
+                      <div class="form-group">
+                        <label>Lokasi Asal</label>
+                        <select name="lokasi_asal" class="form-control" required>
+                          <option value="">-- Pilih Lokasi Asal --</option>
+                          <?php foreach ($lokasi_list as $lok): ?>
+                            <option value="<?= $lok['lokasi_id'] ?>"><?= htmlspecialchars($lok['nama_lokasi']) ?></option>
+                          <?php endforeach; ?>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Lokasi Tujuan</label>
+                        <select name="lokasi_tujuan" class="form-control" required>
+                          <option value="">-- Pilih Lokasi Tujuan --</option>
+                          <?php foreach ($lokasi_list as $lok2): ?>
+                            <option value="<?= $lok2['lokasi_id'] ?>"><?= htmlspecialchars($lok2['nama_lokasi']) ?></option>
+                          <?php endforeach; ?>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Tanggal Mutasi</label>
+                        <input type="date" name="tanggal_mutasi" class="form-control" value="<?= date('Y-m-d') ?>" required>
+                      </div>
+                      <div class="form-group">
+                        <label>Keterangan</label>
+                        <textarea name="keterangan" class="form-control" rows="3"></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                      <button type="submit" class="btn btn-primary">Simpan Pemindahan</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <script>
+              function setPindahData(barangId, kodeInventaris, namaBarang) {
+                document.getElementById('pindahBarangId').value = barangId;
+                document.getElementById('pindahKodeInventaris').value = kodeInventaris;
+                document.getElementById('pindahNamaBarang').value = namaBarang;
+                $('#modalPindah').modal('show');
+              }
+            </script>
             <!-- Modal Detail Barang -->
             <?php foreach ($q as $detailRow): ?>
             <div class="modal fade" id="modalDetailBarang<?= $detailRow['barang_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>" aria-hidden="true">

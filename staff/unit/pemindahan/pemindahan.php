@@ -24,9 +24,9 @@ require_once("../config/koneksi.php");
       <div class="card">
           <div class="card-header">
           <div class="card-tools" style="float: left; text-align: left;">
-            <a href="?unit=create_pemindahan" class="btn btn-tool btn-sm" style="background:rgba(0, 123, 255, 1)">
+            <!-- <a href="?unit=create_pemindahan" class="btn btn-tool btn-sm" style="background:rgba(0, 123, 255, 1)">
               <i class="fas fa-plus-square" style="color: white;"> Tambah Pemindahan</i>
-            </a>
+            </a> -->
             <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
               <i class="fas fa-print" style="color: white;"> Print</i>
             </button>
@@ -53,7 +53,7 @@ require_once("../config/koneksi.php");
                 <tbody>
                     <?php
                     $no = 1;
-                    $q = mysqli_query($config, "SELECT m.*, b.nama_barang, l1.nama_lokasi AS lokasi_asal_nama, l2.nama_lokasi AS lokasi_tujuan_nama, u.nama_lengkap as nama_staff, (SELECT penyerahan_id FROM tb_penyerahan WHERE barang_id = m.barang_id ORDER BY penyerahan_id DESC LIMIT 1) as penyerahan_id 
+                    $q = mysqli_query($config, "SELECT m.*, b.nama_barang, b.kode_inventaris, l1.nama_lokasi AS lokasi_asal_nama, l2.nama_lokasi AS lokasi_tujuan_nama, u.nama_lengkap as nama_staff, (SELECT penyerahan_id FROM tb_penyerahan WHERE barang_id = m.barang_id ORDER BY penyerahan_id DESC LIMIT 1) as penyerahan_id 
                       FROM tb_mutasi_barang m 
                       LEFT JOIN tb_barang b ON m.barang_id = b.barang_id 
                       LEFT JOIN tb_lokasi l1 ON m.lokasi_asal = l1.lokasi_id 
@@ -63,7 +63,10 @@ require_once("../config/koneksi.php");
                     while ($row = mysqli_fetch_assoc($q)) : ?>
                     <tr>
                       <td><?= $no++; ?></td>
-                      <td><?= htmlspecialchars($row['nama_barang']); ?></td>
+                      <td>
+                        <?= htmlspecialchars($row['nama_barang']); ?>
+                        <br><small style="color: #666;">Kode Inventaris: <b><?= htmlspecialchars($row['kode_inventaris'] ?? '') ?></b></small>
+                      </td>
                       <td><?= htmlspecialchars($row['lokasi_asal_nama']); ?></td>
                       <td><?= htmlspecialchars($row['lokasi_tujuan_nama']); ?></td>
                       <td><?= !empty($row['tanggal_mutasi']) ? date('d/m/Y', strtotime($row['tanggal_mutasi'])) : '-'; ?></td>
