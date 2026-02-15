@@ -1,59 +1,67 @@
 <?php
 // Handle Set Selesai form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'set_selesai') {
-  $perbaikan_id = isset($_POST['perbaikan_id']) ? $_POST['perbaikan_id'] : '';
-  $tanggal_selesai = isset($_POST['tanggal_selesai']) ? $_POST['tanggal_selesai'] : '';
-  
-  if (!empty($perbaikan_id) && !empty($tanggal_selesai)) {
-    // Format datetime dari datetime-local input
-    $datetime_selesai = str_replace('T', ' ', $tanggal_selesai);
-    
-    // Get penyerahan_id dari perbaikan record
-    $perbaikan_q = mysqli_query($config, "SELECT penyerahan_id FROM tb_perbaikan_barang WHERE perbaikan_id = '$perbaikan_id'");
-    $perbaikan_r = mysqli_fetch_assoc($perbaikan_q);
-    $penyerahan_id = $perbaikan_r['penyerahan_id'];
-    
-    // Update tanggal_selesai dengan status selesai
-    $update_query = "UPDATE tb_perbaikan_barang SET tanggal_selesai = '$datetime_selesai', status = 'selesai' WHERE perbaikan_id = '$perbaikan_id'";
-    $update_result = mysqli_query($config, $update_query);
-    
-    if ($update_result) {
-      // Update kondisi penyerahan menjadi 'bekas'
-      $update_penyerahan = "UPDATE tb_penyerahan SET kondisi = 'bekas' WHERE penyerahan_id = '$penyerahan_id'";
-      mysqli_query($config, $update_penyerahan);
-      
-      header('Location: dashboard_staff.php?unit=perbaikan&msg=Tanggal selesai berhasil disimpan!');
-      exit;
-    } else {
-      header('Location: dashboard_staff.php?unit=perbaikan&err=Gagal menyimpan tanggal selesai!');
-      exit;
-    }
-  }
+     $perbaikan_id = isset($_POST['perbaikan_id']) ? $_POST['perbaikan_id'] : '';
+     $tanggal_selesai_date = isset($_POST['tanggal_selesai']) ? $_POST['tanggal_selesai'] : '';
+     $jam_selesai = isset($_POST['jam_selesai']) ? $_POST['jam_selesai'] : '';
+
+     if (!empty($perbaikan_id) && !empty($tanggal_selesai_date) && !empty($jam_selesai)) {
+          // Combine date + time into datetime
+          $datetime_selesai = $tanggal_selesai_date . ' ' . $jam_selesai . ':00';
+
+          // Update tanggal_selesai with status selesai
+          $update_query = "UPDATE tb_perbaikan_barang SET tanggal_selesai = '$datetime_selesai', status = 'selesai' WHERE perbaikan_id = '$perbaikan_id'";
+          $update_result = mysqli_query($config, $update_query);
+
+          if ($update_result) {
+               // Setelah selesai, update kondisi di tb_barang menjadi 'bekas'
+               $q_barang = mysqli_query($config, "SELECT barang_id FROM tb_perbaikan_barang WHERE perbaikan_id = '$perbaikan_id'");
+               if ($q_barang) {
+                    $rb = mysqli_fetch_assoc($q_barang);
+                    if ($rb && !empty($rb['barang_id'])) {
+                         mysqli_query($config, "UPDATE tb_barang SET kondisi = 'bekas' WHERE barang_id = '" . intval($rb['barang_id']) . "'");
+                    }
+               }
+
+               header('Location: dashboard_staff.php?unit=perbaikan&msg=Tanggal selesai berhasil disimpan!');
+               exit;
+          } else {
+               header('Location: dashboard_staff.php?unit=perbaikan&err=Gagal menyimpan tanggal selesai!');
+               exit;
+          }
+     }
 }
 
- $result = mysqli_query($config, "SELECT 
-     b.nama_barang,
-     b.jenis_barang,
-     b.nomor_seri,
-     b.foto,
-     b.ip_address,
-     l.nama_lokasi AS lokasi_barang,
-     p.perbaikan_id,
-     p.deskripsi_kerusakan,
-     p.tindakan_perbaikan,
-     p.status,
-     p.tanggal_lapor,
-     p.teknisi,
-     p.keterangan,
-     p.unit_melapor,
-     u.nama_lokasi AS unit_melapor_nama,
-     p.tanggal_selesai
+ $res = mysqli_query($config, "SELECT 
+           b.nama_barang,
+           b.jenis_barang,
+           b.nomor_seri,
+           b.foto,
+           b.ip_address,
+           l.nama_lokasi AS lokasi_barang,
+           p.perbaikan_id,
+           p.deskripsi_kerusakan,
+           p.tindakan_perbaikan,
+           p.status,
+           p.tanggal_lapor,
+           p.teknisi,
+           p.keterangan,
+           p.unit_melapor,
+           u.nama_lokasi AS unit_melapor_nama,
+           p.tanggal_selesai
 FROM tb_perbaikan_barang p
 JOIN tb_barang b ON p.barang_id = b.barang_id
-JOIN tb_penyerahan pen ON p.penyerahan_id = pen.penyerahan_id
 LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id
 LEFT JOIN tb_lokasi u ON p.unit_melapor = u.lokasi_id
 ORDER BY b.barang_id, p.tanggal_lapor DESC");
+
+// fetch all rows into array so we can render table and modals safely
+$rows = [];
+if ($res) {
+     while ($r = mysqli_fetch_assoc($res)) {
+          $rows[] = $r;
+     }
+}
 $n      = 1;
 ?>
 <section class="content-header">
@@ -103,7 +111,7 @@ $n      = 1;
 						</tr>
 					</thead>
 					<tbody>
-						<?php while($row = mysqli_fetch_assoc($result)): ?>
+                              <?php foreach($rows as $row): ?>
 						<tr>
 							<td><?= $n++; ?></td>
 							<td><?= htmlspecialchars($row['tanggal_lapor']); ?></td>
@@ -154,9 +162,9 @@ $n      = 1;
                                         </button>
 							</td>
 						</tr>
-					<?php endwhile; ?>
+                         <?php endforeach; ?>
                          <!-- Modal Detail Barang -->
-                         <?php foreach ($result as $detailRow): ?>
+                         <?php foreach ($rows as $detailRow): ?>
                          <div class="modal fade" id="modalDetailBarang<?= $detailRow['perbaikan_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalDetailBarangLabel<?= $detailRow['perbaikan_id'] ?>" aria-hidden="true">
                          <div class="modal-dialog modal-lg" role="document">
                               <div class="modal-content" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 12px;">
@@ -199,7 +207,7 @@ $n      = 1;
                                              </div>
                                              <div class="form-group">
                                                   <label><strong>Lokasi:</strong></label>
-                                                  <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nama_lokasi']) ?> </div>
+                                                      <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['lokasi_barang']) ?> </div>
                                              </div>
                                         </div>
                                         <div class="col-md-6">
