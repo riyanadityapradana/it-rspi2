@@ -28,6 +28,13 @@ $jenis_list = [
   'Komponen Printer & Scanner',
   'Komponen Network'
 ];
+// Pilihan kondisi barang
+$kondisi_list = [
+  'Baru',
+  'Bekas',
+  'Rusak',
+  'Dalam Perbaikan'
+];
 // Pilihan lokasi
 $lokasi_q = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
 $lokasi_list = [];
@@ -55,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nomor_seri    = trim($_POST['nomor_seri']);
     $ip_address    = trim($_POST['ip_address']);
     $spesifikasi   = trim($_POST['spesifikasi']);
+    $kondisi       = trim($_POST['kondisi']);
     $tanggal_terima= trim($_POST['tanggal_terima']);
     // Proses upload foto
     $foto_nama = $data['foto'];
@@ -71,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
       }
     }
-    $q = mysqli_query($config, "UPDATE tb_barang SET kode_inventaris='$kode_inventaris', nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri', ip_address='$ip_address', spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
+    $q = mysqli_query($config, "UPDATE tb_barang SET kode_inventaris='$kode_inventaris', nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri' , kondisi='$kondisi', ip_address='$ip_address', spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
     if ($q) {
       header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
       exit;
@@ -168,7 +176,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
               </div>
             <?php endforeach; ?>
-            <button type="submit" class="btn btn-primary">Update Penyerahan</button>
+             <button type="submit" class="btn btn-primary">Update Penyerahan</button>
+             <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>
           <?php else: ?>
             <div class="card mb-3">
               <div class="card-header">
@@ -232,6 +241,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </select>
                   </div>
                   <div class="form-group">
+                    <label>Kondisi Barang</label>
+                    <select name="kondisi" class="form-control select2" required>
+                      <option value="">-- Pilih Kondisi --</option>
+                      <?php foreach ($kondisi_list as $kond): ?>
+                        <option value="<?= htmlspecialchars($kond) ?>" <?= strtolower($data['kondisi']) == strtolower($kond) ? 'selected' : '' ?>><?= htmlspecialchars($kond) ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                  <div class="form-group">
                     <label>Nomor Seri</label>
                     <input type="text" name="nomor_seri" class="form-control" value="<?= htmlspecialchars($data['nomor_seri']) ?>" maxlength="150">
                   </div>
@@ -239,6 +257,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label>IP Address</label>
                     <input type="text" name="ip_address" class="form-control" value="<?= htmlspecialchars($data['ip_address']) ?>" maxlength="50">
                   </div>
+                </div>
+                <div class="col-md-6">
                   <div class="form-group">
                     <label>Jumlah</label>
                     <input type="number" name="jumlah" class="form-control" value="<?= htmlspecialchars($data['jumlah']) ?>" readonly>
@@ -247,8 +267,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label>Spesifikasi</label>
                     <textarea name="spesifikasi" class="form-control" rows="2"><?= htmlspecialchars($data['spesifikasi']) ?></textarea>
                   </div>
-                </div>
-                <div class="col-md-6">
                   <div class="form-group">
                     <label>Tanggal Terima</label>
                     <input type="date" name="tanggal_terima" class="form-control" value="<?= htmlspecialchars($data['tanggal_terima']) ?>" required>
@@ -265,10 +283,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
               </div>
               <button type="submit" class="btn btn-primary">Update Barang</button>
+              <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>
             </form>
           </div>
         </div>
-          <a href="dashboard_staff.php?unit=barang" class="btn btn-secondary">Kembali</a>
       </div>
     </div>
   </div>

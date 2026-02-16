@@ -215,22 +215,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
             </a>
           </div>
 			    <div class="card-tools" style="float: right; text-align: right;">
-            <select id="filterJenisBarang" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;">
-              <option value="">Semua Jenis Barang</option>
-              <option value="Komputer & Laptop">Komputer & Laptop</option>
+            <form method="get" id="filterForm" style="display:inline-block; margin-right:10px;">
+              <input type="hidden" name="unit" value="barang">
+              <select id="filterJenisBarang" name="jenis" class="form-control form-control-sm" style="display: inline-block; width: auto;" onchange="document.getElementById('filterForm').submit();">
+                <option value="">Semua Jenis Barang</option>
+                <option value="Komputer & Laptop" <?php if (isset($_GET['jenis']) && $_GET['jenis'] === 'Komputer & Laptop') echo 'selected'; ?>>Komputer & Laptop</option>
               <option value="Komponen Komputer & Laptop">Komponen Komputer & Laptop</option>
               <option value="Printer & Scanner">Printer & Scanner</option>
               <option value="Komponen Printer & Scanner">Komponen Printer & Scanner</option>
               <option value="Kamera & Aksesoris">Kamera & Aksesoris</option>
               <option value="Komponen Network">Komponen Network</option>
-            </select>
-            <select id="filterStatusBarang" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;">
-              <option value="">Semua Status</option>
-              <option value="Baru">Baru</option>
-              <option value="Bekas">Bekas</option>
-              <option value="Rusak">Rusak</option>
-              <option value="Dalam Perbaikan">Dalam Perbaikan</option>
-            </select>
+              </select>
+            </form>
+            <form method="get" id="filterFormKondisi" style="display:inline-block;">
+              <input type="hidden" name="unit" value="barang">
+              <select id="filterStatusBarang" name="kondisi" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;" onchange="document.getElementById('filterFormKondisi').submit();">
+                <option value="">Semua Status</option>
+                <option value="Baru" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === 'Baru') echo 'selected'; ?>>Baru</option>
+                <option value="Bekas" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === 'Bekas') echo 'selected'; ?>>Bekas</option>
+                <option value="Rusak" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === 'Rusak') echo 'selected'; ?>>Rusak</option>
+                <option value="Dalam Perbaikan" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === 'Dalam Perbaikan') echo 'selected'; ?>>Dalam Perbaikan</option>
+              </select>
+            </form>
             <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">
               <i class="fas fa-bars"></i>
             </a>
@@ -262,21 +268,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     while ($row = mysqli_fetch_assoc($lokasi_q)) {
                       $lokasi_list[] = $row;
                     }
-                      $q = mysqli_query($config, "SELECT b.barang_id, b.nama_barang, b.kode_inventaris, b.jenis_barang, b.nomor_seri, b.ip_address, b.jumlah, b.spesifikasi, b.kondisi, b.tanggal_terima, b.foto,
+                    // Build filters from GET parameters
+                    $where = array();
+                    if (!empty($_GET['jenis'])) {
+                      $jenis = mysqli_real_escape_string($config, $_GET['jenis']);
+                      $where[] = "b.jenis_barang = '{$jenis}'";
+                    }
+                    if (!empty($_GET['kondisi'])) {
+                      $kondisi = mysqli_real_escape_string($config, $_GET['kondisi']);
+                      $where[] = "LOWER(b.kondisi) = LOWER('{$kondisi}')";
+                    }
+                    $sql = "SELECT b.barang_id, b.nama_barang, b.kode_inventaris, b.jenis_barang, b.nomor_seri, b.ip_address, b.jumlah, b.spesifikasi, b.kondisi, b.tanggal_terima, b.foto,
                         (SELECT nama_lokasi FROM tb_lokasi WHERE lokasi_id = b.lokasi_id) AS lokasi_saat_ini,
                         b.lokasi_id,
                         (SELECT lokasi_id FROM tb_penyerahan WHERE barang_id = b.barang_id ORDER BY penyerahan_id DESC LIMIT 1) AS last_penyerahan_lokasi_id,
-                        CASE
-                         WHEN b.jumlah >= 1 THEN (
-                            SELECT GROUP_CONCAT(CONCAT('<span class=\"badge badge-', IF(p.kondisi='baru','success',IF(p.kondisi='bekas','secondary',IF(p.kondisi='rusak','danger','warning'))), '\">', REPLACE(REPLACE(l.nama_lokasi, '<', '&lt;'), '>', '&gt;'), ' (', REPLACE(REPLACE(p.kondisi, '<', '&lt;'), '>', '&gt;'), ')</span>') SEPARATOR ', ')
-                           FROM tb_penyerahan p
-                           LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id
-                           WHERE p.barang_id = b.barang_id
-                         )
-                         ELSE '-'
-                       END AS nama_lokasi_gabung,
+                         (SELECT GROUP_CONCAT(CONCAT(l.nama_lokasi, ' (', p.kondisi, ')') SEPARATOR ', ') FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id = b.barang_id) AS nama_lokasi_gabung,
                        (SELECT COUNT(*) FROM tb_penyerahan WHERE barang_id = b.barang_id) AS jumlah_penyerahan
-                    FROM tb_barang b ORDER BY b.barang_id DESC");
+                    FROM tb_barang b";
+                    if (count($where) > 0) {
+                      $sql .= ' WHERE ' . implode(' AND ', $where);
+                    }
+                    $sql .= ' ORDER BY b.barang_id DESC';
+                    $q = mysqli_query($config, $sql);
                     while ($row = mysqli_fetch_assoc($q)) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
@@ -284,16 +297,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
                         <td>
                           <?php
-                          // Tampilkan hanya data penyerahan (tb_penyerahan) yang digabungkan pada kolom nama_lokasi_gabung.
-                          // Jika tidak ada penyerahan, tampilkan '-' untuk konsistensi.
+                          // Tampilkan penyerahan (lokasi) sebagai badge berwarna biru (lokasi awal)
                           if (!empty($row['nama_lokasi_gabung']) && $row['nama_lokasi_gabung'] != '-') {
-                            echo $row['nama_lokasi_gabung'];
+                            $parts = explode(', ', $row['nama_lokasi_gabung']);
+                            foreach ($parts as $pitem) {
+                              // pitem expected format: "NamaLokasi (kondisi)"
+                              $safe = htmlspecialchars(trim($pitem));
+                              echo '<span class="badge badge-primary">' . $safe . '</span> ';
+                            }
                           } else {
                             echo '-';
                           }
                           ?>
                         </td>
-                        <td class="text-center"><?= htmlspecialchars($row['lokasi_saat_ini']); ?></td>
+                        <td class="text-center">
+                          <?php if (!empty($row['lokasi_saat_ini'])): ?>
+                            <span class="badge badge-success"><?= htmlspecialchars($row['lokasi_saat_ini']) ?></span>
+                          <?php else: ?>
+                            -
+                          <?php endif; ?>
+                        </td>
                         <td class="text-center">
                           <?php if ($row['jumlah_penyerahan'] >= $row['jumlah']): ?>
                             <span class="badge badge-success">Completed</span>
@@ -458,16 +481,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       <div class="form-group">
                         <label>Tindakan Perbaikan</label>
                         <select name="tindakan_perbaikan" id="perbaikanTindakan" class="form-control" required>
-                          <option value="service_luar">Service luar</option>
-                          <option value="service_sendiri">Service sendiri</option>
+                          <option value="Service luar">Service luar</option>
+                          <option value="Service sendiri">Service sendiri</option>
                         </select>
                       </div>
                       <div class="form-group">
                         <label>Status Perbaikan</label>
                         <select name="status_perbaikan" class="form-control" required>
-                          <option value="diajukan">diajukan</option>
-                          <option value="proses">proses</option>
-                          <option value="tidak_dapat_diperbaiki">tidak_dapat_diperbaiki</option>
+                          <option value="diajukan">Diajukan</option>
+                          <option value="proses">Proses</option>
+                          <option value="tidak_dapat_diperbaiki">Tidak Dapat Diperbaiki</option>
                         </select>
                       </div>
                       <div class="form-group" id="perbaikanTeknisiGroup" style="display:none;">

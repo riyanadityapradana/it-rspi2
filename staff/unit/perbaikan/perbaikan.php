@@ -1,4 +1,5 @@
 <?php
+
 // Handle Set Selesai form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'set_selesai') {
      $perbaikan_id = isset($_POST['perbaikan_id']) ? $_POST['perbaikan_id'] : '';
@@ -52,8 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 FROM tb_perbaikan_barang p
 JOIN tb_barang b ON p.barang_id = b.barang_id
 LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id
-LEFT JOIN tb_lokasi u ON p.unit_melapor = u.lokasi_id
-ORDER BY b.barang_id, p.tanggal_lapor DESC");
+LEFT JOIN tb_lokasi u ON p.unit_melapor = u.lokasi_id" . 
+  (!empty($_GET['tindakan']) ? " WHERE p.tindakan_perbaikan = '" . mysqli_real_escape_string($config, $_GET['tindakan']) . "'" : "") . 
+  " ORDER BY b.barang_id, p.tanggal_lapor DESC");
 
 // fetch all rows into array so we can render table and modals safely
 $rows = [];
@@ -85,14 +87,17 @@ $n      = 1;
 		<div class="card card-default">
 			<div class="card-header">
 				<div class="card-tools" style="float: left; text-align: left;">
-                         <a href="?unit=create_perbaikan" class="btn btn-tool btn-sm" style="background:rgba(0, 123, 255, 1)">
+                         <!-- <a href="?unit=create_perbaikan" class="btn btn-tool btn-sm" style="background:rgba(0, 123, 255, 1)">
                               <i class="fas fa-plus-square" style="color: white;"> Tambah Data</i>
-                         </a>
+                         </a> -->
               	     </div>
                     <div class="card-tools" style="float: right; text-align: right;">
                          <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">
                               <i class="fas fa-bars"></i>
                          </a>
+                         <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
+                              <i class="fas fa-print" style="color: white;"> Print</i>
+                         </button>
                     </div>
 			</div>
 			<div class="card-body">
@@ -279,3 +284,42 @@ $n      = 1;
 		</div>
 	</div>
 </section>
+
+<!-- Modal Print -->
+<div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form id="formPrint" method="get" target="_blank" action="unit/perbaikan/print_perbaikan.php">
+      <div class="modal-content">
+        <div class="modal-header" style="background: #1976d2; color: white;">
+          <h5 class="modal-title" id="modalPrintLabel"><i class="fas fa-print"></i> Cetak Laporan Data Perbaikan</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Pilihan Tindakan</label>
+            <select class="form-control" name="tindakan">
+              <option value="">Semua Tindakan</option>
+              <option value="service_luar">Service Luar</option>
+              <option value="service_sendiri">Service Sendiri</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pilihan Status</label>
+            <select class="form-control" name="status">
+              <option value="">Semua Status</option>
+              <option value="diajukan">Diajukan</option>
+              <option value="proses">Proses</option>
+              <option value="selesai">Selesai</option>
+              <option value="tidak_dapat_diperbaiki">Tidak Dapat Diperbaiki</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer" style="background: #e3f2fd;">
+          <button type="submit" class="btn btn-success"><i class="fas fa-print"></i> Cetak</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

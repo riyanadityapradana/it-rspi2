@@ -58,6 +58,9 @@ else if ($unit == "delete_perbaikan"){
 else if ($unit == "detail_perbaikan"){
   require_once("unit/perbaikan/detail_perbaikan.php");
 }
+else if ($unit == "export_perbaikan"){
+  require_once("unit/perbaikan/export_perbaikan.php");
+}
 // PengajuanBarang
 else if ($unit == "pengajuan"){
   require_once("unit/pengajuan/pengajuan.php");
@@ -116,39 +119,6 @@ else if ($unit == "update_remote"){
 }
 else if ($unit == "delete_remote"){
   require_once("unit/remote_destop/delete.php");
-}
-// Rekap kunjungan
-else if ($unit == "rekap_pasien_poli"){
-  require_once("unit/rekap-kunjungan-pasien/rawat-jalan/rekap_pasien_poli.php");
-}
-else if ($unit == "rekap_pasien_ranap"){
-  require_once("unit/rekap-kunjungan-pasien/rawat-inap/rekap_pasien_ranap.php");
-}
-  else if ($unit == "rekap_px_usia_ranap"){
-    require_once("unit/rekap-kunjungan-pasien/rawat-inap/rekap_px_usia_ranap.php");
-  }
-else if ($unit == "rekap_px_usia_ralan"){
-  require_once("unit/rekap-kunjungan-pasien/rawat-jalan/rekap_px_usia_ralan.php");
-}
-else if ($unit == "rekap_pasien_ranap_kabupaten"){
-  require_once("unit/rekap-kunjungan-pasien/rawat-inap/rekap_pasien_ranap_kabupaten.php");
-}
-// Picare
-else if ($unit == "daftar"){
-  require_once("unit/pi-care/pi-care_daftar.php");
-}
-else if ($unit == 'lap_pi-care_daftar'){
-  require_once("unit/pi-care/lap_pi-care_daftar.php");
-}
-else if ($unit == "batal"){
-  require_once("unit/pi-care/pi-care_batal.php");
-}
-else if ($unit == "alasan"){
-  require_once("unit/pi-care/pi-care_alasan.php");
-}
-// Resep Obat Update
-else if ($unit == "rsp-obat-update"){
-  require_once("unit/rsp-obat-update/rsp-obat-update.php");
 }
 // Update Profile
 else if ($unit == "update_profile"){
