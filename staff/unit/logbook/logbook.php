@@ -34,43 +34,65 @@
 			</div>
 		    <!-- /.card-header -->
 		    <div class="card-body">
-		    	<div class="row mb-3">
-		    		<div class="col-md-3">
-		    			<label>Bulan</label>
-		    			<select class="form-control" id="filterBulan" name="bulan">
-		    				<option value="">-- Pilih Bulan --</option>
-		    				<option value="1" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '1') ? 'selected' : ''; ?>>Januari</option>
-		    				<option value="2" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '2') ? 'selected' : ''; ?>>Februari</option>
-		    				<option value="3" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '3') ? 'selected' : ''; ?>>Maret</option>
-		    				<option value="4" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '4') ? 'selected' : ''; ?>>April</option>
-		    				<option value="5" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '5') ? 'selected' : ''; ?>>Mei</option>
-		    				<option value="6" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '6') ? 'selected' : ''; ?>>Juni</option>
-		    				<option value="7" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '7') ? 'selected' : ''; ?>>Juli</option>
-		    				<option value="8" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '8') ? 'selected' : ''; ?>>Agustus</option>
-		    				<option value="9" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '9') ? 'selected' : ''; ?>>September</option>
-		    				<option value="10" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '10') ? 'selected' : ''; ?>>Oktober</option>
-		    				<option value="11" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '11') ? 'selected' : ''; ?>>November</option>
-		    				<option value="12" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '12') ? 'selected' : ''; ?>>Desember</option>
-		    			</select>
-		    		</div>
-		    		<div class="col-md-3">
-		    			<label>Tahun</label>
-		    			<select class="form-control" id="filterTahun" name="tahun">
-		    				<option value="">-- Pilih Tahun --</option>
-		    				<?php
-		    				$tahunSekarang = date('Y');
-		    				for ($i = $tahunSekarang; $i >= $tahunSekarang - 10; $i--) {
-		    					$selected = (isset($_GET['tahun']) && $_GET['tahun'] == $i) ? 'selected' : '';
-		    					echo "<option value=\"$i\" $selected>$i</option>";
-		    				}
-		    				?>
-		    			</select>
-		    		</div>
-		    		<div class="col-md-1">
-		    			<label>&nbsp;</label>
-		    			<button type="button" class="btn btn-primary form-control" id="btnFilter">Filter</button>
-		    		</div>
-		    	</div>
+				<div class="row mb-3">
+					<?php
+					if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+					$nip = isset($_SESSION['nip']) ? $_SESSION['nip'] : '';
+					$role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
+					$id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : '';
+					$showUserDropdown = ($nip === '662.140725' && strtolower($role) === 'staff');
+					?>
+					<?php if ($showUserDropdown): ?>
+					<div class="col-md-3">
+						<label>User</label>
+						<select class="form-control" id="filterUser" name="user">
+							<option value="<?= $id_user ?>">-- Pilih User --</option>
+							<?php
+							$queryUser = mysqli_query($config, "SELECT id_user, nama_lengkap FROM tb_user WHERE status = 'aktif' AND role = 'Staff' ORDER BY nama_lengkap");
+							while ($user = mysqli_fetch_array($queryUser)) {
+								$selected = (isset($_GET['user']) && $_GET['user'] == $user['id_user']) ? 'selected' : '';
+								echo "<option value=\"{$user['id_user']}\" $selected>{$user['nama_lengkap']}</option>";
+							}
+							?>
+						</select>
+					</div>
+					<?php endif; ?>
+					<div class="col-md-3">
+						<label>Bulan</label>
+						<select class="form-control" id="filterBulan" name="bulan">
+							<option value="">-- Pilih Bulan --</option>
+							<option value="1" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '1') ? 'selected' : ''; ?>>Januari</option>
+							<option value="2" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '2') ? 'selected' : ''; ?>>Februari</option>
+							<option value="3" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '3') ? 'selected' : ''; ?>>Maret</option>
+							<option value="4" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '4') ? 'selected' : ''; ?>>April</option>
+							<option value="5" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '5') ? 'selected' : ''; ?>>Mei</option>
+							<option value="6" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '6') ? 'selected' : ''; ?>>Juni</option>
+							<option value="7" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '7') ? 'selected' : ''; ?>>Juli</option>
+							<option value="8" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '8') ? 'selected' : ''; ?>>Agustus</option>
+							<option value="9" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '9') ? 'selected' : ''; ?>>September</option>
+							<option value="10" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '10') ? 'selected' : ''; ?>>Oktober</option>
+							<option value="11" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '11') ? 'selected' : ''; ?>>November</option>
+							<option value="12" <?php echo (isset($_GET['bulan']) && $_GET['bulan'] == '12') ? 'selected' : ''; ?>>Desember</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label>Tahun</label>
+						<select class="form-control" id="filterTahun" name="tahun">
+							<option value="">-- Pilih Tahun --</option>
+							<?php
+							$tahunSekarang = date('Y');
+							for ($i = $tahunSekarang; $i >= $tahunSekarang - 10; $i--) {
+								$selected = (isset($_GET['tahun']) && $_GET['tahun'] == $i) ? 'selected' : '';
+								echo "<option value=\"$i\" $selected>$i</option>";
+							}
+							?>
+						</select>
+					</div>
+					<div class="col-md-1">
+						<label>&nbsp;</label>
+						<button type="button" class="btn btn-primary form-control" id="btnFilter">Filter</button>
+					</div>
+				</div>
 		    	<hr>
 		        <table id="example1" class="table table-bordered table-striped">
 		          	<thead style="background:rgb(129, 2, 0, 1)">
@@ -91,7 +113,14 @@
 		          	$bulan = isset($_GET['bulan']) && $_GET['bulan'] != '' ? $_GET['bulan'] : date('m');
 		          	$tahun = isset($_GET['tahun']) && $_GET['tahun'] != '' ? $_GET['tahun'] : date('Y');
 		          	
-		          	$query = mysqli_query($config,"SELECT * FROM tb_logbook l JOIN tb_user u ON l.id_user=u.id_user WHERE MONTH(tanggal_log) = '$bulan' AND YEAR(tanggal_log) = '$tahun' ORDER BY tanggal_log DESC")or die(mysqli_error($config));
+				if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+				$nip = isset($_SESSION['nip']) ? $_SESSION['nip'] : '';
+				$role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
+				$id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : '';
+				$showUserDropdown = ($nip === '662.140725' && strtolower($role) === 'staff');
+				$selectedUser = $showUserDropdown ? (isset($_GET['user']) ? $_GET['user'] : $id_user) : $id_user;
+				$userFilter = $selectedUser ? " AND l.id_user = '".mysqli_real_escape_string($config, $selectedUser)."'" : "";
+				$query = mysqli_query($config, "SELECT * FROM tb_logbook l JOIN tb_user u ON l.id_user=u.id_user WHERE MONTH(tanggal_log) = '$bulan' AND YEAR(tanggal_log) = '$tahun' $userFilter ORDER BY tanggal_log DESC") or die(mysqli_error($config));
 		          	$n=1;
 						while ($data=mysqli_fetch_array($query)) {
 							// Perhitungan Stok
@@ -119,16 +148,21 @@
 			            <td><?php echo $data['deskripsi_log'] ?></td>
 			            <td><?php echo $data['catatan_log'] ?></td>
 			            <td><span class="badge <?php echo $badge; ?>"><?php echo $status; ?></span></td>
-			            <td>
-			            	<input type="hidden" id="code">
-			            	<span>
-			            		<a href="?unit=update_logbook&id=<?=$data['id_log']?>" class="btn btn-success"><i class="fa fa-pencil"></i> Edit</a>
-			            	</span>
-						<span>
-							<a onclick="return confirm ('Yakin hapus <?php echo $data['judul_log'];?>')" href="?unit=delete_logbook&id=<?=$data['id_log']?>" class="btn btn-danger">
-							<i class="fa fa-trash"></i> Hapus</a>
-						</span>	
-			            </td>
+						<td>
+						<input type="hidden" id="code">
+						<?php
+						// Tombol edit/hapus hanya muncul jika user yang dipilih adalah user login sendiri
+						if (!$showUserDropdown || $selectedUser == $id_user) {
+						?>
+							<span>
+								<a href="?unit=update_logbook&id=<?=$data['id_log']?>" class="btn btn-success"><i class="fa fa-pencil"></i> Edit</a>
+							</span>
+							<span>
+								<a onclick="return confirm ('Yakin hapus <?php echo $data['judul_log'];?>')" href="?unit=delete_logbook&id=<?=$data['id_log']?>" class="btn btn-danger">
+								<i class="fa fa-trash"></i> Hapus</a>
+							</span>
+						<?php } ?>
+						</td>
 			          </tr>
 			        <?php }//end while?>
 		        	</tbody>
@@ -146,13 +180,16 @@
 document.getElementById('btnFilter').addEventListener('click', function() {
 	var bulan = document.getElementById('filterBulan').value;
 	var tahun = document.getElementById('filterTahun').value;
-	
+	var user = document.getElementById('filterUser') ? document.getElementById('filterUser').value : '';
 	if (bulan == '' || tahun == '') {
 		alert('Silahkan pilih bulan dan tahun');
 		return;
 	}
-	
-	window.location.href = '?unit=logbook&bulan=' + bulan + '&tahun=' + tahun;
+	var url = '?unit=logbook&bulan=' + bulan + '&tahun=' + tahun;
+	if (user !== '') {
+		url += '&user=' + user;
+	}
+	window.location.href = url;
 });
 </script>
 
