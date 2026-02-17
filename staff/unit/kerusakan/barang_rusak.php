@@ -65,6 +65,7 @@ if ($res) {
         <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item"><a href="dashboard_staff.php?unit=beranda">Home</a></li>
           <li class="breadcrumb-item active">Barang Rusak</li>
+          <li class="breadcrumb-item"><a href="dashboard_staff.php?unit=grafik_barang">Grafik Barang Rusak</a></li>
         </ol>
       </div>
     </div>

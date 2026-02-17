@@ -58,6 +58,9 @@ else if ($unit == "delete_perbaikan"){
 else if ($unit == "detail_perbaikan"){
   require_once("unit/perbaikan/detail_perbaikan.php");
 }
+else if ($unit == "grafik_barang"){
+  require_once("unit/kerusakan/grafik_barang.php");
+}
 else if ($unit == "export_perbaikan"){
   require_once("unit/perbaikan/export_perbaikan.php");
 }

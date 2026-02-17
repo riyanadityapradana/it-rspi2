@@ -6,7 +6,7 @@ require_once("../config/koneksi.php");
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1>DATA PEMINDAHAN BARANG IT KE UNIT LAIN</h1>
+        <h1>DATA PEMINDAHAN BARANG KE UNIT LAIN</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -81,13 +81,13 @@ require_once("../config/koneksi.php");
                 </tbody>
               </table>
 <div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
     <form id="formPrint" method="get" target="_blank" action="unit/pemindahan/print_pemindahan.php">
-            <td><?= htmlspecialchars($row['nama_barang']); ?></td>
-            <td><?= htmlspecialchars($row['lokasi_asal_nama']); ?></td>
-            <td><?= htmlspecialchars($row['lokasi_tujuan_nama']); ?></td>
-            <td><?= date('d/m/Y', strtotime($row['tanggal_mutasi'])); ?></td>
-            <td><?= htmlspecialchars($row['keterangan']); ?></td>
+      <div class="modal-content">
+        <div class="modal-header" style="background: #1976d2; color: white;">
+          <h5 class="modal-title" id="modalPrintLabel"><i class="fas fa-print"></i> Cetak Data Pemindahan</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
@@ -102,7 +102,6 @@ require_once("../config/koneksi.php");
             <label>Jenis Barang</label>
             <select class="form-control select2" name="jenis_barang" id="jenis_barang">
               <option value="">-- Pilih Jenis Barang --</option>
-              <!-- Isi dengan data dari database -->
               <option value="Komputer & Laptop">Komputer & Laptop</option>
               <option value="Komponen Komputer & Laptop">Komponen Komputer & Laptop</option>
               <option value="Printer & Scanner">Printer & Scanner</option>

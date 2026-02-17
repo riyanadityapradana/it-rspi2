@@ -34,78 +34,94 @@ while ($row = mysqli_fetch_assoc($q)) {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Pemindahan Barang</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
     <style>
-        @media print {
-            .no-print { display: none; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            font-size: 13px;
         }
-        th, td { font-size: 12px; }
-        .kop-surat img { height: 100px; }
-        .kop-surat .kanan { float: right; height: 40px; margin-left: 10px; }
-        .kop-surat .kiri { float: left; height: 80px; margin-right: 10px; }
-        .kop-surat { text-align: center; position: relative; }
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            padding: 32px 28px 24px 28px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
+            color: #fff;
+            border-radius: 12px 12px 0 0;
+            padding: 18px 0 10px 0;
+        }
+        .header h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+        .header p { margin: 6px 0; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; background: #fafafa; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #90caf9; padding: 10px 7px; text-align: left; font-size: 12px; }
+        th { background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%); color: #fff; font-weight: bold; border-bottom: 2px solid #1976d2; }
+        tr:nth-child(even) { background: #e3f2fd; }
+        .footer { margin-top: 24px; text-align: right; color: #1976d2; font-size: 13px; }
+        .no-print { margin-top: 24px; text-align: center; }
+        .btn { background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%); color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-size: 13px; cursor: pointer; margin: 0 6px; }
+        .btn:hover { opacity: 0.95; }
+        @media print { body { margin: 0; background: #000000ff; } .container { box-shadow: none; padding: 0; } .no-print { display: none; } }
     </style>
 </head>
 <body>
-<div class="container mt-4">
-    <div class="kop-surat mb-2">
-        <img src="../../../assets/img/logo.jpg" alt="Logo" class="kiri">
-        <img src="../../../assets/img/bintang.png" alt="Bintang" class="kanan">
-        <span style="font-size:20px; font-weight:bold;">PT. PELITA INSANI MULIA</span><br>
-        <span style="font-size:16px;">RUMAH SAKIT PELITA INSANI MARTAPURA</span><br>
-        <span style="font-size:14px;">Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya</span><br>
-        <span style="font-size:12px;">Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan</span><br>
-        <span style="font-size:12px; color:red;">Emergency Call (0511) 4722222</span> |
-        <span style="font-size:12px;">Fax. (0511) 4722230 | Email: <span style="color:blue;">rs.pelitainsani@gmail.com</span></span><br>
-        <span style="font-size:12px;">Website: www.pelitainsani.com</span>
-        <div style="clear:both;"></div>
+    <script>
+        window.onload = function() {
+            setTimeout(function(){ window.print(); }, 700);
+        };
+    </script>
+    <div class="container">
+        <div class="header">
+            <h1 style="color: #000000ff;"><i class="fa fa-print"></i> LAPORAN PEMINDAHAN BARANG</h1>
+            <p style="color: #000000ff;">Periode: <b><?= htmlspecialchars(date('F', mktime(0,0,0,$bulan,10)) . ' ' . $tahun) ?></b></p>
+            <p style="color: #000000ff;">Filter: <span style="background:#fff; color:#1976d2; padding:2px 8px; border-radius:6px; font-weight:bold;">Jenis: <?= $printType === 'jenis' && $jenisBarang ? htmlspecialchars($jenisBarang) : 'Semua' ?></span></p>
+        </div>
+        <table style="color: #000000ff;">
+            <thead>
+                <tr>
+                    <th style="color: #000000ff;">No</th>
+                    <th style="color: #000000ff;">Nama Barang</th>
+                    <th style="color: #000000ff;">Jenis Barang</th>
+                    <th style="color: #000000ff;">Lokasi Asal</th>
+                    <th style="color: #000000ff;">Lokasi Tujuan</th>
+                    <th style="color: #000000ff;">Tanggal Mutasi</th>
+                    <th style="color: #000000ff;">Keterangan</th>
+                    <th style="color: #000000ff;">Staff</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if(empty($data)): ?>
+                    <tr><td colspan="8" class="text-center text-muted">Tidak ada data</td></tr>
+                <?php else: foreach($data as $i => $row): ?>
+                <tr>
+                    <td><?= $i+1 ?></td>
+                    <td><?= htmlspecialchars($row['nama_barang']) ?></td>
+                    <td><?= htmlspecialchars($row['jenis_barang']) ?></td>
+                    <td><?= htmlspecialchars($row['lokasi_asal_nama']) ?></td>
+                    <td><?= htmlspecialchars($row['lokasi_tujuan_nama']) ?></td>
+                    <td><?= !empty($row['tanggal_mutasi']) ? date('d/m/Y', strtotime($row['tanggal_mutasi'])) : '-' ?></td>
+                    <td><?= htmlspecialchars($row['keterangan']) ?></td>
+                    <td><?= htmlspecialchars($row['nama_staff']) ?></td>
+                </tr>
+                <?php endforeach; endif; ?>
+            </tbody>
+        </table>
+        <div class="footer">
+            <p style="color: #000000ff;">Dicetak pada: <?= date('d/m/Y H:i:s') ?></p>
+            <p style="color: #000000ff;">Total Data: <?= count($data) ?> item</p>
+        </div>
+        <div class="no-print">
+            <button class="btn" onclick="window.print()"><i class="fa fa-print"></i> Cetak</button>
+            <button class="btn" onclick="window.close()"><i class="fa fa-times"></i> Tutup</button>
+        </div>
     </div>
-    <hr style="border:1px solid #000; margin-top:10px; margin-bottom:20px;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Laporan Pemindahan Barang</h4>
-        <button class="btn btn-success no-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
-    </div>
-    <div class="mb-2">
-        <strong>Periode:</strong> <?= date('F', mktime(0,0,0,$bulan,10)) ?> <?= $tahun ?><br>
-        <?php if($printType === 'jenis' && $jenisBarang): ?>
-            <strong>Jenis Barang:</strong> <?= htmlspecialchars($jenisBarang) ?>
-        <?php else: ?>
-            <strong>Jenis Barang:</strong> Semua
-        <?php endif; ?>
-    </div>
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Barang</th>
-                <th>Jenis Barang</th>
-                <th>Lokasi Asal</th>
-                <th>Lokasi Tujuan</th>
-                <th>Tanggal Mutasi</th>
-                <th>Keterangan</th>
-                <th>Staff</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php if(empty($data)): ?>
-            <tr><td colspan="8" class="text-center text-muted">Tidak ada data</td></tr>
-        <?php else: foreach($data as $i => $row): ?>
-            <tr>
-                <td><?= $i+1 ?></td>
-                <td><?= htmlspecialchars($row['nama_barang']) ?></td>
-                <td><?= htmlspecialchars($row['jenis_barang']) ?></td>
-                <td><?= htmlspecialchars($row['lokasi_asal_nama']) ?></td>
-                <td><?= htmlspecialchars($row['lokasi_tujuan_nama']) ?></td>
-                <td><?= date('d/m/Y', strtotime($row['tanggal_mutasi'])) ?></td>
-                <td><?= htmlspecialchars($row['keterangan']) ?></td>
-                <td><?= htmlspecialchars($row['nama_staff']) ?></td>
-            </tr>
-        <?php endforeach; endif; ?>
-        </tbody>
-    </table>
-</div>
-<!-- FontAwesome for print icon -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 </body>
 </html>

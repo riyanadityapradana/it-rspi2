@@ -33,30 +33,60 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
      }
 }
 
- $res = mysqli_query($config, "SELECT 
-           b.kode_inventaris,
-           b.nama_barang,
-           b.jenis_barang,
-           b.nomor_seri,
-           b.foto,
-           b.ip_address,
-           l.nama_lokasi AS lokasi_barang,
-           p.perbaikan_id,
-           p.deskripsi_kerusakan,
-           p.tindakan_perbaikan,
-           p.status,
-           p.tanggal_lapor,
-           p.teknisi,
-           p.keterangan,
-           p.unit_melapor,
-           u.nama_lokasi AS unit_melapor_nama,
-           p.tanggal_selesai
+// Build dynamic WHERE conditions from filters (tindakan, status, tanggal range)
+$conditions = [];
+if (!empty($_GET['tindakan'])) {
+     // normalize passed tindakan (e.g. service_sendiri) and compare against a normalized
+     // version of p.tindakan_perbaikan to avoid mismatches due to spaces/case
+     $tindakan_raw = $_GET['tindakan'];
+     $tindakan = mysqli_real_escape_string($config, $tindakan_raw);
+     // create a normalized value for SQL comparison: lowercase and replace spaces with underscores
+     $t_norm = strtolower(str_replace(' ', '_', $tindakan_raw));
+     $t_norm = mysqli_real_escape_string($config, $t_norm);
+     $conditions[] = "LOWER(REPLACE(p.tindakan_perbaikan, ' ', '_')) = '" . $t_norm . "'";
+}
+if (!empty($_GET['status'])) {
+     $status = mysqli_real_escape_string($config, $_GET['status']);
+     $conditions[] = "p.status = '" . $status . "'";
+}
+if (!empty($_GET['tanggal_mulai'])) {
+     $tanggal_mulai = mysqli_real_escape_string($config, $_GET['tanggal_mulai']);
+     $conditions[] = "DATE(p.tanggal_lapor) >= '" . $tanggal_mulai . "'";
+}
+if (!empty($_GET['tanggal_selesai'])) {
+     $tanggal_selesai = mysqli_real_escape_string($config, $_GET['tanggal_selesai']);
+     $conditions[] = "DATE(p.tanggal_lapor) <= '" . $tanggal_selesai . "'";
+}
+
+$where_sql = '';
+if (!empty($conditions)) {
+     $where_sql = ' WHERE ' . implode(' AND ', $conditions);
+}
+
+$query = "SELECT 
+             b.kode_inventaris,
+             b.nama_barang,
+             b.jenis_barang,
+             b.nomor_seri,
+             b.foto,
+             b.ip_address,
+             l.nama_lokasi AS lokasi_barang,
+             p.perbaikan_id,
+             p.deskripsi_kerusakan,
+             p.tindakan_perbaikan,
+             p.status,
+             p.tanggal_lapor,
+             p.teknisi,
+             p.keterangan,
+             p.unit_melapor,
+             u.nama_lokasi AS unit_melapor_nama,
+             p.tanggal_selesai
 FROM tb_perbaikan_barang p
 JOIN tb_barang b ON p.barang_id = b.barang_id
 LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id
-LEFT JOIN tb_lokasi u ON p.unit_melapor = u.lokasi_id" . 
-  (!empty($_GET['tindakan']) ? " WHERE p.tindakan_perbaikan = '" . mysqli_real_escape_string($config, $_GET['tindakan']) . "'" : "") . 
-  " ORDER BY b.barang_id, p.tanggal_lapor DESC");
+LEFT JOIN tb_lokasi u ON p.unit_melapor = u.lokasi_id" . $where_sql . " ORDER BY b.barang_id, p.tanggal_lapor DESC";
+
+$res = mysqli_query($config, $query);
 
 // fetch all rows into array so we can render table and modals safely
 $rows = [];
@@ -102,6 +132,37 @@ $n      = 1;
                     </div>
 			</div>
 			<div class="card-body">
+                    <div class="mb-3">
+                         <form method="get" class="form-inline">
+                              <input type="hidden" name="unit" value="perbaikan">
+                              <div class="form-group mr-2">
+                                   <select name="tindakan" class="form-control">
+                                        <option value="">Semua Tindakan</option>
+                                        <option value="service_luar" <?php if(!empty($_GET['tindakan']) && $_GET['tindakan']==='service_luar') echo 'selected'; ?>>Service Luar</option>
+                                        <option value="service_sendiri" <?php if(!empty($_GET['tindakan']) && $_GET['tindakan']==='service_sendiri') echo 'selected'; ?>>Service Sendiri</option>
+                                   </select>
+                              </div>
+                              <div class="form-group mr-2">
+                                   <select name="status" class="form-control">
+                                        <option value="">Semua Status</option>
+                                        <option value="diajukan" <?php if(!empty($_GET['status']) && $_GET['status']==='diajukan') echo 'selected'; ?>>Diajukan</option>
+                                        <option value="proses" <?php if(!empty($_GET['status']) && $_GET['status']==='proses') echo 'selected'; ?>>Proses</option>
+                                        <option value="selesai" <?php if(!empty($_GET['status']) && $_GET['status']==='selesai') echo 'selected'; ?>>Selesai</option>
+                                        <option value="tidak_dapat_diperbaiki" <?php if(!empty($_GET['status']) && $_GET['status']==='tidak_dapat_diperbaiki') echo 'selected'; ?>>Tidak Dapat Diperbaiki</option>
+                                   </select>
+                              </div>
+                              <div class="form-group mr-2">
+                                   <input type="date" name="tanggal_mulai" class="form-control" value="<?php echo !empty($_GET['tanggal_mulai']) ? htmlspecialchars($_GET['tanggal_mulai']) : ''; ?>" placeholder="Tanggal Mulai">
+                              </div>
+                              <div class="form-group mr-2">
+                                   <input type="date" name="tanggal_selesai" class="form-control" value="<?php echo !empty($_GET['tanggal_selesai']) ? htmlspecialchars($_GET['tanggal_selesai']) : ''; ?>" placeholder="Tanggal Selesai">
+                              </div>
+                              <div class="form-group">
+                                   <button type="submit" class="btn btn-primary">Filter</button>
+                                   <a href="dashboard_staff.php?unit=perbaikan" class="btn btn-secondary ml-2">Reset</a>
+                              </div>
+                         </form>
+                    </div>
 				<table id="example1" class="table table-bordered table-striped">
 					<thead style="background:rgb(129, 2, 0, 1)">
 						<tr>
@@ -149,7 +210,11 @@ $n      = 1;
 							</td>
                                    <td><?= htmlspecialchars($row['tindakan_perbaikan']); ?></td>
 							<td style="text-align:center;">
-								<?php if (empty($row['tanggal_selesai'])): ?>
+								<?php if ($row['status'] == 'tidak_dapat_diperbaiki'): ?>
+									<span style="background: #dc3545; color: #fff; padding: 4px 12px; border-radius: 10px; font-weight: bold;">
+										RUSAK
+									</span>
+								<?php elseif (empty($row['tanggal_selesai'])): ?>
 									<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modalSetSelesai<?= $row['perbaikan_id'] ?>">
 										<i class="fa fa-clock"></i> Set Selesai
 									</button>
