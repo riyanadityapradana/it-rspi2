@@ -86,8 +86,23 @@
   <div class="col-lg-3 col-6">
     <div class="small-box bg-warning">
       <div class="inner">
-        <h3>2,000</h3>
-        <p>New Members</p>
+        <?php
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        $userId = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : null;
+        $bulan = date('m');
+        $tahun = date('Y');
+        $totalLogs = 0;
+        if ($userId) {
+          $sqlLogs = "SELECT COUNT(*) as total FROM tb_logbook WHERE id_user = '".mysqli_real_escape_string($config, $userId)."' AND MONTH(tanggal_log)='$bulan' AND YEAR(tanggal_log)='$tahun'";
+          $resLogs = mysqli_query($config, $sqlLogs);
+          if ($resLogs) {
+            $rowLogs = mysqli_fetch_assoc($resLogs);
+            $totalLogs = isset($rowLogs['total']) ? $rowLogs['total'] : 0;
+          }
+        }
+        ?>
+        <h3><?= $totalLogs ?> <small>Kerjaan</small></h3>
+        <small>Aktivitas Pekerjaan Bulan Ini</small>
       </div>
       <div class="icon">
         <i class="fas fa-child"></i>
