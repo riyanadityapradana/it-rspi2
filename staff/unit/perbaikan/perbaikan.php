@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 }
 
  $res = mysqli_query($config, "SELECT 
+           b.kode_inventaris,
            b.nama_barang,
            b.jenis_barang,
            b.nomor_seri,
@@ -121,7 +122,7 @@ $n      = 1;
 							<td><?= $n++; ?></td>
 							<td><?= htmlspecialchars($row['tanggal_lapor']); ?></td>
                                    <td><?= htmlspecialchars($row['unit_melapor_nama'] ?? $row['unit_melapor']); ?></td>
-                                   <td><?= htmlspecialchars($row['nama_barang']); ?></td>
+                                   <td><?= htmlspecialchars($row['nama_barang']); ?><br><small style="color:#666;">Kode: <?= htmlspecialchars($row['kode_inventaris'] ?? '-') ?></small></td>
                                    <td><?= htmlspecialchars($row['nomor_seri']); ?></td>
 							<td style="text-align:center;">
 								<?php
@@ -314,6 +315,14 @@ $n      = 1;
               <option value="selesai">Selesai</option>
               <option value="tidak_dapat_diperbaiki">Tidak Dapat Diperbaiki</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label>Tanggal Mulai</label>
+            <input type="date" class="form-control" name="tanggal_mulai">
+          </div>
+          <div class="form-group">
+            <label>Tanggal Selesai</label>
+            <input type="date" class="form-control" name="tanggal_selesai">
           </div>
         </div>
         <div class="modal-footer" style="background: #e3f2fd;">

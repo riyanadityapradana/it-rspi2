@@ -74,6 +74,10 @@ else if ($unit == "update_pengajuan"){
 else if ($unit == "delete_pengajuan"){
   require_once("unit/pengajuan/delete.php");
 }
+// KerusakanBarang
+else if ($unit == "barang_rusak"){
+  require_once("unit/kerusakan/barang_rusak.php");
+}
 // User
 else if ($unit == "user"){
   require_once("unit/user/user.php");

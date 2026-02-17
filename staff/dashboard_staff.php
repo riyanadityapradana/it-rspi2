@@ -179,10 +179,14 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                                     <i class="nav-icon fas fa-exchange-alt" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Pemindahan Barang</p>
                                 </a>
-                                 <a href="dashboard_staff.php?unit=perbaikan" class="nav-link">
+                                <a href="dashboard_staff.php?unit=perbaikan" class="nav-link">
                                     <i class="nav-icon fas fa-tools" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Perbaikan Barang</p>
                                 </a>
+                                 <a href="dashboard_staff.php?unit=barang_rusak" class="nav-link">
+                                    <i class="nav-icon fas fa-trash" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Barang Rusak</p>
+                                 </a>
                             </li>
                         </ul>
                     </li>

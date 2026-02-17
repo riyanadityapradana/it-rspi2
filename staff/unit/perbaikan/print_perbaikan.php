@@ -4,6 +4,8 @@ require_once("../../../config/koneksi.php");
 // Ambil parameter dari form
 $tindakan = $_GET['tindakan'] ?? '';
 $status = $_GET['status'] ?? '';
+$tanggal_mulai = $_GET['tanggal_mulai'] ?? '';
+$tanggal_selesai = $_GET['tanggal_selesai'] ?? '';
 
 // Build WHERE clause
 $where_conditions = [];
@@ -21,9 +23,20 @@ if (!empty($status)) {
     $where_conditions[] = "LOWER(p.status) = '{$status_esc}'";
 }
 
+if (!empty($tanggal_mulai)) {
+    $tanggal_mulai_esc = mysqli_real_escape_string($config, $tanggal_mulai);
+    $where_conditions[] = "DATE(p.tanggal_lapor) >= '{$tanggal_mulai_esc}'";
+}
+
+if (!empty($tanggal_selesai)) {
+    $tanggal_selesai_esc = mysqli_real_escape_string($config, $tanggal_selesai);
+    $where_conditions[] = "DATE(p.tanggal_lapor) <= '{$tanggal_selesai_esc}'";
+}
+
 $where = count($where_conditions) > 0 ? "WHERE " . implode(" AND ", $where_conditions) : "";
 
 $query = "SELECT 
+         b.kode_inventaris,
          b.nama_barang,
          b.jenis_barang,
          b.nomor_seri,
@@ -201,7 +214,7 @@ if (!$result) {
             <p style="color: #000000ff;">IT-RSPI <?= date('d/m/Y H:i:s') ?></p>
         </div>
 
-        <?php if (!empty($tindakan) || !empty($status)): ?>
+        <?php if (!empty($tindakan) || !empty($status) || !empty($tanggal_mulai) || !empty($tanggal_selesai)): ?>
         <div class="filter-info">
             Filter Aktif:
             <?php if (!empty($tindakan)): ?>
@@ -209,6 +222,12 @@ if (!$result) {
             <?php endif; ?>
             <?php if (!empty($status)): ?>
                 <span class="filter-badge">Status: <?= htmlspecialchars(ucwords($status)) ?></span>
+            <?php endif; ?>
+            <?php if (!empty($tanggal_mulai)): ?>
+                <span class="filter-badge">Dari: <?= htmlspecialchars(date('d/m/Y', strtotime($tanggal_mulai))) ?></span>
+            <?php endif; ?>
+            <?php if (!empty($tanggal_selesai)): ?>
+                <span class="filter-badge">Sampai: <?= htmlspecialchars(date('d/m/Y', strtotime($tanggal_selesai))) ?></span>
             <?php endif; ?>
         </div>
         <?php endif; ?>
@@ -244,12 +263,20 @@ if (!$result) {
                     <td><?= $no++ ?></td>
                     <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($row['tanggal_lapor']))) ?></td>
                     <td><?= htmlspecialchars($row['unit_melapor_nama'] ?? $row['unit_melapor']) ?></td>
-                    <td><?= htmlspecialchars($row['nama_barang']) ?></td>
+                    <td><?= htmlspecialchars($row['nama_barang']) ?><br><small style="color:#666;">Kode: <?= htmlspecialchars($row['kode_inventaris'] ?? '-') ?></small></td>
                     <td><?= htmlspecialchars($row['jenis_barang']) ?></td>
                     <td><?= htmlspecialchars($row['nomor_seri']) ?></td>
                     <td><?= htmlspecialchars(substr($row['deskripsi_kerusakan'], 0, 50)) . (strlen($row['deskripsi_kerusakan']) > 50 ? '...' : '') ?></td>
                     <td class="<?= $tindakan_class ?>"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $row['tindakan_perbaikan']))) ?></td>
-                    <td class="<?= $status_class ?>"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $row['status']))) ?></td>
+                    <td class="<?= $status_class ?>">
+                        <?php
+                            if (strtolower($row['status']) === 'tidak_dapat_diperbaiki') {
+                                echo 'RUSAK';
+                            } else {
+                                echo htmlspecialchars(ucwords(str_replace('_', ' ', $row['status'])));
+                            }
+                        ?>
+                    </td>
                     <td><?= htmlspecialchars($row['teknisi'] ?? '-') ?></td>
                     <td><?= !empty($row['tanggal_selesai']) ? htmlspecialchars(date('d/m/Y H:i', strtotime($row['tanggal_selesai']))) : '-' ?></td>
                 </tr>
