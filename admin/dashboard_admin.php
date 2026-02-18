@@ -80,7 +80,7 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-folder" style="color: green;"></i>
-                            <p style="color: white;">Master Barang <i class="right fas fa-angle-left" style="color: black;"></i></p>
+                            <p style="color: white;">Master Barang <i class="right fas fa-angle-left" style="color: green;"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
@@ -92,16 +92,26 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                                     <i class="nav-icon fas fa-box" style="color: green;"></i>
                                     <p style="font-size: 14px; color: white;">Data Barang</p>
                                 </a>
+                                <a href="dashboard_admin.php?unit=pemindahan" class="nav-link">
+                                    <i class="nav-icon fas fa-exchange-alt" style="color: green;"></i>
+                                    <p style="font-size: 14px; color: white;">Pemindahan Barang</p>
+                                </a>
                                 <a href="dashboard_admin.php?unit=perbaikan" class="nav-link">
                                     <i class="nav-icon fas fa-tools" style="color: green;"></i>
                                     <p style="font-size: 14px; color: white;">Perbaikan Barang</p>
                                 </a>
-                                <a href="dashboard_admin.php?unit=logbook" class="nav-link">
-                                    <i class="nav-icon fas fa-book" style="color: green;"></i>
-                                    <p style="font-size: 14px; color: white;">Logbook</p>
-                                </a>
+                                <a href="dashboard_admin.php?unit=barang_rusak" class="nav-link">
+                                    <i class="nav-icon fas fa-trash" style="color: green;"></i>
+                                    <p style="font-size: 14px; color: white;">Barang Rusak</p>
+                                 </a>
                             </li>
                         </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dashboard_admin.php?unit=logbook" class="nav-link">
+                            <i class="nav-icon fas fa-book" style="color: green;"></i>
+                            <p style="font-size: 14px; color: white;">Logbook</p>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a href="dashboard_admin.php?unit=lembur" class="nav-link">
