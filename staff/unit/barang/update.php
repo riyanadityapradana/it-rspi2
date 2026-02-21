@@ -26,7 +26,9 @@ $jenis_list = [
   'Komponen Komputer & Laptop',
   'Printer & Scanner',
   'Komponen Printer & Scanner',
-  'Komponen Network'
+  'Komponen Network',
+  'Perangkat Mobile',
+  'Aksesoris Perangkat Mobile'
 ];
 // Pilihan kondisi barang
 $kondisi_list = [

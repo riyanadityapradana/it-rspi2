@@ -62,7 +62,9 @@ $jenis_list = [
     'Komponen Komputer & Laptop',
     'Printer & Scanner',
     'Komponen Printer & Scanner',
-    'Komponen Network'
+    'Komponen Network',
+    'Perangkat Mobile',
+    'Aksesoris Perangkat Mobile'
 ];
 ?>
 <div class="content-header">
