@@ -82,6 +82,7 @@ c.c Kabag Kepegawaian",
 0, 'L');
 
 
+$html = '';
 $html .= '<p style="margin:0 0 4px 0; font-family: times; font-size: 11px;">Dengan hormat,</p>';
 $html .= '<p style="margin:0 0 10px 0; font-family: times; font-size: 11px; line-height: 1.5;">Saya yang bertandatangan dibawah ini :</p>';
 
@@ -107,25 +108,82 @@ $hari = intval($dataCuti['banyak_hari']);
 $html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 11px; margin: 8px 0;">Bahwa sehubungan dengan <strong>'.(isset($dataCuti['alasan']) && $dataCuti['alasan'] !== '' ? htmlspecialchars($dataCuti['alasan']) : 'keperluan keluarga').'</strong>, saya mengajukan izin cuti tahunan sebanyak <strong>'.$hari.' hari kerja</strong> yaitu sejak tanggal <strong>'.$mulai.'</strong> sampai dengan tanggal <strong>'.$sampai.'</strong>, dan saya akan masuk bekerja kembali pada tanggal <strong>'.$masuk.'</strong>.</p>';
 
 $html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 11px; margin: 12px 0;">Demikian surat permohonan ini saya sampaikan. Besar harapan saya agar permohonan ini dapat dikabulkan. Atas perhatian dan bantuan Bapak/Ibu saya ucapkan terima kasih.</p>';
+// Tanda tangan tampat QR code, karena sudah ditempatkan di bagian bawah
+//$html .= '<table width="100%" cellpadding="8" style="font-family: times; font-size: 11px;">';
+//$html .= '<tr>';
+//$html .= '<td align="center">Mengetahui,<br/>Kepala Ruangan<br/><br/><br/><u>'.(val($pimpinan,'nama_lengkap')!='-'?val($pimpinan,'nama_lengkap'):'__________________').'</u><br/>NIP. '.(isset($pimpinan['nip']) && $pimpinan['nip'] ? htmlspecialchars($pimpinan['nip']):'_______________').'</td>';
+//$html .= '<td align="center">Pegawai yang bersangkutan,<br/><br/><br/><u>'.val($user,'nama_lengkap').'</u><br/>NIP. '.val($user,'nip').'</td>';
+//$html .= '</tr>';
+//$html .= '<tr>';
+//$html .= '<td colspan="2" align="center" style="padding-top:120px;">';
+//$html .= 'Mengetahui,<br/>';
+//$html .= '<em>Kabag Kepegawaian, SDM & Pemasaran</em><br/>';
+//$html .= '<em>RS Pelita Insani</em><br/>';
+//$html .= '<div style="width:220px; height:25px; margin:8px auto 6px auto;"></div>';
+//$html .= 'Nanda Alhumaira, B.Marketing<br/>NIP. 005.120813';
+//$html .= '</td>';
+//$html .= '</tr>';
+//$html .= '</table>';
 
-$html .= '<div style="height:12px;"></div>';
-$html .= '<table width="100%" cellpadding="8" style="font-family: times; font-size: 11px;">';
-$html .= '<tr>';
-$html .= '<td align="center">Mengetahui,<br/>Kepala Ruangan<br/><br/><br/><u>'.(val($pimpinan,'nama_lengkap')!='-'?val($pimpinan,'nama_lengkap'):'__________________').'</u><br/>NIP. '.(isset($pimpinan['nip']) && $pimpinan['nip'] ? htmlspecialchars($pimpinan['nip']):'_______________').'</td>';
-$html .= '<td align="center">Pegawai yang bersangkutan,<br/><br/><br/><u>'.val($user,'nama_lengkap').'</u><br/>NIP. '.val($user,'nip').'</td>';
-$html .= '</tr>';
-$html .= '<tr>';
-$html .= '<td colspan="2" align="center" style="padding-top:120px;">';
-$html .= 'Mengetahui,<br/>';
-$html .= '<em>Kabag Kepegawaian, SDM & Pemasaran</em><br/>';
-$html .= '<em>RS Pelita Insani</em><br/>';
-$html .= '<div style="width:220px; height:25px; margin:8px auto 6px auto;"></div>';
-$html .= 'Nanda Alhumaira, B.Marketing<br/>NIP. 005.120813';
-$html .= '</td>';
-$html .= '</tr>';
-$html .= '</table>';
 
+// Tanda tangan dan QR code akan dirender terpisah agar bisa ditempatkan dengan presisi di dalam kotak tanda tangan
+// write main content
 $pdf->writeHTML($html, true, false, true, false, '');
+
+// ------- Render signatures with QR codes placed inside signature boxes -------
+$y = $pdf->GetY();
+$leftMargin = 15;
+$rightMargin = 15;
+$pageWidth = $pdf->getPageWidth();
+$usableWidth = $pageWidth - $leftMargin - $rightMargin;
+$colWidth = $usableWidth / 2;
+
+// smaller barcode size as requested
+$barcodeSize = 18; // mm
+$labelAreaHeight = 12; // space for label above barcode
+$gapAfterBarcode = 4;
+
+$style = array('border'=>0, 'padding'=>0, 'fgcolor'=>array(0,0,0), 'bgcolor'=>false);
+
+// starting Y for labels
+$labelY = $y + 6;
+
+// Left column (Kepala Ruangan)
+$pdf->SetFont('times', '', 11);
+$pdf->SetXY($leftMargin, $labelY);
+$pdf->MultiCell($colWidth, 5, "Mengetahui:\nKepala Ruangan", 0, 'C');
+$leftBarcodeX = $leftMargin + ($colWidth - $barcodeSize) / 2;
+$leftBarcodeY = $labelY + $labelAreaHeight;
+$pimpinan_nip = isset($pimpinan['nip']) && $pimpinan['nip'] ? $pimpinan['nip'] : '';
+if ($pimpinan_nip) {
+    $pdf->write2DBarcode($pimpinan_nip, 'QRCODE,H', $leftBarcodeX, $leftBarcodeY, $barcodeSize, $barcodeSize, $style, 'N');
+}
+$leftNameY = $leftBarcodeY + $barcodeSize + $gapAfterBarcode;
+$pimpinan_name = isset($pimpinan['nama_lengkap']) && $pimpinan['nama_lengkap'] ? htmlspecialchars($pimpinan['nama_lengkap']) : '__________________';
+$pimpinan_nip_label = isset($pimpinan['nip']) && $pimpinan['nip'] ? htmlspecialchars($pimpinan['nip']) : '_______________';
+$pdf->SetXY($leftMargin, $leftNameY);
+$pdf->MultiCell($colWidth, 5, "{$pimpinan_name}\nNIP. {$pimpinan_nip_label}", 0, 'C');
+
+// Right column (Pegawai)
+$pdf->SetXY($leftMargin + $colWidth, $labelY);
+$pdf->MultiCell($colWidth, 5, "Pegawai yang bersangkutan:", 0, 'C');
+$rightBarcodeX = $leftMargin + $colWidth + ($colWidth - $barcodeSize) / 2;
+$rightBarcodeY = $labelY + $labelAreaHeight;
+$user_nip = isset($user['nip']) && $user['nip'] ? $user['nip'] : '';
+if ($user_nip) {
+    $pdf->write2DBarcode($user_nip, 'QRCODE,H', $rightBarcodeX, $rightBarcodeY, $barcodeSize, $barcodeSize, $style, 'N');
+}
+$rightNameY = $rightBarcodeY + $barcodeSize + $gapAfterBarcode;
+$user_name = isset($user['nama_lengkap']) && $user['nama_lengkap'] ? htmlspecialchars($user['nama_lengkap']) : '__________________';
+$user_nip_label = isset($user['nip']) && $user['nip'] ? htmlspecialchars($user['nip']) : '_______________';
+$pdf->SetXY($leftMargin + $colWidth, $rightNameY);
+$pdf->MultiCell($colWidth, 5, "{$user_name}\nNIP. {$user_nip_label}", 0, 'C');
+
+// Middle Kabag signature centered (below the two)
+$midY = max($leftNameY, $rightNameY) + 18;
+$pdf->SetXY($leftMargin, $midY);
+$pdf->MultiCell($usableWidth, 5, "Mengetahui,\nKabag Kepegawaian, SDM & Pemasaran\nRS Pelita Insani\n\n\nNanda Alhumaira, B.Marketing\nNIP. 005.120813", 0, 'C');
+
 if (ob_get_length()) ob_end_clean();
 $pdf->Output('surat_cuti_'.$user['nama_lengkap'].'.pdf', 'I');
 ?>
