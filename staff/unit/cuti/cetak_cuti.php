@@ -66,8 +66,8 @@ $pdf->SetFont('times', '', 11);
 // ===== BAGIAN KIRI =====
 $pdf->SetXY(15, 48);
 $pdf->MultiCell(90, 6,
-"Nomor      : /SI/PEG/ /2024
-Lampiran   : -
+"Nomor     :       /SI/PEG/      /" . date('Y') . "
+Lampiran : -
 Perihal     : Izin Cuti Tahunan",
 0, 'L');
 
