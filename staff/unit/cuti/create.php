@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 	$mulai_tanggal = mysqli_real_escape_string($config, $_POST['mulai_tanggal']);
 	$sampai_tanggal = mysqli_real_escape_string($config, $_POST['sampai_tanggal']);
 	$masuk_tanggal = mysqli_real_escape_string($config, $_POST['masuk_tanggal']);
+		$alasan = mysqli_real_escape_string($config, isset($_POST['alasan'])?$_POST['alasan']: '');
 	$status = 'Menunggu';
 
 	// Hitung banyak_hari secara server-side (inklusif)
@@ -21,10 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 	$banyak_hari = ($diff_seconds !== false) ? intval(floor($diff_seconds / 86400) + 1) : 0;
 
 	// Basic validation
-	if (empty($mulai_tanggal) || empty($sampai_tanggal) || empty($masuk_tanggal) || $banyak_hari <= 0) {
+		if (empty($mulai_tanggal) || empty($sampai_tanggal) || empty($masuk_tanggal) || $banyak_hari <= 0) {
 		$error = 'Lengkapi semua field dengan benar.';
 	} else {
-		$sql = "INSERT INTO tb_cuti (id_user, nip, banyak_hari, mulai_tanggal, sampai_tanggal, masuk_tanggal, status_lembur) VALUES ('{$id_user}','{$nip}','{$banyak_hari}','{$mulai_tanggal}','{$sampai_tanggal}','{$masuk_tanggal}','{$status}')";
+			$sql = "INSERT INTO tb_cuti (id_user, nip, banyak_hari, mulai_tanggal, sampai_tanggal, masuk_tanggal, alasan, status_lembur) VALUES ('{$id_user}','{$nip}','{$banyak_hari}','{$mulai_tanggal}','{$sampai_tanggal}','{$masuk_tanggal}','{$alasan}','{$status}')";
 		$insert = mysqli_query($config, $sql) or die(mysqli_error($config));
 		if ($insert) {
 			echo '<script>window.location.href="?unit=cuti&msg=created";</script>';
@@ -85,6 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 							<div class="form-group">
 								<label>Masuk Tanggal</label>
 								<input type="date" name="masuk_tanggal" class="form-control" value="<?php echo isset($_POST['masuk_tanggal'])?htmlspecialchars($_POST['masuk_tanggal']):''; ?>" required>
+							</div>
+							<div class="form-group">
+								<label>Alasan</label>
+								<textarea name="alasan" class="form-control" rows="3"><?php echo isset($_POST['alasan'])?htmlspecialchars($_POST['alasan']):''; ?></textarea>
 							</div>
 						</div>
 						<div class="card-footer">

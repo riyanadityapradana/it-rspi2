@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 	$mulai_tanggal = mysqli_real_escape_string($config, $_POST['mulai_tanggal']);
 	$sampai_tanggal = mysqli_real_escape_string($config, $_POST['sampai_tanggal']);
 	$masuk_tanggal = mysqli_real_escape_string($config, $_POST['masuk_tanggal']);
+	$alasan = mysqli_real_escape_string($config, isset($_POST['alasan'])?$_POST['alasan']:'');
 
 	// Hitung banyak_hari server-side (inklusif)
 	$diff_seconds = strtotime($sampai_tanggal) - strtotime($mulai_tanggal);
@@ -39,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 	if ($banyak_hari <= 0 || empty($mulai_tanggal) || empty($sampai_tanggal) || empty($masuk_tanggal)) {
 		$error = 'Lengkapi semua field dengan benar.';
 	} else {
-		$sql = "UPDATE tb_cuti SET banyak_hari='{$banyak_hari}', mulai_tanggal='{$mulai_tanggal}', sampai_tanggal='{$sampai_tanggal}', masuk_tanggal='{$masuk_tanggal}' WHERE id_cuti='{$id}'";
+		$sql = "UPDATE tb_cuti SET banyak_hari='{$banyak_hari}', mulai_tanggal='{$mulai_tanggal}', sampai_tanggal='{$sampai_tanggal}', masuk_tanggal='{$masuk_tanggal}', alasan='{$alasan}' WHERE id_cuti='{$id}'";
 		$update = mysqli_query($config, $sql) or die(mysqli_error($config));
 		if ($update) {
 			echo '<script>window.location.href="?unit=cuti&msg=updated";</script>';
@@ -96,6 +97,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 							<div class="form-group">
 								<label>Masuk Tanggal</label>
 								<input type="date" name="masuk_tanggal" class="form-control" value="<?php echo htmlspecialchars($data['masuk_tanggal']); ?>" required>
+							</div>
+							<div class="form-group">
+								<label>Alasan</label>
+								<textarea name="alasan" class="form-control" rows="3"><?php echo htmlspecialchars(isset($data['alasan'])?$data['alasan']:''); ?></textarea>
 							</div>
 						</div>
 						<div class="card-footer">

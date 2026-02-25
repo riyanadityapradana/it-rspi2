@@ -104,7 +104,7 @@ $sampai = tgl_indo($dataCuti['sampai_tanggal']);
 $masuk = tgl_indo($dataCuti['masuk_tanggal']);
 $hari = intval($dataCuti['banyak_hari']);
 
-$html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 11px; margin: 8px 0;">Bahwa sehubungan dengan keperluan keluarga, saya mengajukan izin cuti tahunan sebanyak <strong>'.$hari.' hari kerja</strong> yaitu sejak tanggal <strong>'.$mulai.'</strong> sampai dengan tanggal <strong>'.$sampai.'</strong>, dan saya akan masuk bekerja kembali pada tanggal <strong>'.$masuk.'</strong>.</p>';
+$html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 11px; margin: 8px 0;">Bahwa sehubungan dengan <strong>'.(isset($dataCuti['alasan']) && $dataCuti['alasan'] !== '' ? htmlspecialchars($dataCuti['alasan']) : 'keperluan keluarga').'</strong>, saya mengajukan izin cuti tahunan sebanyak <strong>'.$hari.' hari kerja</strong> yaitu sejak tanggal <strong>'.$mulai.'</strong> sampai dengan tanggal <strong>'.$sampai.'</strong>, dan saya akan masuk bekerja kembali pada tanggal <strong>'.$masuk.'</strong>.</p>';
 
 $html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 11px; margin: 12px 0;">Demikian surat permohonan ini saya sampaikan. Besar harapan saya agar permohonan ini dapat dikabulkan. Atas perhatian dan bantuan Bapak/Ibu saya ucapkan terima kasih.</p>';
 
