@@ -10,6 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = isset($_POST['username']) ? mysqli_real_escape_string($config, trim($_POST['username'])) : '';
     $password = isset($_POST['password']) ? trim($_POST['password']) : '';
     $no_hp = isset($_POST['no_hp']) ? mysqli_real_escape_string($config, trim($_POST['no_hp'])) : '';
+    $tmp_lahir = isset($_POST['tmp_lahir']) ? mysqli_real_escape_string($config, trim($_POST['tmp_lahir'])) : '';
+    $tgl_lahir = isset($_POST['tgl_lahir']) ? mysqli_real_escape_string($config, trim($_POST['tgl_lahir'])) : '';
+    $jbtn = isset($_POST['jbtn']) ? mysqli_real_escape_string($config, trim($_POST['jbtn'])) : '';
+    $pendidikan = isset($_POST['pendidikan']) ? mysqli_real_escape_string($config, trim($_POST['pendidikan'])) : '';
+    $alamat = isset($_POST['alamat']) ? mysqli_real_escape_string($config, trim($_POST['alamat'])) : '';
     $role = 'Staff';
 
     // Validasi field wajib
@@ -57,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                         
                         // Simpan ke database
-                        $query = "INSERT INTO tb_user (nip, nama_lengkap, username, password, email, no_hp, role, foto, status) 
-                                  VALUES ('$nip', '$nama_lengkap', '$username', '$hashed_password', '$email', '$no_hp', '$role', '$foto', 'nonaktif')";
+                        $query = "INSERT INTO tb_user (nip, nama_lengkap, username, password, email, no_hp, role, tmp_lahir, tgl_lahir, jbtn, pendidikan, alamat, foto, status) 
+                                  VALUES ('$nip', '$nama_lengkap', '$username', '$hashed_password', '$email', '$no_hp', '$role', '$tmp_lahir', " . ($tgl_lahir !== '' ? "'".$tgl_lahir."'" : "NULL") . ", '$jbtn', '$pendidikan', '$alamat', '$foto', 'nonaktif')";
                         
                         if (mysqli_query($config, $query)) {
                             $success = 'Akun berhasil dibuat! Silakan tunggu konfirmasi admin.';
@@ -108,6 +113,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    /* Widen the login/register box while keeping it responsive */
+    .login-box {
+      max-width: 760px;
+      width: 92%;
+      margin: 6vh auto;
+    }
+
+    .card {
+      padding: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .login-box {
+        width: 96%;
+        margin: 3vh auto;
+      }
+      .card {
+        padding: 1rem;
+      }
     }
     .card-header .h1 {
       color: #fff;
@@ -210,53 +236,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <?php endif; ?>
       <p class="login-box-msg">Register akun baru</p>
       <form action="#" method="post" enctype="multipart/form-data">
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              <span class="fas fa-id-badge"></span>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-id-badge"></span>
+                </div>
+              </div>
+              <input type="text" class="form-control" placeholder="NIP" name="nip" required>
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-envelope"></span>
+                </div>
+              </div>
+              <input type="email" class="form-control" placeholder="Email" name="email" required>
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-id-card"></span>
+                </div>
+              </div>
+              <input type="text" class="form-control" placeholder="Nama Karyawan" name="nama_lengkap" required>
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-user"></span>
+                </div>
+              </div>
+              <input type="text" class="form-control" placeholder="Username" name="username" required>
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-lock"></span>
+                </div>
+              </div>
+              <input type="password" class="form-control" placeholder="Password" name="password" required>
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-phone"></span>
+                </div>
+              </div>
+              <input type="text" class="form-control" placeholder="No. HP" name="no_hp">
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-image"></span>
+                </div>
+              </div>
+              <input type="file" class="form-control" name="foto" accept="image/*">
             </div>
           </div>
-          <input type="text" class="form-control" placeholder="NIP" name="nip" required>
-        </div>
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              <span class="fas fa-envelope"></span>
+          <div class="col-md-6">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-map-marker-alt"></span>
+                </div>
+              </div>
+              <input type="text" class="form-control" placeholder="Tempat Lahir" name="tmp_lahir">
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-calendar"></span>
+                </div>
+              </div>
+              <input type="date" class="form-control" name="tgl_lahir">
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-briefcase"></span>
+                </div>
+              </div>
+              <input type="text" class="form-control" placeholder="Jabatan" name="jbtn">
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-graduation-cap"></span>
+                </div>
+              </div>
+              <input type="text" class="form-control" placeholder="Pendidikan" name="pendidikan">
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <span class="fas fa-home"></span>
+                </div>
+              </div>
+              <textarea class="form-control" placeholder="Alamat" name="alamat" rows="4"></textarea>
             </div>
           </div>
-          <input type="email" class="form-control" placeholder="Email" name="email" required>
-        </div>
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              <span class="fas fa-id-card"></span>
-            </div>
-          </div>
-          <input type="text" class="form-control" placeholder="Nama Karyawan" name="nama_lengkap" required>
-        </div>
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              <span class="fas fa-user"></span>
-            </div>
-          </div>
-          <input type="text" class="form-control" placeholder="Username" name="username" required>
-        </div>
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              <span class="fas fa-lock"></span>
-            </div>
-          </div>
-          <input type="password" class="form-control" placeholder="Password" name="password" required>
-        </div>
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              <span class="fas fa-image"></span>
-            </div>
-          </div>
-          <input type="file" class="form-control" name="foto" accept="image/*">
         </div>
         <input type="hidden" name="role" value="Staff">
         <div class="row">

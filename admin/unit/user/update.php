@@ -25,6 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $no_hp = trim($_POST['no_hp'] ?? '');
+    $tmp_lahir = trim($_POST['tmp_lahir'] ?? '');
+    $tgl_lahir = trim($_POST['tgl_lahir'] ?? '');
+    $jbtn = trim($_POST['jbtn'] ?? '');
+    $pendidikan = trim($_POST['pendidikan'] ?? '');
+    $alamat = trim($_POST['alamat'] ?? '');
     $role = trim($_POST['role'] ?? '');
     $status = trim($_POST['status'] ?? '');
     $password = trim($_POST['password'] ?? '');
@@ -79,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Update data
     if ($password_hashed !== null) {
-        $stmt = $config->prepare('UPDATE tb_user SET nip=?, nama_lengkap=?, username=?, email=?, no_hp=?, role=?, status=?, foto=?, password=?, updated_at=? WHERE id_user=?');
-        $stmt->bind_param('ssssssssssi', $nip, $nama_lengkap, $username, $email, $no_hp, $role, $status, $foto, $password_hashed, $updated_at, $id_user);
+      $stmt = $config->prepare('UPDATE tb_user SET nip=?, nama_lengkap=?, username=?, email=?, no_hp=?, role=?, status=?, foto=?, tmp_lahir=?, tgl_lahir=?, jbtn=?, pendidikan=?, alamat=?, password=?, updated_at=? WHERE id_user=?');
+      $stmt->bind_param('sssssssssssssssi', $nip, $nama_lengkap, $username, $email, $no_hp, $role, $status, $foto, $tmp_lahir, $tgl_lahir, $jbtn, $pendidikan, $alamat, $password_hashed, $updated_at, $id_user);
     } else {
-        $stmt = $config->prepare('UPDATE tb_user SET nip=?, nama_lengkap=?, username=?, email=?, no_hp=?, role=?, status=?, foto=?, updated_at=? WHERE id_user=?');
-        $stmt->bind_param('sssssssssi', $nip, $nama_lengkap, $username, $email, $no_hp, $role, $status, $foto, $updated_at, $id_user);
+      $stmt = $config->prepare('UPDATE tb_user SET nip=?, nama_lengkap=?, username=?, email=?, no_hp=?, role=?, status=?, foto=?, tmp_lahir=?, tgl_lahir=?, jbtn=?, pendidikan=?, alamat=?, updated_at=? WHERE id_user=?');
+      $stmt->bind_param('ssssssssssssssi', $nip, $nama_lengkap, $username, $email, $no_hp, $role, $status, $foto, $tmp_lahir, $tgl_lahir, $jbtn, $pendidikan, $alamat, $updated_at, $id_user);
     }
     $success = $stmt->execute();
     $stmt->close();
@@ -120,6 +125,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="form-group">
             <label>Nama Lengkap</label>
             <input type="text" class="form-control" name="nama_lengkap" value="<?= htmlspecialchars($user['nama_lengkap']) ?>" required>
+          </div>
+          <div class="form-group">
+            <label>Tempat Lahir</label>
+            <input type="text" class="form-control" name="tmp_lahir" value="<?= htmlspecialchars($user['tmp_lahir'] ?? '') ?>">
+          </div>
+          <div class="form-group">
+            <label>Tanggal Lahir</label>
+            <input type="date" class="form-control" name="tgl_lahir" value="<?= htmlspecialchars($user['tgl_lahir'] ?? '') ?>">
+          </div>
+          <div class="form-group">
+            <label>Jabatan</label>
+            <input type="text" class="form-control" name="jbtn" value="<?= htmlspecialchars($user['jbtn'] ?? '') ?>">
+          </div>
+          <div class="form-group">
+            <label>Pendidikan</label>
+            <input type="text" class="form-control" name="pendidikan" value="<?= htmlspecialchars($user['pendidikan'] ?? '') ?>">
+          </div>
+          <div class="form-group">
+            <label>Alamat</label>
+            <textarea class="form-control" name="alamat" rows="3"><?= htmlspecialchars($user['alamat'] ?? '') ?></textarea>
           </div>
           <div class="form-group">
             <label>Username</label>

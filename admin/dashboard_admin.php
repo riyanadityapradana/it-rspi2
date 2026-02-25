@@ -120,6 +120,12 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="dashboard_admin.php?unit=cuti" class="nav-link">
+                            <i class="nav-icon fas fa-file" style="color: green;"></i>
+                            <p style="font-size: 14px; color: white;">Verifikasi Cuti Staff</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="dashboard_admin.php?unit=user" class="nav-link">
                             <i class="nav-icon fas fa-users" style="color: green;"></i>
                             <p>Data User</p>

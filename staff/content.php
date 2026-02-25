@@ -114,6 +114,25 @@ else if ($unit == "detail_lembur"){
 else if ($unit== "delete_lembur"){
   require_once("unit/lembur/delete.php");
 }
+// Cuti
+else if ($unit == "cuti"){
+  require_once("unit/cuti/cuti.php");
+}
+else if ($unit == "create_cuti"){
+  require_once("unit/cuti/create.php");
+}
+else if ($unit == "detail_cuti"){
+  require_once("unit/cuti/detail.php");
+}
+else if ($unit == "update_cuti"){
+  require_once("unit/cuti/update.php");
+}
+else if ($unit== "delete_cuti"){
+  require_once("unit/cuti/delete.php");
+}
+else if ($unit== "cetak_cuti"){
+  require_once("unit/cuti/cetak_cuti.php");
+}
 // Remote Desktop
 else if ($unit == "remote"){
   require_once("unit/remote_destop/remote.php");

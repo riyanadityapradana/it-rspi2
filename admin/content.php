@@ -55,30 +55,12 @@ else if ($unit == "grafik_barang"){
 else if ($_GET['unit'] == "lembur"){
   require_once("unit/lembur/lembur.php");
 }
+// Data Verifikasi Cuti staff
+else if ($_GET['unit'] == "cuti"){
+  require_once("unit/cuti/cuti.php");
+}
 // Data Logbook
 else if ($_GET['unit'] == "logbook"){
   require_once("unit/logbook/logbook.php");
-}
-// Picare
-else if ($unit == "daftar"){
-  require_once("unit/pi-care/pi-care_daftar.php");
-}
-else if ($unit == 'lap_pi-care_daftar'){
-  require_once("unit/pi-care/lap_pi-care_daftar.php");
-}
-else if ($unit == "batal"){
-  require_once("unit/pi-care/pi-care_batal.php");
-}
-else if ($unit == "alasan"){
-  require_once("unit/pi-care/pi-care_alasan.php");
-}
-else if ($unit == "lap_pi-care_batal"){
-  require_once("unit/pi-care/lap_pi-care_batal.php");
-}
-else if ($unit == "rekap"){
-  require_once("unit/pi-care/pi-care_rekap.php");
-}
-else if ($unit == "lap_pi-care_rekap"){
-  require_once("unit/pi-care/lap_pi-care_rekap.php");
 }
 ?> 

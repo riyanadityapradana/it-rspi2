@@ -14,6 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = mysqli_real_escape_string($config, $_POST['email']);
     $no_hp = mysqli_real_escape_string($config, $_POST['no_hp']);
     $password = isset($_POST['password']) ? trim($_POST['password']) : '';
+    $tmp_lahir = mysqli_real_escape_string($config, $_POST['tmp_lahir'] ?? '');
+    $tgl_lahir = mysqli_real_escape_string($config, $_POST['tgl_lahir'] ?? '');
+    $jbtn = mysqli_real_escape_string($config, $_POST['jbtn'] ?? '');
+    $pendidikan = mysqli_real_escape_string($config, $_POST['pendidikan'] ?? '');
+    $alamat = mysqli_real_escape_string($config, $_POST['alamat'] ?? '');
     
     $error = '';
     
@@ -86,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Update database
-            $sql = "UPDATE tb_user SET nip='$nip', nama_lengkap='$nama_lengkap', username='$username', email='$email', no_hp='$no_hp' $update_password $update_foto WHERE id_user='$id_user'";
+            $sql = "UPDATE tb_user SET nip='$nip', nama_lengkap='$nama_lengkap', username='$username', email='$email', no_hp='$no_hp', tmp_lahir='$tmp_lahir', tgl_lahir=" . ($tgl_lahir !== '' ? "'".$tgl_lahir."'" : "NULL") . ", jbtn='$jbtn', pendidikan='$pendidikan', alamat='$alamat' $update_password $update_foto WHERE id_user='$id_user'";
             
             if (mysqli_query($config, $sql)) {
                 // Update session
@@ -177,6 +182,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <label for="email">Email</label>
                                         <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" required>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="tmp_lahir">Tempat Lahir</label>
+                                        <input type="text" class="form-control" id="tmp_lahir" name="tmp_lahir" value="<?= htmlspecialchars($user['tmp_lahir'] ?? '') ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tgl_lahir">Tanggal Lahir</label>
+                                        <input type="date" class="form-control" id="tgl_lahir" name="tgl_lahir" value="<?= htmlspecialchars($user['tgl_lahir'] ?? '') ?>">
+                                    </div>
                                 </div>
                                 
                                 <!-- Kolom Kanan -->
@@ -184,6 +197,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="form-group">
                                         <label for="no_hp">Nomor HP</label>
                                         <input type="text" class="form-control" id="no_hp" name="no_hp" value="<?= htmlspecialchars($user['no_hp'] ?? '') ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="jbtn">Jabatan</label>
+                                        <input type="text" class="form-control" id="jbtn" name="jbtn" value="<?= htmlspecialchars($user['jbtn'] ?? '') ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pendidikan">Pendidikan</label>
+                                        <input type="text" class="form-control" id="pendidikan" name="pendidikan" value="<?= htmlspecialchars($user['pendidikan'] ?? '') ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="alamat">Alamat</label>
+                                        <textarea class="form-control" id="alamat" name="alamat" rows="3"><?= htmlspecialchars($user['alamat'] ?? '') ?></textarea>
                                     </div>
                                     
                                     <div class="form-group">

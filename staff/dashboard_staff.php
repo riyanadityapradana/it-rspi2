@@ -153,6 +153,10 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                                     <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Data Lembur</p>
                                 </a>
+                                <a href="dashboard_staff.php?unit=cuti" class="nav-link">
+                                    <i class="nav-icon fas fa-hospital-user" style="color: black;"></i>
+                                    <p style="font-size: 14px; color: black;">Data Cuti</p>
+                                </a>
                                 <a href="dashboard_staff.php?unit=remote" class="nav-link">
                                     <i class="nav-icon fas fa-laptop" style="color: black;"></i>
                                     <p style="font-size: 14px; color: black;">Remote Desktop</p>
