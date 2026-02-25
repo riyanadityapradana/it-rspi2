@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 <section class="content">
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-8">
+			<div class="col-md-12">
 				<div class="card card-primary">
 					<div class="card-header"><h3 class="card-title">Form Ubah</h3></div>
 					<form method="post">
