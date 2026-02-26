@@ -36,17 +36,17 @@ class MYPDF extends TCPDF {
         // Logo dan header
         $this->Image('../../../assets/img/logo.jpg', 8, 5, 32); // Ganti logo sesuai file kamu
         $this->SetFont('helvetica', 'B', 14);
-        $this->Cell(0, 10, 'PT. PELITA INSANI MULIA', 0, 1, 'C');
-        $this->SetFont('helvetica', '', 12);
+        $this->Cell(0, 9, 'PT. PELITA INSANI MULIA', 0, 1, 'C');
+        $this->SetFont('helvetica', 'B', 12);
         $this->Cell(0, 5, 'RUMAH SAKIT PELITA INSANI MARTAPURA  ', 0, 1, 'C');
         $this->SetFont('helvetica', '', 12);
-        $this->Cell(0, 5, 'Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya', 0, 1, 'C');
-        $this->Image('../../../assets/img/bintang.png', 159, 13 , 27); // posisi X:160, Y:18, width:5mm
+        $this->Cell(0, 5, 'Terakreditasi KARS Standar Kemenkes RI Tingkat Paripurna', 0, 1, 'C');
+        $this->Image('../../../assets/img/bintang.png', 163, 12 , 27); // posisi X:160, Y:18, width:5mm
         $this->SetFont('helvetica', '', 10);
         $this->Cell(0, 5, 'Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan', 0, 1, 'C');
-        $html = '<span style="color:black;">Fax. (0511) 4722230, </span><span style="color:red;">Emergency Call (0511) 4722222</span> <span>Email: </span><span style="color:blue;">rs.pelitainsani@gmail.com</span>';
+        $html = '<span style="color:red;">Emergency Call (0511) 4722222</span> <span>Email: </span><span style="color:blue;">rs.pelitainsani@gmail.com</span>';
         $this->writeHTMLCell(0, 5, '', '', $html, 0, 1, false, true, 'C', true);
-        $this->Cell(0, 5, 'Website: www.pelitainsani.com', 0, 1, 'C');
+        $this->Cell(0, 5, 'Website: www.rspelitainsani.com', 0, 1, 'C');
         $this->Ln(4);
         $this->Line(10, 40, 200, 40);
         $this->Ln(5);
@@ -65,10 +65,11 @@ $pdf->SetFont('times', '', 11);
 
 // ===== BAGIAN KIRI =====
 $pdf->SetXY(15, 48);
+$jenisCutiDisplay = isset($dataCuti['jenis_cuti']) && $dataCuti['jenis_cuti'] ? htmlspecialchars($dataCuti['jenis_cuti']) : 'Izin Cuti Tahunan';
 $pdf->MultiCell(90, 6,
-"Nomor     :       /SI/PEG/      /" . date('Y') . "
+"Nomor     :       /SI/PEG/      /" . date('Y') ."-B4
 Lampiran : -
-Perihal     : Izin Cuti Tahunan",
+Perihal     : {$jenisCutiDisplay}",
 0, 'L');
 
 // ===== BAGIAN KANAN =====
@@ -78,7 +79,8 @@ $pdf->MultiCell(80, 6,
 
 Kepada Yth :
 Direktur RS. Pelita Insani
-c.c Kabag Kepegawaian",
+c.q Kabag Kepegawaian
+      di-Tempat",
 0, 'L');
 
 
@@ -105,7 +107,7 @@ $sampai = tgl_indo($dataCuti['sampai_tanggal']);
 $masuk = tgl_indo($dataCuti['masuk_tanggal']);
 $hari = intval($dataCuti['banyak_hari']);
 
-$html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 11px; margin: 8px 0;">Bahwa sehubungan dengan <strong>'.(isset($dataCuti['alasan']) && $dataCuti['alasan'] !== '' ? htmlspecialchars($dataCuti['alasan']) : 'keperluan keluarga').'</strong>, saya mengajukan izin cuti tahunan sebanyak <strong>'.$hari.' hari kerja</strong> yaitu sejak tanggal <strong>'.$mulai.'</strong> sampai dengan tanggal <strong>'.$sampai.'</strong>, dan saya akan masuk bekerja kembali pada tanggal <strong>'.$masuk.'</strong>.</p>';
+$html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 11px; margin: 8px 0;">Bahwa sehubungan dengan <strong>'.(isset($dataCuti['alasan']) && $dataCuti['alasan'] !== '' ? htmlspecialchars($dataCuti['alasan']) : 'keperluan keluarga').'</strong>, maka dengan ini saya menyampaikan <strong>'.$jenisCutiDisplay.'</strong> kepada Bapak/Ibu sebanyak <strong>'.$hari.' hari kerja</strong> yaitu sejak tanggal <strong>'.$mulai.'</strong> sampai dengan tanggal <strong>'.$sampai.'</strong>, dan saya akan masuk bekerja kembali pada tanggal <strong>'.$masuk.'</strong>.</p>';
 
 $html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 11px; margin: 12px 0;">Demikian surat permohonan ini saya sampaikan. Besar harapan saya agar permohonan ini dapat dikabulkan. Atas perhatian dan bantuan Bapak/Ibu saya ucapkan terima kasih.</p>';
 // Tanda tangan tampat QR code, karena sudah ditempatkan di bagian bawah

@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 	$sampai_tanggal = mysqli_real_escape_string($config, $_POST['sampai_tanggal']);
 	$masuk_tanggal = mysqli_real_escape_string($config, $_POST['masuk_tanggal']);
 		$alasan = mysqli_real_escape_string($config, isset($_POST['alasan'])?$_POST['alasan']: '');
+	$jenis_cuti = mysqli_real_escape_string($config, isset($_POST['jenis_cuti'])?$_POST['jenis_cuti']: '');
 	$status = 'Menunggu';
 
 	// Hitung banyak_hari secara server-side (inklusif)
@@ -25,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 		if (empty($mulai_tanggal) || empty($sampai_tanggal) || empty($masuk_tanggal) || $banyak_hari <= 0) {
 		$error = 'Lengkapi semua field dengan benar.';
 	} else {
-			$sql = "INSERT INTO tb_cuti (id_user, nip, banyak_hari, mulai_tanggal, sampai_tanggal, masuk_tanggal, alasan, status_lembur) VALUES ('{$id_user}','{$nip}','{$banyak_hari}','{$mulai_tanggal}','{$sampai_tanggal}','{$masuk_tanggal}','{$alasan}','{$status}')";
+		$sql = "INSERT INTO tb_cuti (id_user, nip, banyak_hari, mulai_tanggal, sampai_tanggal, masuk_tanggal, alasan, jenis_cuti, status_lembur) VALUES ('{$id_user}','{$nip}','{$banyak_hari}','{$mulai_tanggal}','{$sampai_tanggal}','{$masuk_tanggal}','{$alasan}','{$jenis_cuti}','{$status}');";
+
 		$insert = mysqli_query($config, $sql) or die(mysqli_error($config));
 		if ($insert) {
 			echo '<script>window.location.href="?unit=cuti&msg=created";</script>';
@@ -39,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 
 <!-- Content Header -->
 <section class="content-header">
-	<div class="container-fluid">
 		<div class="row mb-2">
 			<div class="col-sm-6">
 				<h1>Tambah Pengajuan Cuti</h1>
@@ -51,57 +52,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 					<li class="breadcrumb-item active">Tambah</li>
 				</ol>
 			</div>
-		</div>
-	</div>
+		</div>	
 </section>
 
 <!-- Main content -->
 <section class="content">
 	<div class="container-fluid">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="card card-primary">
-					<div class="card-header"><h3 class="card-title">Form Pengajuan Cuti</h3></div>
-					<form method="post">
-						<div class="card-body">
-							<?php if (isset($error)): ?>
-								<div class="alert alert-danger"><?php echo $error; ?></div>
-							<?php endif; ?>
-							<div class="form-group">
-								<label>NIP</label>
-								<input type="text" class="form-control" value="<?php echo isset($_SESSION['nip'])?htmlspecialchars($_SESSION['nip']):''; ?>" readonly>
-							</div>
-							<div class="form-group">
-								<label>Banyak Hari</label>
-								<input type="number" id="banyak_hari" name="banyak_hari" class="form-control" min="0" value="<?php echo isset($_POST['banyak_hari'])?htmlspecialchars($_POST['banyak_hari']):'1'; ?>" readonly required>
-							</div>
+		<div class="card card-default">
+			<div class="card-header">
+				<h3 class="card-title">Silahkan Isi Form Pengajuan Cuti</h3>
+			</div>
+			<form method="post" enctype="multipart/form-data">
+				<div class="card-body">
+					<?php if (isset($error)): ?>
+						<div class="alert alert-danger"><?php echo $error; ?></div>
+					<?php endif; ?>
+					<div class="form-group">
+						<label>NIP</label>
+						<input type="text" class="form-control" value="<?php echo isset($_SESSION['nip'])?htmlspecialchars($_SESSION['nip']):''; ?>" readonly>
+					</div>
+					<div class="form-group">
+						<label>Banyak Hari</label>
+						<input type="number" id="banyak_hari" name="banyak_hari" class="form-control" min="0" value="<?php echo isset($_POST['banyak_hari'])?htmlspecialchars($_POST['banyak_hari']):'1'; ?>" readonly required>
+					</div>
+					<div class="row">
+						<div class="col-md-4">
 							<div class="form-group">
 								<label>Mulai Tanggal</label>
 								<input type="date" name="mulai_tanggal" class="form-control" value="<?php echo isset($_POST['mulai_tanggal'])?htmlspecialchars($_POST['mulai_tanggal']):''; ?>" required>
 							</div>
+						</div>
+						<div class="col-md-4">
 							<div class="form-group">
 								<label>Sampai Tanggal</label>
 								<input type="date" name="sampai_tanggal" class="form-control" value="<?php echo isset($_POST['sampai_tanggal'])?htmlspecialchars($_POST['sampai_tanggal']):''; ?>" required>
 							</div>
+						</div>
+						<div class="col-md-4">
 							<div class="form-group">
 								<label>Masuk Tanggal</label>
 								<input type="date" name="masuk_tanggal" class="form-control" value="<?php echo isset($_POST['masuk_tanggal'])?htmlspecialchars($_POST['masuk_tanggal']):''; ?>" required>
 							</div>
-							<div class="form-group">
-								<label>Alasan</label>
-								<textarea name="alasan" class="form-control" rows="3"><?php echo isset($_POST['alasan'])?htmlspecialchars($_POST['alasan']):''; ?></textarea>
-							</div>
 						</div>
-						<div class="card-footer">
-							<button type="submit" name="save" class="btn btn-primary">Simpan</button>
-							<a href="?unit=cuti" class="btn btn-secondary">Batal</a>
-						</div>
-					</form>
+					</div>
+					<div class="form-group">
+						<label>Jenis Cuti</label>
+						<select name="jenis_cuti" id="jenis_cuti" class="form-control select2" required>
+							<option value="">-- Pilih Jenis Cuti --</option>
+							<option value="Izin Cuti Melahirkan" <?php echo (isset($_POST['jenis_cuti']) && $_POST['jenis_cuti']=='Izin Cuti Melahirkan')?'selected':''; ?>>Izin Cuti Melahirkan</option>
+							<option value="Izin Cuti Tahunan" <?php echo (isset($_POST['jenis_cuti']) && $_POST['jenis_cuti']=='Izin Cuti Tahunan')?'selected':''; ?>>Izin Cuti Tahunan</option>
+							<option value="Izin Cuti Menikah" <?php echo (isset($_POST['jenis_cuti']) && $_POST['jenis_cuti']=='Izin Cuti Menikah')?'selected':''; ?>>Izin Cuti Menikah</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Alasan</label>
+						<textarea name="alasan" class="form-control" rows="3"><?php echo isset($_POST['alasan'])?htmlspecialchars($_POST['alasan']):''; ?></textarea>
+					</div>
 				</div>
-			</div>
+				<div class="card-footer">
+					<a class="btn btn-app bg-warning float-left" href="?unit=cuti">
+						<i class="fas fa-reply"></i> Kembali
+					</a>
+					<button class="btn btn-app bg-success float-right" type="submit" name="save">
+						<i class="fas fa-save"></i> SIMPAN
+					</button>
+				</div>
+			</form>
 		</div>
 	</div>
 </section>
+<!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
 <script>
 function calcDaysCreate(){
 	var mulai = document.querySelector('input[name="mulai_tanggal"]').value;
@@ -122,4 +143,10 @@ if (startInput && endInput){
 	endInput.addEventListener('change', calcDaysCreate);
 	window.addEventListener('load', calcDaysCreate);
 }
+$(document).ready(function() {
+	$('#jenis_cuti').select2({
+		placeholder: '-- Pilih Jenis Cuti --',
+		allowClear: true
+	});
+});
 </script>

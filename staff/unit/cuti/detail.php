@@ -48,6 +48,7 @@ if ($status == 'Diterima') {
               <tr><th>Banyak Hari</th><td><?php echo htmlspecialchars($data['banyak_hari']); ?></td></tr>
               <tr><th>Mulai Tanggal</th><td><?php echo htmlspecialchars($data['mulai_tanggal']); ?></td></tr>
               <tr><th>Sampai Tanggal</th><td><?php echo htmlspecialchars($data['sampai_tanggal']); ?></td></tr>
+              <tr><th>Jenis Cuti</th><td><?php echo htmlspecialchars(isset($data['jenis_cuti'])?$data['jenis_cuti']:'-'); ?></td></tr>
               <tr><th>Alasan</th><td><?php echo htmlspecialchars(isset($data['alasan'])?$data['alasan']:'-'); ?></td></tr>
               <tr><th>Masuk Tanggal</th><td><?php echo htmlspecialchars($data['masuk_tanggal']); ?></td></tr>
               <tr><th>Status</th><td><span class="badge <?php echo $badge;?>"><?php echo $status;?></span></td></tr>

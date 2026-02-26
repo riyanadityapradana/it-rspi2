@@ -65,6 +65,7 @@ if (isset($_GET['tolak'])) {
                             <th style="text-align: center; color: white;">Mulai</th>
                             <th style="text-align: center; color: white;">Sampai</th>
                             <th style="text-align: center; color: white;">Hari</th>
+                            <th style="text-align: center; color: white;">Jenis Cuti</th>
                             <th style="text-align: center; color: white;">Alasan</th>
                             <th style="text-align: center; color: white;">Status</th>
                             <th style="text-align: center; color: white;">Masuk Tanggal</th>
@@ -85,6 +86,7 @@ if (isset($_GET['tolak'])) {
                             <td><?= !empty($data['mulai_tanggal']) ? date('d-m-Y', strtotime($data['mulai_tanggal'])) : '' ?></td>
                             <td><?= !empty($data['sampai_tanggal']) ? date('d-m-Y', strtotime($data['sampai_tanggal'])) : '' ?></td>
                             <td align="center"><?= htmlspecialchars($data['banyak_hari']) ?></td>
+                            <td><?= htmlspecialchars(isset($data['jenis_cuti'])?$data['jenis_cuti']:'-') ?></td>
                             <td><?= htmlspecialchars(mb_strimwidth(isset($data['alasan'])?$data['alasan']:'-',0,60,'...')) ?></td>
                             <td align="center">
                                 <?php
@@ -100,7 +102,7 @@ if (isset($_GET['tolak'])) {
                                 ?>
                             </td>
                             <td><?= !empty($data['masuk_tanggal']) ? date('d-m-Y', strtotime($data['masuk_tanggal'])) : '' ?></td>
-                            <td align="center">
+                            <td align="left">
                                     <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetail<?= $data['id_cuti'] ?>">
                                             <i class="fa fa-eye"></i> Detail
                                     </button>
@@ -146,6 +148,10 @@ if (isset($_GET['tolak'])) {
                                                                 <div class="col-md-6 mb-2">
                                                                     <strong>Banyak Hari:</strong><br>
                                                                     <span><?= htmlspecialchars($data['banyak_hari']) ?></span>
+                                                                </div>
+                                                                <div class="col-md-6 mb-2">
+                                                                    <strong>Jenis Cuti:</strong><br>
+                                                                    <span><?= htmlspecialchars(isset($data['jenis_cuti'])?$data['jenis_cuti']:'-') ?></span>
                                                                 </div>
                                                                 <div class="col-md-6 mb-2">
                                                                     <strong>Alasan:</strong><br>

@@ -77,14 +77,15 @@
 								<table id="example1" class="table table-bordered table-striped">
 										<thead style="background:rgb(129, 2, 0, 1)">
 											<tr>
-												<th style="text-align: center; color: white;">No</th>
-												<th style="text-align: center; color: white;">NIP</th>
-												<th style="text-align: center; color: white;">Banyak Hari</th>
-												<th style="text-align: center; color: white;">Mulai Tanggal</th>
-												<th style="text-align: center; color: white;">Sampai Tanggal</th>
-												<th style="text-align: center; color: white;">Masuk Tanggal</th>
-												<th style="text-align: center; color: white;">Status</th>
-												<th style="text-align: center; color: white;">Action</th>
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>No</th>
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>NIP</th>
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>Banyak Hari</th>											
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>Jenis Cuti</th>												
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>Mulai Tanggal</th>
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>Sampai Tanggal</th>
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>Masuk Tanggal</th>
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>Status</th>
+												<th style="text-align: center; color: white; font-size: 14px;" responsive>Action</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -116,12 +117,13 @@
 											<tr>
 												<td><?php echo $nn ?></td>
 												<td><?php echo $data['nip'] ?></td>
-												<td><?php echo $data['banyak_hari'] ?></td>
+												<td style="text-align: center;"><?php echo $data['banyak_hari'] ?> Hari</td>										
+												<td><?php echo isset($data['jenis_cuti'])?htmlspecialchars($data['jenis_cuti']):'-' ?></td>												
 												<td><?php echo $data['mulai_tanggal'] ?></td>
 												<td><?php echo $data['sampai_tanggal'] ?></td>
 												<td><?php echo $data['masuk_tanggal'] ?></td>
 												<td><span class="badge <?php echo $badge; ?>"><?php echo $status; ?></span></td>
-												<td>
+												<td style="text-align: center;">
 													<?php
 													if (!$showUserDropdown || $selectedUser == $id_user) {
 														if ($status == 'Menunggu') {
