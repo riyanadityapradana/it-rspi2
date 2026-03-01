@@ -25,6 +25,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $tanggal_selesai     = isset($_POST['tanggal_selesai']) ? $_POST['tanggal_selesai'] : NULL;
   $teknisi             = isset($_POST['teknisi']) ? $_POST['teknisi'] : NULL;
   $keterangan          = $_POST['keterangan'];
+  // proses upload bukti_struk jika ada dan tindakan = Service luar
+  $bukti_struk_new = null;
+  if ($tindakan_perbaikan == 'Service luar' && isset($_FILES['bukti_struk']) && $_FILES['bukti_struk']['error'] == 0) {
+    $file = $_FILES['bukti_struk'];
+    $allowed = ['jpg','jpeg','png','gif','bmp','webp'];
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $maxSize = 2 * 1024 * 1024; // 2MB
+    $target_dir = __DIR__ . '/bukti_struk/';
+    if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
+    if (in_array($ext, $allowed) && $file['size'] <= $maxSize) {
+      $newname = $id . '_' . time() . '.' . $ext;
+      $target = $target_dir . $newname;
+      if (move_uploaded_file($file['tmp_name'], $target)) {
+        // hapus file lama jika ada
+        if (!empty($r['bukti_struk'])) {
+          $old = $target_dir . $r['bukti_struk'];
+          if (file_exists($old)) @unlink($old);
+        }
+        $bukti_struk_new = $newname;
+      }
+    }
+  }
 
   // Validasi barang_id
   if (empty($barang_id)) {
@@ -37,11 +59,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       // Logika update sesuai tindakan_perbaikan
       if ($tindakan_perbaikan == 'Service luar') {
         $teknisi = NULL;
-        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='$tindakan_perbaikan', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", teknisi=NULL, status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
+        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='$tindakan_perbaikan', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", teknisi=NULL, keterangan='$keterangan'";
+        if ($bukti_struk_new !== null) {
+          $edit .= ", bukti_struk='" . mysqli_real_escape_string($config, $bukti_struk_new) . "'";
+        }
+        $edit .= " WHERE perbaikan_id='$id'";
       } else if ($tindakan_perbaikan == 'Service sendiri') {
-        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='$tindakan_perbaikan', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", teknisi=" . ($teknisi ? "'$teknisi'" : "NULL") . ", status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
+        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='$tindakan_perbaikan', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", teknisi=" . ($teknisi ? "'$teknisi'" : "NULL") . ", keterangan='$keterangan' WHERE perbaikan_id='$id'";
       } else {
-        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", status='diajukan', keterangan='$keterangan' WHERE perbaikan_id='$id'";
+        $edit = "UPDATE tb_perbaikan_barang SET barang_id='$barang_id', tanggal_lapor='$tanggal_lapor', deskripsi_kerusakan='$deskripsi_kerusakan', tindakan_perbaikan='', tanggal_selesai=" . ($tanggal_selesai ? "'$tanggal_selesai'" : "NULL") . ", keterangan='$keterangan' WHERE perbaikan_id='$id'";
       }
       $query = mysqli_query($config, $edit);
       if ($query) {
@@ -95,6 +121,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               <option value="Service sendiri" <?php if($r['tindakan_perbaikan']=='Service sendiri') echo 'selected'; ?>>Service sendiri</option>
             </select>
           </div>
+          <div class="form-group" id="field_bukti_struk" style="display:<?= ($r['tindakan_perbaikan']=='Service luar') ? 'block' : 'none' ?>;">
+            <label>Upload Bukti Struk / Kuitansi (gambar)</label>
+            <input type="file" class="form-control" name="bukti_struk" accept="image/*">
+            <?php if (!empty($r['bukti_struk'])): ?>
+              <div style="margin-top:8px;">
+                <b>Preview saat ini:</b><br>
+                <img src="bukti_struk/<?= htmlspecialchars($r['bukti_struk']) ?>" alt="Bukti Struk" style="max-width:200px;max-height:200px;">
+              </div>
+            <?php endif; ?>
+          </div>
           <div class="form-group">
             <label>Tanggal Selesai</label>
             <input type="datetime-local" class="form-control" name="tanggal_selesai" value="<?php echo str_replace(' ', 'T', $r['tanggal_selesai']); ?>">
@@ -124,9 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       </form>
       <script>
       function togglePerbaikanFields() {
-        var tindakan = document.getElementById('tindakan_perbaikan').value;
-        document.getElementById('field_tanggal_selesai').style.display = (tindakan === 'Service luar') ? 'block' : 'none';
-        document.getElementById('field_teknisi').style.display = (tindakan === 'Service sendiri') ? 'block' : 'none';
+  var tindakan = document.getElementById('tindakan_perbaikan').value;
+  var fieldTeknisi = document.getElementById('field_teknisi');
+  if (fieldTeknisi) fieldTeknisi.style.display = (tindakan === 'Service sendiri') ? 'block' : 'none';
+  var fieldBukti = document.getElementById('field_bukti_struk');
+  if (fieldBukti) fieldBukti.style.display = (tindakan === 'Service luar') ? 'block' : 'none';
       }
       </script>
     </div>

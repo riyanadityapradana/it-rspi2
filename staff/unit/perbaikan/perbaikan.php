@@ -243,7 +243,9 @@ $n      = 1;
 									echo $badge;
 								?>
 							</td>
-                                   <td><?= htmlspecialchars($row['tindakan_perbaikan']); ?></td>
+                                   <td><?= htmlspecialchars($row['tindakan_perbaikan']); ?><br><small style="color:#666;"><?php if (strtolower(str_replace(' ', '_', $row['tindakan_perbaikan'])) === 'service_luar'): ?>
+                                             <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalUploadBukti<?= $row['perbaikan_id'] ?>">Upload Bukti</button>
+                                          <?php endif; ?></small></td>
 							<td style="text-align:center;">
 								<?php if ($row['status'] == 'tidak_dapat_diperbaiki'): ?>
 									<span style="background: #dc3545; color: #fff; padding: 4px 12px; border-radius: 10px; font-weight: bold;">
@@ -262,9 +264,6 @@ $n      = 1;
 							<td>
                                           <a href="dashboard_staff.php?unit=update_perbaikan&id=<?= urlencode($row['perbaikan_id']); ?>" class="btn btn-warning btn-sm">Edit</a>
                                           <a href="dashboard_staff.php?unit=delete_perbaikan&id=<?= urlencode($row['perbaikan_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus data?')">Hapus</a>
-                                          <?php if (strtolower(str_replace(' ', '_', $row['tindakan_perbaikan'])) === 'service_luar'): ?>
-                                             <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalUploadBukti<?= $row['perbaikan_id'] ?>">Upload Bukti</button>
-                                          <?php endif; ?>
                                           <!-- Button Detail Data -->
                                                   <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetailBarang<?= $row['perbaikan_id'] ?>">
                                                        <i class="fa fa-eye"></i> Detail
