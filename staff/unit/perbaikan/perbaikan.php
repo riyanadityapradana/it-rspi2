@@ -33,6 +33,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
      }
 }
 
+// Handle Upload Bukti Struk (gambar) form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'upload_bukti') {
+     $perbaikan_id = isset($_POST['perbaikan_id']) ? $_POST['perbaikan_id'] : '';
+     if (!empty($perbaikan_id) && isset($_FILES['bukti_struk']) && $_FILES['bukti_struk']['error'] == 0) {
+          $file = $_FILES['bukti_struk'];
+          $allowed = ['jpg','jpeg','png','gif','bmp','webp'];
+          $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+          $maxSize = 2 * 1024 * 1024; // 2MB
+          $target_dir = __DIR__ . '/bukti_struk/';
+          if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
+          if (!in_array($ext, $allowed)) {
+               header('Location: dashboard_staff.php?unit=perbaikan&err=Format file tidak diperbolehkan!');
+               exit;
+          }
+          if ($file['size'] > $maxSize) {
+               header('Location: dashboard_staff.php?unit=perbaikan&err=File terlalu besar (max 2MB)!');
+               exit;
+          }
+          $newname = $perbaikan_id . '_' . time() . '.' . $ext;
+          $target = $target_dir . $newname;
+          if (move_uploaded_file($file['tmp_name'], $target)) {
+               // simpan nama file ke DB (relatif)
+               $safe_name = mysqli_real_escape_string($config, $newname);
+               $up = "UPDATE tb_perbaikan_barang SET bukti_struk = '$safe_name' WHERE perbaikan_id = '" . mysqli_real_escape_string($config, $perbaikan_id) . "'";
+               mysqli_query($config, $up);
+               header('Location: dashboard_staff.php?unit=perbaikan&msg=Upload bukti struk berhasil!');
+               exit;
+          } else {
+               header('Location: dashboard_staff.php?unit=perbaikan&err=Gagal memindahkan file!');
+               exit;
+          }
+     }
+}
+
 // Build dynamic WHERE conditions from filters (tindakan, status, tanggal range)
 $conditions = [];
 if (!empty($_GET['tindakan'])) {
@@ -75,6 +109,7 @@ $query = "SELECT
              p.deskripsi_kerusakan,
              p.tindakan_perbaikan,
              p.status,
+             p.bukti_struk,
              p.tanggal_lapor,
              p.teknisi,
              p.keterangan,
@@ -225,15 +260,53 @@ $n      = 1;
 								<?php endif; ?>
 							</td>
 							<td>
-								<a href="dashboard_staff.php?unit=update_perbaikan&id=<?= urlencode($row['perbaikan_id']); ?>" class="btn btn-warning btn-sm">Edit</a>
-								<a href="dashboard_staff.php?unit=delete_perbaikan&id=<?= urlencode($row['perbaikan_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus data?')">Hapus</a>
-								<!-- Button Detail Data -->
-                                        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetailBarang<?= $row['perbaikan_id'] ?>">
-                                             <i class="fa fa-eye"></i> Detail
-                                        </button>
+                                          <a href="dashboard_staff.php?unit=update_perbaikan&id=<?= urlencode($row['perbaikan_id']); ?>" class="btn btn-warning btn-sm">Edit</a>
+                                          <a href="dashboard_staff.php?unit=delete_perbaikan&id=<?= urlencode($row['perbaikan_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus data?')">Hapus</a>
+                                          <?php if (strtolower(str_replace(' ', '_', $row['tindakan_perbaikan'])) === 'service_luar'): ?>
+                                             <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalUploadBukti<?= $row['perbaikan_id'] ?>">Upload Bukti</button>
+                                          <?php endif; ?>
+                                          <!-- Button Detail Data -->
+                                                  <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetailBarang<?= $row['perbaikan_id'] ?>">
+                                                       <i class="fa fa-eye"></i> Detail
+                                                  </button>
 							</td>
 						</tr>
                          <?php endforeach; ?>
+                                   <!-- Modal Upload Bukti per row -->
+                                   <?php foreach ($rows as $uploadRow): ?>
+                                   <div class="modal fade" id="modalUploadBukti<?= $uploadRow['perbaikan_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalUploadBuktiLabel<?= $uploadRow['perbaikan_id'] ?>" aria-hidden="true">
+                                   <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                        <div class="modal-header" style="background: #007bff; color: white;">
+                                             <h5 class="modal-title" id="modalUploadBuktiLabel<?= $uploadRow['perbaikan_id'] ?>">Upload Bukti Struk - ID <?= htmlspecialchars($uploadRow['perbaikan_id']) ?></h5>
+                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+                                             <span aria-hidden="true">&times;</span>
+                                             </button>
+                                        </div>
+                                        <form method="post" enctype="multipart/form-data" action="">
+                                             <div class="modal-body">
+                                                  <input type="hidden" name="perbaikan_id" value="<?= htmlspecialchars($uploadRow['perbaikan_id']) ?>">
+                                                  <input type="hidden" name="action" value="upload_bukti">
+                                                  <div class="form-group">
+                                                       <label>Pilih gambar bukti struk (jpg/png/gif/webp, max 2MB)</label>
+                                                       <input type="file" name="bukti_struk" accept="image/*" class="form-control" required>
+                                                  </div>
+                                                  <?php if (!empty($uploadRow['bukti_struk'])): ?>
+                                                       <div class="form-group">
+                                                            <label>Preview saat ini:</label><br>
+                                                            <img src="bukti_struk/<?= htmlspecialchars($uploadRow['bukti_struk']) ?>" alt="Bukti" style="max-width:220px; max-height:220px; border:1px solid #ddd; padding:6px; background:#fff;">
+                                                       </div>
+                                                  <?php endif; ?>
+                                             </div>
+                                             <div class="modal-footer">
+                                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                                  <button type="submit" class="btn btn-primary">Upload</button>
+                                             </div>
+                                        </form>
+                                        </div>
+                                   </div>
+                                   </div>
+                                   <?php endforeach; ?>
                          <!-- Modal Detail Barang -->
                          <?php foreach ($rows as $detailRow): ?>
                          <div class="modal fade" id="modalDetailBarang<?= $detailRow['perbaikan_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalDetailBarangLabel<?= $detailRow['perbaikan_id'] ?>" aria-hidden="true">
