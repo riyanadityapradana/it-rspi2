@@ -293,7 +293,7 @@ $n      = 1;
                                                   <?php if (!empty($uploadRow['bukti_struk'])): ?>
                                                        <div class="form-group">
                                                             <label>Preview saat ini:</label><br>
-                                                            <img src="bukti_struk/<?= htmlspecialchars($uploadRow['bukti_struk']) ?>" alt="Bukti" style="max-width:220px; max-height:220px; border:1px solid #ddd; padding:6px; background:#fff;">
+                                                            <img src="unit/perbaikan/bukti_struk/<?= htmlspecialchars($uploadRow['bukti_struk']) ?>" alt="Bukti" style="max-width:220px; max-height:220px; border:1px solid #ddd; padding:6px; background:#fff;">
                                                        </div>
                                                   <?php endif; ?>
                                              </div>
@@ -375,6 +375,14 @@ $n      = 1;
                                                   <label><strong>Keterangan:</strong></label>
                                                   <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['keterangan']) ?> </div>
                                              </div>
+                                             <?php if (!empty($detailRow['bukti_struk'])): ?>
+                                             <div class="form-group">
+                                                  <label><strong>Bukti Struk:</strong></label><br>
+                                                  <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">
+                                                       <img src="unit/perbaikan/bukti_struk/<?= htmlspecialchars($detailRow['bukti_struk']) ?>" alt="Bukti Struk" style="max-width:220px; max-height:220px;">
+                                                  </div>
+                                             </div>
+                                             <?php endif; ?>
                                         </div>
                                    </div>
                               </div>
