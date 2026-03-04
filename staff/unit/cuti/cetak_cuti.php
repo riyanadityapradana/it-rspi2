@@ -54,7 +54,7 @@ class MYPDF extends TCPDF {
 }
 
 $pdf = new MYPDF('P', 'mm', 'A4', true, 'UTF-8', false);
-$pdf->SetMargins(15, 50, 15);
+$pdf->SetMargins(15, 35, 15);
 $pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->AddPage();
 $pdf->SetFont('helvetica', '', 11);
@@ -85,15 +85,15 @@ c.q Kabag Kepegawaian
 
 
 $html = '';
-$html .= '<p style="margin:0 0 4px 0; font-family: times; font-size: 12px;">Dengan hormat,</p>';
-$html .= '<p style="margin:0 0 10px 0; font-family: times; font-size: 12px; line-height: 1.5;">Saya yang bertandatangan dibawah ini :</p>';
+$html .= '<p style="margin:0 0 4px 0; font-family: times; font-size: 11px;">Dengan hormat,</p>';
+$html .= '<p style="margin:0 0 8px 0; font-family: times; font-size: 11px; line-height: 1.4;">Saya yang bertandatangan dibawah ini :</p>';
 
 // helper untuk nilai default
 function val($arr, $key){
     return isset($arr[$key]) && $arr[$key] !== '' ? htmlspecialchars($arr[$key]) : '-';
 }
 
-$html .= '<table width="100%" style="font-size:12px; font-family: times; line-height: 1.6;">';
+$html .= '<table width="100%" style="font-size:11px; font-family: times; line-height: 1.4;">';
 $html .= '<tr><td width="18%"><strong>Nama</strong></td><td width="2%">:</td><td width="80%">'.val($user,'nama_lengkap').'</td></tr>';
 $html .= '<tr><td><strong>NIP</strong></td><td>:</td><td>'.val($user,'nip').'</td></tr>';
 $html .= '<tr><td><strong>Tempat Tgl Lahir</strong></td><td>:</td><td>'.(val($user,'tmp_lahir') != '-' ? val($user,'tmp_lahir').' ' . (isset($user['tgl_lahir'])?tgl_indo($user['tgl_lahir']):'') : '-').'</td></tr>';
@@ -107,17 +107,17 @@ $sampai = tgl_indo($dataCuti['sampai_tanggal']);
 $masuk = tgl_indo($dataCuti['masuk_tanggal']);
 $hari = intval($dataCuti['banyak_hari']);
 
-$html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 12px; margin: 8px 0;">Bahwa sehubungan dengan <strong>'.(isset($dataCuti['alasan']) && $dataCuti['alasan'] !== '' ? htmlspecialchars($dataCuti['alasan']) : 'keperluan keluarga').'</strong>, maka dengan ini saya menyampaikan <strong>'.$jenisCutiDisplay.'</strong> kepada Bapak/Ibu sebanyak <strong>'.$hari.' hari kerja</strong> yaitu sejak tanggal <strong>'.$mulai.'</strong> sampai dengan tanggal <strong>'.$sampai.'</strong>, dan saya akan masuk bekerja kembali pada tanggal <strong>'.$masuk.'</strong>.</p>';
+$html .= '<p style="text-align:justify; line-height:1.4; font-family: times; font-size: 11px; margin: 6px 0;">Bahwa sehubungan dengan <strong>'.(isset($dataCuti['alasan']) && $dataCuti['alasan'] !== '' ? htmlspecialchars($dataCuti['alasan']) : 'keperluan keluarga').'</strong>, maka dengan ini saya menyampaikan <strong>'.$jenisCutiDisplay.'</strong> kepada Bapak/Ibu sebanyak <strong>'.$hari.' hari kerja</strong> yaitu sejak tanggal <strong>'.$mulai.'</strong> sampai dengan tanggal <strong>'.$sampai.'</strong>, dan saya akan masuk bekerja kembali pada tanggal <strong>'.$masuk.'</strong>.</p>';
 
-$html .= '<p style="text-align:justify; line-height:1.6; font-family: times; font-size: 12px; margin: 12px 0;">Demikian surat permohonan ini saya sampaikan. Besar harapan saya agar permohonan ini dapat dikabulkan. Atas perhatian dan bantuan Bapak/Ibu saya ucapkan terima kasih.</p>';
+$html .= '<p style="text-align:justify; line-height:1.4; font-family: times; font-size: 11px; margin: 8px 0;">Demikian surat permohonan ini saya sampaikan. Besar harapan saya agar permohonan ini dapat dikabulkan. Atas perhatian dan bantuan Bapak/Ibu saya ucapkan terima kasih.</p>';
 // Tanda tangan tampat QR code, karena sudah ditempatkan di bagian bawah
-$html .= '<table width="100%" cellpadding="8" style="font-family: times; font-size: 12px;">';
+$html .= '<table width="100%" cellpadding="6" style="font-family: times; font-size: 11px;">';
 $html .= '<tr>';
 $html .= '<td align="center">Mengetahui,<br/>Kepala Ruangan<br/><br/><br/><u>'.(val($pimpinan,'nama_lengkap')!='-'?val($pimpinan,'nama_lengkap'):'__________________').'</u><br/>NIP. '.(isset($pimpinan['nip']) && $pimpinan['nip'] ? htmlspecialchars($pimpinan['nip']):'_______________').'</td>';
 $html .= '<td align="center">Pegawai yang bersangkutan,<br/><br/><br/><u>'.val($user,'nama_lengkap').'</u><br/>NIP. '.val($user,'nip').'</td>';
 $html .= '</tr>';
 $html .= '<tr>';
-$html .= '<td colspan="2" align="center" style="padding-top:120px;">';
+$html .= '<td colspan="2" align="center" style="padding-top:18px;">';
 $html .= 'Mengetahui,<br/>';
 $html .= '<em>Kabag Kepegawaian, SDM & Pemasaran</em><br/>';
 $html .= '<em>RS Pelita Insani</em><br/>';
@@ -127,6 +127,8 @@ $html .= '</td>';
 $html .= '</tr>';
 $html .= '</table>';
 
+// tambahan tembusan di bawah tanda tangan nama nanda
+$html .= '<p style="margin-top:8px; font-family: times; font-size: 11px;">Tembusan :<br>- Kepala Ruangan/Koordinator<br>- Arsip</p>';
 
 // #Tanda tangan dan QR code akan dirender terpisah agar bisa ditempatkan dengan presisi di dalam kotak tanda tangan
 // #write main content
