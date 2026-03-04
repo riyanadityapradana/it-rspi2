@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         if (!empty($user['foto']) && file_exists($foto_path)):
                                     ?>
                                         <div class="text-center mb-3">
-                                            <img src="<?= htmlspecialchars($foto_path) ?>" alt="Foto Profil" style="max-width: 200px; max-height: 200px; border-radius: 5px; object-fit: cover;">
+                                            <img src="<?= htmlspecialchars($foto_path) ?>" alt="Foto Profil" style="max-width: 200px; max-height: 200px; border-radius: 5px; object-fit: cover;" class="zoomable" data-full="<?= htmlspecialchars($foto_path) ?>">
                                             <p class="text-muted small mt-2">Foto saat ini | Abaikan jika tidak ingin diubah</p>
                                         </div>
                                     <?php else: ?>
@@ -242,3 +242,32 @@ document.getElementById('foto').addEventListener('change', function(e) {
     document.querySelector('.custom-file-label').textContent = fileName;
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.zoomable').forEach(function(img) {
+                img.style.cursor = 'pointer';
+                img.addEventListener('click', function() {
+                        var src = img.getAttribute('data-full') || img.src;
+                        var modalImg = document.getElementById('modalImage');
+                        if (modalImg) {
+                                modalImg.src = src;
+                                $('#imageModal').modal('show');
+                        } else {
+                                window.open(src, '_blank');
+                        }
+                });
+        });
+});
+</script>
+
+<!-- full-size image modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="background:transparent; border:none;">
+            <div class="modal-body text-center p-0">
+                <img src="" id="modalImage" style="max-width:100%; height:auto;" />
+            </div>
+        </div>
+    </div>
+</div>

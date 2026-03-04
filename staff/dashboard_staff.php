@@ -65,7 +65,7 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
                     <?php
                         $foto = isset($_SESSION['foto']) && $_SESSION['foto'] ? $_SESSION['foto'] : 'default-user.png';
                     ?>
-                    <img src="../assets/img/<?= htmlspecialchars($foto) ?>" class="img-circle elevation-2" alt="User Image" style="width: 47px; height: 52px; object-fit: cover;">
+                    <img src="../assets/img/<?= htmlspecialchars($foto) ?>" class="zoomable img-circle elevation-2" data-full="../assets/img/<?= htmlspecialchars($foto) ?>" alt="User Image" style="width: 47px; height: 52px; object-fit: cover;">
                 </div>
                 <div class="info ml-2">
                     <a href="#" class="d-block" style="color: black; font-size: 12px; color: black; white-space: normal; word-break: break-word; line-height: 1.2;"><?php echo htmlspecialchars($nama); ?></a>
@@ -297,6 +297,34 @@ $(document).ready(function() {
         toastr.error("<?= htmlspecialchars($_GET['err']) ?>");
     <?php endif; ?>
     });
+</script>
+<!-- full-size image modal for zoomable images -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="background:transparent; border:none;">
+            <div class="modal-body text-center p-0">
+                <img src="" id="modalImage" style="max-width:100%; height:auto;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.zoomable').forEach(function(img) {
+                img.style.cursor = 'pointer';
+                img.addEventListener('click', function() {
+                        var src = img.getAttribute('data-full') || img.src;
+                        var modalImg = document.getElementById('modalImage');
+                        if (modalImg) {
+                                modalImg.src = src;
+                                $('#imageModal').modal('show');
+                        } else {
+                                window.open(src, '_blank');
+                        }
+                });
+        });
+});
 </script>
 </body>
 </html> 

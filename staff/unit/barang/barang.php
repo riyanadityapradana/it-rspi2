@@ -666,7 +666,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           <label><strong>Foto Barang:</strong></label>
                           <?php if (!empty($detailRow['foto'])): ?>
                             <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">
-                              <img src="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width:180px;max-height:180px;">
+                              <img src="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width:180px;max-height:180px;" class="zoomable" data-full="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>">
                             </div>
                           <?php else: ?>
                             <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">-</div>
@@ -757,6 +757,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
     </div>
 </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.zoomable').forEach(function(img) {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', function() {
+            var src = img.getAttribute('data-full') || img.src;
+            var modalImg = document.getElementById('modalImage');
+            if (modalImg) {
+                modalImg.src = src;
+                $('#imageModal').modal('show');
+            } else {
+                window.open(src, '_blank');
+            }
+        });
+    });
+});
+</script>
+
+<!-- full-size image modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" style="background:transparent; border:none;">
+      <div class="modal-body text-center p-0">
+        <img src="" id="modalImage" style="max-width:100%; height:auto;" />
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Print -->
 

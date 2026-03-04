@@ -293,7 +293,7 @@ $n      = 1;
                                                   <?php if (!empty($uploadRow['bukti_struk'])): ?>
                                                        <div class="form-group">
                                                             <label>Preview saat ini:</label><br>
-                                                            <img src="unit/perbaikan/bukti_struk/<?= htmlspecialchars($uploadRow['bukti_struk']) ?>" alt="Bukti" style="max-width:220px; max-height:220px; border:1px solid #ddd; padding:6px; background:#fff;">
+                                                            <img src="unit/perbaikan/bukti_struk/<?= htmlspecialchars($uploadRow['bukti_struk']) ?>" alt="Bukti" style="max-width:220px; max-height:220px; border:1px solid #ddd; padding:6px; background:#fff;" class="zoomable" data-full="unit/perbaikan/bukti_struk/<?= htmlspecialchars($uploadRow['bukti_struk']) ?>">
                                                        </div>
                                                   <?php endif; ?>
                                              </div>
@@ -324,7 +324,7 @@ $n      = 1;
                                                   <label><strong>Foto Barang:</strong></label>
                                                   <?php if (!empty($detailRow['foto'])): ?>
                                                   <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">
-                                                       <img src="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width:180px;max-height:180px;">
+                                                       <img src="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width:180px;max-height:180px;" class="zoomable" data-full="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>">
                                                   </div>
                                                   <?php else: ?>
                                                   <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">-</div>
@@ -379,7 +379,7 @@ $n      = 1;
                                              <div class="form-group">
                                                   <label><strong>Bukti Struk:</strong></label><br>
                                                   <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">
-                                                       <img src="unit/perbaikan/bukti_struk/<?= htmlspecialchars($detailRow['bukti_struk']) ?>" alt="Bukti Struk" style="max-width:220px; max-height:220px;">
+                                                       <img src="unit/perbaikan/bukti_struk/<?= htmlspecialchars($detailRow['bukti_struk']) ?>" alt="Bukti Struk" style="max-width:220px; max-height:220px;" class="zoomable" data-full="unit/perbaikan/bukti_struk/<?= htmlspecialchars($detailRow['bukti_struk']) ?>">
                                                   </div>
                                              </div>
                                              <?php endif; ?>
@@ -476,4 +476,34 @@ $n      = 1;
       </div>
     </form>
   </div>
+</div>
+<script>
+// when an image has class 'zoomable' open its source in new tab on click
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.zoomable').forEach(function(img) {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', function() {
+                              var src = img.getAttribute('data-full') || img.src;
+                              // show inside bootstrap modal instead of new tab
+                              var modalImg = document.getElementById('modalImage');
+                              if (modalImg) {
+                                        modalImg.src = src;
+                                        $('#imageModal').modal('show');
+                              } else {
+                                        window.open(src, '_blank');
+                              }
+        });
+    });
+});
+</script>
+
+<!-- modal used for displaying full-size images -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content" style="background:transparent; border:none;">
+               <div class="modal-body text-center p-0">
+                    <img src="" id="modalImage" style="max-width:100%; height:auto;" />
+               </div>
+          </div>
+     </div>
 </div>
