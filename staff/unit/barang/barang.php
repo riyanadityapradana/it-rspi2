@@ -249,14 +249,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                 <table id="example2" class="table table-bordered table-striped">
                 <thead style="background:rgb(129, 2, 0, 1); color:white;">
                     <tr>
-                    <th style="width: 50px; text-align: center;">No</th>
-                    <th style="width: 200px;">Nama Barang</th>
-                    <th style="width: 130px ;">Jenis Barang</th>
-                    <th style="width: 70px; text-align: center;">Lokasi Awal</th>
-                    <th style="width: 70px; text-align: center;">Lokasi Saat Ini</th>
-                    <th style="width: 50px; text-align: center;">Status Penyerahan</th>
-                    <th style="width: 50px; text-align: center;">Kondisi</th>
-                    <th style="width: 200px; text-align: center;">Aksi</th>
+                    <th style="width: 30px; text-align: center;" responsive>No</th>
+                    <th style="width: 280px;" responsive>Nama Barang</th>
+                    <th style="width: 130px ;" responsive>Jenis Barang</th>
+                    <th style="width: 50px; text-align: center;" responsive>Lokasi Awal</th>
+                    <th style="width: 70px; text-align: center;" responsive>Lokasi Saat Ini</th>
+                    <th style="width: 35px; text-align: center;" responsive>Status Penyerahan</th>
+                    <th style="width: 30px; text-align: center;" responsive>Kondisi</th>
+                    <th style="width: 280px; text-align: center;" responsive>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -293,7 +293,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                     while ($row = mysqli_fetch_assoc($q)) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
-                        <td><?= htmlspecialchars($row['nama_barang']); ?><br><small style="color: #666;">Kode Inventaris :<b><?= htmlspecialchars($row['kode_inventaris']); ?></b></small></td>
+                        <td><?= htmlspecialchars($row['nama_barang']); ?>
+                          <br><small style="color: #2266e4;">Kode Inventaris :<b><?= htmlspecialchars($row['kode_inventaris']); ?></b></small>
+                          <br><small style="color: #2266e4;">S/N : <b><?= htmlspecialchars($row['nomor_seri']); ?></b></small>
+                          <br><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalPindah" onclick="setPindahData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['kode_inventaris']) ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= $row['lokasi_id'] ?>')" responsive>
+                              <i class="fa fa-exchange-alt"></i> Pindah
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm" onclick="setPerbaikanData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= $row['lokasi_id'] ?>')" data-toggle="modal" data-target="#modalPerbaikan" responsive>
+                              <i class="fa fa-wrench"></i> Perbaikan
+                            </button>
+                        </td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
                         <td>
                           <?php
@@ -353,12 +362,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           <!-- Button Detail Data -->
                           <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetailBarang<?= $row['barang_id'] ?>" responsive>
                             <i class="fa fa-eye"></i> Detail
-                          </button>
-                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalPindah" onclick="setPindahData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['kode_inventaris']) ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= $row['lokasi_id'] ?>')" responsive>
-                              <i class="fa fa-exchange-alt"></i> Pindah
-                            </button>
-                          <button type="button" class="btn btn-warning btn-sm" onclick="setPerbaikanData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= $row['lokasi_id'] ?>')" data-toggle="modal" data-target="#modalPerbaikan" responsive>
-                            <i class="fa fa-wrench"></i> Perbaikan
                           </button>
                           <?php if ($row['jumlah_penyerahan'] < $row['jumlah']): ?>
                             <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalUpdateLokasi" onclick="setUpdateLokasiData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '', '', '', '<?= $row['jumlah'] ?>')" responsive>
