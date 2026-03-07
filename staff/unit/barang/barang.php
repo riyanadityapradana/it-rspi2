@@ -383,7 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                               <span aria-hidden="true">&times;</span>
                             </button>
                           </div>
-                      <form id="formUpdateLokasi" method="POST" action="">
+                          <form id="formUpdateLokasi" method="POST" action="">
                             <div class="modal-body">
                               <input type="hidden" name="barang_id" id="updateBarangId">
                               <input type="hidden" name="unit_index" id="unitIndex">
@@ -393,7 +393,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                               </div>
                               <div class="form-group">
                                 <label id="unitLabel">Lokasi:</label>
-                                <select class="form-control select2" name="lokasi_id[]" required>
+                                <select  name="lokasi_id[]" class="form-control select2bs4" required>
                                   <option value="">-- Pilih Lokasi --</option>
                                   <?php foreach ($lokasi_list as $lokasi): ?>
                                     <option value="<?= $lokasi['lokasi_id'] ?>"><?= htmlspecialchars($lokasi['nama_lokasi']) ?></option>
@@ -402,7 +402,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                               </div>
                               <div class="form-group">
                                 <label>Kondisi:</label>
-                                <select class="form-control select2" name="kondisi[]" required>
+                                <select class="form-control select2bs4" name="kondisi[]" required>
                                   <option value="baru">Baru</option>
                                   <option value="bekas">Bekas</option>
                                 </select>
@@ -432,8 +432,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         document.getElementById('unitIndex').value = unit_index;
                         document.getElementById('unitLabel').textContent = 'Unit ' + (unit_index + 1) + ' dari ' + jumlah + ' - Lokasi:';
                         if (unit_index == 0) {
-                          document.querySelector('select[name="lokasi_id[]"]').value = lokasiId;
-                          document.querySelector('select[name="kondisi[]"]').value = kondisi;
+                          $('select[name="lokasi_id[]"]').val(lokasiId).trigger('change');
+                          $('select[name="kondisi[]"]').val(kondisi).trigger('change');
                           document.querySelector('textarea[name="keterangan_unit[]"]').value = keterangan;
                         }
                         // Jika continue, auto show modal
@@ -441,6 +441,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                           $('#modalUpdateLokasi').modal('show');
                         }
                       }
+                    </script>
+                    <style>
+                      /* Ensure Select2 dropdown appears above modal */
+                      .select2-container--open { z-index: 2099999999 !important; }
+                    </style>
+                    <script>
+                      // Defer jQuery-dependent initialization until window.load (after scripts like jQuery are loaded)
+                      window.addEventListener('load', function() {
+                        if (typeof window.jQuery === 'undefined') return;
+                        var $ = window.jQuery;
+                        // Initialize Select2 when modal is shown — support both .select2 and .select2bs4
+                        $('#modalUpdateLokasi').on('shown.bs.modal', function () {
+                          var $modal = $(this);
+                          $modal.find('select').each(function() {
+                            var $s = $(this);
+                            if (!$s.hasClass('select2') && !$s.hasClass('select2bs4')) return;
+                            try { $s.select2('destroy'); } catch(e){}
+                            var opts = { width: '100%', dropdownParent: $modal };
+                            if ($s.hasClass('select2bs4')) opts.theme = 'bootstrap4';
+                            $s.select2(opts);
+                          });
+                          // focus search field if present after dropdown opens
+                          setTimeout(function(){
+                            var $search = $modal.find('.select2-container--open .select2-search__field').first();
+                            if ($search.length) $search.focus();
+                          }, 150);
+                        });
+
+                        // Also ensure Select2 inside other modals uses modal as dropdown parent
+                        $('#modalPerbaikan, #modalPindah').on('shown.bs.modal', function () {
+                          var $modal = $(this);
+                          $modal.find('select').each(function() {
+                            var $s = $(this);
+                            if (!$s.hasClass('select2') && !$s.hasClass('select2bs4')) return;
+                            try { $s.select2('destroy'); } catch(e){}
+                            var opts = { width: '100%', dropdownParent: $modal };
+                            if ($s.hasClass('select2bs4')) opts.theme = 'bootstrap4';
+                            $s.select2(opts);
+                          });
+                          setTimeout(function(){
+                            var $search = $modal.find('.select2-container--open .select2-search__field').first();
+                            if ($search.length) $search.focus();
+                          }, 150);
+                        });
+
+                        // Initialize non-modal selects on ready
+                        $('select.select2, select.select2bs4').each(function(){
+                          var $s = $(this);
+                          try { $s.select2('destroy'); } catch(e){}
+                          var opts = { width: '100%' };
+                          if ($s.hasClass('select2bs4')) opts.theme = 'bootstrap4';
+                          $s.select2(opts);
+                        });
+                      });
                     </script>
                 </tr>
                 <?php endwhile; ?>
@@ -469,7 +523,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       </div>
                       <div class="form-group">
                         <label>Unit Pelapor</label>
-                        <select id="perbaikanUnitMelapor" class="form-control" disabled>
+                        <select id="perbaikanUnitMelapor" class="form-control select2bs4" disabled>
                           <option value="">-- Lokasi barang (otomatis) --</option>
                           <?php foreach ($lokasi_list as $lok): ?>
                             <option value="<?= $lok['lokasi_id'] ?>"><?= htmlspecialchars($lok['nama_lokasi']) ?></option>
@@ -483,14 +537,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       </div>
                       <div class="form-group">
                         <label>Tindakan Perbaikan</label>
-                        <select name="tindakan_perbaikan" id="perbaikanTindakan" class="form-control" required>
+                        <select name="tindakan_perbaikan" id="perbaikanTindakan" class="form-control select2bs4" required>
                           <option value="Service luar">Service luar</option>
                           <option value="Service sendiri">Service sendiri</option>
                         </select>
                       </div>
                       <div class="form-group">
                         <label>Status Perbaikan</label>
-                        <select name="status_perbaikan" class="form-control" required>
+                        <select name="status_perbaikan" class="form-control select2bs4" required>
                           <option value="diajukan">Diajukan</option>
                           <option value="proses">Proses</option>
                           <option value="tidak_dapat_diperbaiki">Tidak Dapat Diperbaiki</option>
@@ -534,7 +588,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                 if (lokasiId) {
                   var sel = document.getElementById('perbaikanUnitMelapor');
                   var hid = document.getElementById('perbaikanUnitMelaporHidden');
-                  if (sel) sel.value = lokasiId;
+                  if (sel) {
+                    sel.value = lokasiId;
+                    if (window.jQuery) try { window.jQuery(sel).val(lokasiId).trigger('change'); } catch(e){}
+                  }
                   if (hid) hid.value = lokasiId;
                 } else {
                   var hid = document.getElementById('perbaikanUnitMelaporHidden');
@@ -593,7 +650,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       <div class="form-group">
                         <label>Lokasi Asal</label>
                         <!-- read-only display select (disabled) -->
-                        <select id="pindahLokasiAsalDisplay" class="form-control" disabled>
+                        <select id="pindahLokasiAsalDisplay" class="form-control select2bs4" disabled>
                           <option value="">-- Lokasi Asal (otomatis) --</option>
                           <?php foreach ($lokasi_list as $lok): ?>
                             <option value="<?= $lok['lokasi_id'] ?>"><?= htmlspecialchars($lok['nama_lokasi']) ?></option>
@@ -604,7 +661,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       </div>
                       <div class="form-group">
                         <label>Lokasi Tujuan</label>
-                        <select name="lokasi_tujuan" class="form-control" required>
+                        <select name="lokasi_tujuan" class="form-control select2bs4" required>
                           <option value="">-- Pilih Lokasi Tujuan --</option>
                           <?php foreach ($lokasi_list as $lok2): ?>
                             <option value="<?= $lok2['lokasi_id'] ?>"><?= htmlspecialchars($lok2['nama_lokasi']) ?></option>
@@ -640,6 +697,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                   var hid = document.getElementById('pindahLokasiAsalHidden');
                   if (sel && lastPenyerahanLokasiId) {
                     sel.value = lastPenyerahanLokasiId;
+                    if (window.jQuery) try { window.jQuery(sel).val(lastPenyerahanLokasiId).trigger('change'); } catch(e){}
                   }
                   if (hid) {
                     hid.value = lastPenyerahanLokasiId ? lastPenyerahanLokasiId : '';
@@ -759,20 +817,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
 </section>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.zoomable').forEach(function(img) {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', function() {
-            var src = img.getAttribute('data-full') || img.src;
-            var modalImg = document.getElementById('modalImage');
-            if (modalImg) {
-                modalImg.src = src;
-                $('#imageModal').modal('show');
-            } else {
-                window.open(src, '_blank');
-            }
-        });
+// Defer zoomable image handler until window.load so jQuery/Bootstrap modal are available
+window.addEventListener('load', function() {
+  document.querySelectorAll('.zoomable').forEach(function(img) {
+    img.style.cursor = 'pointer';
+    img.addEventListener('click', function() {
+      var src = img.getAttribute('data-full') || img.src;
+      var modalImg = document.getElementById('modalImage');
+      if (modalImg) {
+        modalImg.src = src;
+        if (typeof window.jQuery !== 'undefined') {
+          window.jQuery('#imageModal').modal('show');
+        } else {
+          window.open(src, '_blank');
+        }
+      } else {
+        window.open(src, '_blank');
+      }
     });
+  });
 });
 </script>
 
@@ -834,11 +897,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // Filter berdasarkan jenis barang dan status barang
 document.addEventListener('DOMContentLoaded', function() {
-    const filterJenisSelect = document.getElementById('filterJenisBarang');
-    const filterStatusSelect = document.getElementById('filterStatusBarang');
-    const table = document.getElementById('example1');
-    const tbody = table.querySelector('tbody');
-    const rows = tbody.querySelectorAll('tr');
+  const filterJenisSelect = document.getElementById('filterJenisBarang');
+  const filterStatusSelect = document.getElementById('filterStatusBarang');
+  if (!filterJenisSelect || !filterStatusSelect) return;
+  const table = document.getElementById('example1') || document.getElementById('example2');
+  if (!table) return;
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+  const rows = tbody.querySelectorAll('tr');
 
     function filterTable() {
         const selectedJenis = filterJenisSelect.value;
