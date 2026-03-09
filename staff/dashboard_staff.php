@@ -271,6 +271,57 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
     $('.select2bs4').select2({ theme: 'bootstrap4' });
     });
 </script>
+<script>
+    // Defer jQuery-dependent initialization until window.load (after scripts like jQuery are loaded)
+    window.addEventListener('load', function() {
+    if (typeof window.jQuery === 'undefined') return;
+    var $ = window.jQuery;
+    // Initialize Select2 when modal is shown — support both .select2 and .select2bs4
+    $('#modalUpdateLokasi').on('shown.bs.modal', function () {
+        var $modal = $(this);
+        $modal.find('select').each(function() {
+        var $s = $(this);
+        if (!$s.hasClass('select2') && !$s.hasClass('select2bs4')) return;
+        try { $s.select2('destroy'); } catch(e){}
+        var opts = { width: '100%', dropdownParent: $modal };
+        if ($s.hasClass('select2bs4')) opts.theme = 'bootstrap4';
+        $s.select2(opts);
+        });
+        // focus search field if present after dropdown opens
+        setTimeout(function(){
+        var $search = $modal.find('.select2-container--open .select2-search__field').first();
+        if ($search.length) $search.focus();
+        }, 150);
+    });
+
+    // Also ensure Select2 inside other modals uses modal as dropdown parent
+    $('#modalPerbaikan, #modalPindah').on('shown.bs.modal', function () {
+        var $modal = $(this);
+        $modal.find('select').each(function() {
+        var $s = $(this);
+        if (!$s.hasClass('select2') && !$s.hasClass('select2bs4')) return;
+        try { $s.select2('destroy'); } catch(e){}
+        var opts = { width: '100%', dropdownParent: $modal };
+        if ($s.hasClass('select2bs4')) opts.theme = 'bootstrap4';
+        $s.select2(opts);
+        });
+        setTimeout(function(){
+        var $search = $modal.find('.select2-container--open .select2-search__field').first();
+        if ($search.length) $search.focus();
+        }, 150);
+    });
+
+    // Initialize non-modal selects on ready
+    $('select.select2, select.select2bs4').each(function(){
+        var $s = $(this);
+        try { $s.select2('destroy'); } catch(e){}
+        var opts = { width: '100%' };
+        if ($s.hasClass('select2bs4')) opts.theme = 'bootstrap4';
+        $s.select2(opts);
+    });
+    });
+</script>
+
 <script type="text/javascript">
 $(document).ready(function() {
     // Inisialisasi DataTable dengan pengaturan custom
