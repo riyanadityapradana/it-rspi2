@@ -442,10 +442,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         }
                       }
                     </script>
-                    <style>
-                      /* Ensure Select2 dropdown appears above modal */
-                      .select2-container--open { z-index: 2099999999 !important; }
-                    </style>
                 </tr>
                 <?php endwhile; ?>
 
@@ -765,29 +761,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
     </div>
 </div>
 </section>
-
-<script>
-// Defer zoomable image handler until window.load so jQuery/Bootstrap modal are available
-window.addEventListener('load', function() {
-  document.querySelectorAll('.zoomable').forEach(function(img) {
-    img.style.cursor = 'pointer';
-    img.addEventListener('click', function() {
-      var src = img.getAttribute('data-full') || img.src;
-      var modalImg = document.getElementById('modalImage');
-      if (modalImg) {
-        modalImg.src = src;
-        if (typeof window.jQuery !== 'undefined') {
-          window.jQuery('#imageModal').modal('show');
-        } else {
-          window.open(src, '_blank');
-        }
-      } else {
-        window.open(src, '_blank');
-      }
-    });
-  });
-});
-</script>
 
 <!-- full-size image modal -->
 <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
