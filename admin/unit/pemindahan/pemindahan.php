@@ -41,13 +41,13 @@ require_once("../config/koneksi.php");
                 <table id="example1" class="table table-bordered table-striped">
                 <thead style="background:rgb(52, 58, 64, 1)">
                     <tr>
-                      <th>No</th>
-                      <th>Nama Barang</th>
-                      <th>Lokasi Asal</th>
-                      <th>Lokasi Tujuan</th>
-                      <th>Tanggal Mutasi</th>
-                      <th>Staff</th>
-                      <th>Aksi</th>
+                      <th style="font-size: 14px; color: white;" responsive>No</th>
+                      <th style="font-size: 14px; color: white;" responsive>Nama Barang</th>
+                      <th style="font-size: 14px; color: white;" responsive>Lokasi Asal</th>
+                      <th style="font-size: 14px; color: white;" responsive>Lokasi Tujuan</th>
+                      <th style="font-size: 14px; color: white;" responsive>Tanggal Mutasi</th>
+                      <th style="font-size: 14px; color: white;" responsive>Staff Memindahkan</th>
+                      <th style="font-size: 14px; color: white;" responsive>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>

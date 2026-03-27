@@ -139,9 +139,9 @@ $n      = 1;
 							<th style="font-size: 14px; color: white;" width="120" responsive>Nama Barang</th>
                                    <th style="font-size: 14px; color: white;" width="120" responsive>No.Seri/SN</th>
 							<th style="font-size: 14px; color: white;" width="120" responsive>Status</th>
-                                   <th style="font-size: 14px; color: white;" width="120" responsive>Tindakan</th>
+                                   <th style="font-size: 14px; color: white;" width="90" responsive>Tindakan</th>
 							<th style="font-size: 14px; color: white;" width="120" responsive>Tanggal Selesai</th>
-							<th style="font-size: 14px; color: white;" width="200" responsive>Aksi</th>
+							<th style="font-size: 14px; color: white;" width="90" responsive>Aksi</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -152,7 +152,7 @@ $n      = 1;
                                    <td><?= htmlspecialchars($row['unit_melapor_nama'] ?? $row['unit_melapor']); ?></td>
                                    <td><?= htmlspecialchars($row['nama_barang']); ?><br><small style="color:#666;">Kode: <?= htmlspecialchars($row['kode_inventaris'] ?? '-') ?></small></td>
                                    <td><?= htmlspecialchars($row['nomor_seri']); ?></td>
-							<td style="text-align:center;">
+							<td class="text-center">
 								<?php
 									$status = $row['status'];
 									$badge = '';
@@ -167,7 +167,7 @@ $n      = 1;
 											$badge = '<span style="background: #28a745; color: #fff; padding: 4px 12px; border-radius: 10px; font-weight: bold;">Selesai</span>';
 											break;
 										case 'tidak_dapat_diperbaiki':
-											$badge = '<span style="background: #dc3545; color: #fff; padding: 4px 12px; border-radius: 10px; font-weight: bold;">Tidak Dapat Diperbaiki</span>';
+											$badge = '<span style="background: #dc3545; color: #fff; padding: 2px 3px; border-radius: 5px; font-weight: bold;">Tidak Dapat Diperbaiki</span>';
 											break;
 										default:
 											$badge = htmlspecialchars($status);

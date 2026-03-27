@@ -109,11 +109,11 @@ if ($res) {
             <tr>
               <th style="font-size: 14px; color: white;" width="40" responsive>No</th>
               <th style="font-size: 14px; color: white;" width="40" responsive>Tanggal Lapor</th>
-              <th style="font-size: 14px; color: white;">Unit Melapor</th>
-              <th style="font-size: 14px; color: white;">Nama Barang</th>
-              <th style="font-size: 14px; color: white;">Jenis</th>
-              <th style="font-size: 14px; color: white;">No. Seri</th>
-              <th style="font-size: 14px; color: white;">Deskripsi</th>
+              <th style="font-size: 14px; color: white;" responsive>Unit Melapor</th>
+              <th style="font-size: 14px; color: white;" responsive>Nama Barang</th>
+              <th style="font-size: 14px; color: white;" responsive>Jenis</th>
+              <th style="font-size: 14px; color: white;" responsive>No. Seri</th>
+              <th style="font-size: 14px; color: white;" responsive>Deskripsi</th>
             </tr>
           </thead>
           <tbody>

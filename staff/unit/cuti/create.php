@@ -1,4 +1,3 @@
-
 <?php
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 // asumsi: $config (koneksi mysqli) tersedia di scope pemanggil
@@ -14,8 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 	$mulai_tanggal = mysqli_real_escape_string($config, $_POST['mulai_tanggal']);
 	$sampai_tanggal = mysqli_real_escape_string($config, $_POST['sampai_tanggal']);
 	$masuk_tanggal = mysqli_real_escape_string($config, $_POST['masuk_tanggal']);
-		$alasan = mysqli_real_escape_string($config, isset($_POST['alasan'])?$_POST['alasan']: '');
-	$jenis_cuti = mysqli_real_escape_string($config, isset($_POST['jenis_cuti'])?$_POST['jenis_cuti']: '');
+	$alasan = mysqli_real_escape_string($config, isset($_POST['alasan']) ? $_POST['alasan'] : '');
+	$jenis_cuti = mysqli_real_escape_string($config, isset($_POST['jenis_cuti']) ? $_POST['jenis_cuti'] : '');
 	$status = 'Menunggu';
 
 	// Hitung banyak_hari secara server-side (inklusif)
@@ -23,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 	$banyak_hari = ($diff_seconds !== false) ? intval(floor($diff_seconds / 86400) + 1) : 0;
 
 	// Basic validation
-		if (empty($mulai_tanggal) || empty($sampai_tanggal) || empty($masuk_tanggal) || $banyak_hari <= 0) {
+	if (empty($mulai_tanggal) || empty($sampai_tanggal) || empty($masuk_tanggal) || $banyak_hari <= 0) {
 		$error = 'Lengkapi semua field dengan benar.';
 	} else {
 		$sql = "INSERT INTO tb_cuti (id_user, nip, banyak_hari, mulai_tanggal, sampai_tanggal, masuk_tanggal, alasan, jenis_cuti, status_lembur) VALUES ('{$id_user}','{$nip}','{$banyak_hari}','{$mulai_tanggal}','{$sampai_tanggal}','{$masuk_tanggal}','{$alasan}','{$jenis_cuti}','{$status}');";
@@ -58,6 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 <!-- Main content -->
 <section class="content">
 	<div class="container-fluid">
+		<?php
+		$today = date('Y-m-d');
+		$mulaiTanggalValue = isset($_POST['mulai_tanggal']) ? htmlspecialchars($_POST['mulai_tanggal']) : $today;
+		$sampaiTanggalValue = isset($_POST['sampai_tanggal']) ? htmlspecialchars($_POST['sampai_tanggal']) : $today;
+		$masukTanggalValue = isset($_POST['masuk_tanggal']) ? htmlspecialchars($_POST['masuk_tanggal']) : $today;
+		?>
 		<div class="card card-default">
 			<div class="card-header">
 				<h3 class="card-title">Silahkan Isi Form Pengajuan Cuti</h3>
@@ -79,19 +84,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 						<div class="col-md-4">
 							<div class="form-group">
 								<label>Mulai Tanggal</label>
-								<input type="date" name="mulai_tanggal" class="form-control" value="<?php echo isset($_POST['mulai_tanggal'])?htmlspecialchars($_POST['mulai_tanggal']):''; ?>" required>
+								<input type="date" name="mulai_tanggal" class="form-control" value="<?php echo $mulaiTanggalValue; ?>" required>
 							</div>
 						</div>
 						<div class="col-md-4">
 							<div class="form-group">
 								<label>Sampai Tanggal</label>
-								<input type="date" name="sampai_tanggal" class="form-control" value="<?php echo isset($_POST['sampai_tanggal'])?htmlspecialchars($_POST['sampai_tanggal']):''; ?>" required>
+								<input type="date" name="sampai_tanggal" class="form-control" value="<?php echo $sampaiTanggalValue; ?>" required>
 							</div>
 						</div>
 						<div class="col-md-4">
 							<div class="form-group">
 								<label>Masuk Tanggal</label>
-								<input type="date" name="masuk_tanggal" class="form-control" value="<?php echo isset($_POST['masuk_tanggal'])?htmlspecialchars($_POST['masuk_tanggal']):''; ?>" required>
+								<input type="date" name="masuk_tanggal" class="form-control" value="<?php echo $masukTanggalValue; ?>" required>
 							</div>
 						</div>
 					</div>
@@ -121,8 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 		</div>
 	</div>
 </section>
-<!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
 <script>
 function calcDaysCreate(){
 	var mulai = document.querySelector('input[name="mulai_tanggal"]').value;
@@ -134,6 +137,8 @@ function calcDaysCreate(){
 		var diff = Math.floor((d2 - d1)/(1000*60*60*24)) + 1;
 		if (isNaN(diff) || diff < 0) diff = 0;
 		banyak.value = diff;
+	} else {
+		banyak.value = 0;
 	}
 }
 var startInput = document.querySelector('input[name="mulai_tanggal"]');

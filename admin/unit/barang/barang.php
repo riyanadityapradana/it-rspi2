@@ -56,17 +56,17 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
           </div>
 			</div>
             <div class="card-body">
-                <table id="example2" class="table table-bordered table-striped">
+                <table id="example1" class="table table-bordered table-striped">
                 <thead style="background:rgb(52, 58, 64, 1)">
                     <tr>
-                    <th style="width: 50px; text-align: center;">No</th>
-                    <th style="width: 200px;">Nama Barang</th>
-                    <th style="width: 130px ;">Jenis Barang</th>
-                    <th style="width: 70px; text-align: center;">Lokasi Awal</th>
-                    <th style="width: 70px; text-align: center;">Lokasi Saat Ini</th>
-                    <th style="width: 50px; text-align: center;">Status Penyerahan</th>
-                    <th style="width: 50px; text-align: center;">Kondisi</th>
-                    <th style="width: 200px; text-align: center;">Aksi</th>
+                    <th style="width: 50px; text-align: center; color: white;">No</th>
+                    <th style="width: 200px; color: white;">Nama Barang</th>
+                    <th style="width: 130px ; color: white;">Jenis Barang</th>
+                    <th style="width: 70px; text-align: center; color: white;">Lokasi Awal</th>
+                    <th style="width: 70px; text-align: center; color: white;">Lokasi Saat Ini</th>
+                    <th style="width: 50px; text-align: center; color: white;">Status Penyerahan</th>
+                    <th style="width: 50px; text-align: center; color: white;">Kondisi</th>
+                    <th style="width: 100px; text-align: center; color: white;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,7 +105,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
                         <td><?= $no++; ?></td>
                         <td><?= htmlspecialchars($row['nama_barang']); ?><br><small style="color: #666;">Kode Inventaris :<b><?= htmlspecialchars($row['kode_inventaris']); ?></b></small></td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
-                        <td>
+                        <td class="text-center">
                           <?php
                           // Tampilkan penyerahan (lokasi) sebagai badge berwarna biru (lokasi awal)
                           if (!empty($row['nama_lokasi_gabung']) && $row['nama_lokasi_gabung'] != '-') {
@@ -136,7 +136,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
                             <span class="badge badge-secondary">Belum Diserahkan</span>
                           <?php endif; ?>
                         </td>
-                        <td>
+                        <td class="text-center">
                           <?php
                             $kval = isset($row['kondisi']) ? strtolower(trim($row['kondisi'])) : '';
                             switch ($kval) {
@@ -159,7 +159,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
                           ?>
                           <span class="badge badge-<?= $badge ?>"><?= htmlspecialchars($row['kondisi']) ?></span>
                         </td>
-                        <td>
+                        <td class="text-center">
                           <!-- Button Detail Data -->
                           <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#modalDetailBarang<?= $row['barang_id'] ?>">
                             <i class="fa fa-eye"></i> Detail
