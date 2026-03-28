@@ -84,6 +84,7 @@
 									<a href="?unit=detail_lembur&id=<?= $data['id_lembur'] ?>" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Detail</a>
 								<?php elseif ($data['status_lembur'] == 'Diterima') : ?>
 									<a href="unit/lembur/cetak_lembur.php?id=<?= $data['id_lembur'] ?>" target="_blank" class="btn btn-success btn-sm"><i class="fa fa-print"></i> Cetak</a>
+									<a href="?unit=delete_lembur&id=<?= $data['id_lembur'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus data ini?')"><i class="fa fa-trash"></i> Hapus</a>
 								<?php else : ?>
 									<span class="text-muted">Status tidak diketahui</span>
 								<?php endif; ?>
