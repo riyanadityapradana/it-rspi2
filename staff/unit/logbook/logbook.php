@@ -104,7 +104,7 @@
 			            <th style="text-align: center; color: white;">Deskripsi Log</th>
 			            <th style="text-align: center; color: white;">Catatan</th>
 			            <th style="text-align: center; color: white;">Status</th>
-			            <th style="text-align: center; color: white;">Action</th>
+			            <th style="text-align: center; color: white; width: 180px;">Action</th>
 			          </tr>
 		          	</thead>
 		          	<tbody>
@@ -148,7 +148,7 @@
 			            <td><?php echo $data['deskripsi_log'] ?></td>
 			            <td><?php echo $data['catatan_log'] ?></td>
 			            <td><span class="badge <?php echo $badge; ?>"><?php echo $status; ?></span></td>
-						<td>
+						<td class="text-center">
 						<input type="hidden" id="code">
 						<button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#detailModal" onclick="showDetail(<?php echo htmlspecialchars(json_encode($data)); ?>)">
 							<i class="fa fa-eye"></i> Detail
@@ -325,7 +325,7 @@ function copyToClipboard(elementId) {
               </div>
             </div>
             <div>
-              <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Nama Staff / Pegawai</p>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Nama Staff / Pegawai</p>
               <div style="display: flex; align-items: center; justify-content: space-between;">
                 <strong id="detailNamaUser" style="font-size: 15px;">-</strong>
                 <button type="button" onclick="copyToClipboard('detailNamaUser')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">

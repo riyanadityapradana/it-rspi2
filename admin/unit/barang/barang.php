@@ -100,7 +100,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
                     }
                     $sql .= ' ORDER BY b.barang_id DESC';
                     $q = mysqli_query($config, $sql);
-                    while ($row = mysqli_fetch_assoc($q)) : ?>
+                    $barangRows = [];
+                    while ($row = mysqli_fetch_assoc($q)) {
+                      $barangRows[] = $row;
+                    }
+                    foreach ($barangRows as $row) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
                         <td><?= htmlspecialchars($row['nama_barang']); ?><br><small style="color: #666;">Kode Inventaris :<b><?= htmlspecialchars($row['kode_inventaris']); ?></b></small></td>
@@ -166,7 +170,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
                           </button>
                         </td>
                 </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
 
             <!-- Modal Perbaikan Barang -->
             <div class="modal fade" id="modalPerbaikan" tabindex="-1" role="dialog" aria-labelledby="modalPerbaikanLabel" aria-hidden="true">
@@ -293,66 +297,92 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
             </script>
 
             <!-- Modal Detail Barang -->
-            <?php foreach ($q as $detailRow): ?>
+            <?php foreach ($barangRows as $detailRow): ?>
             <div class="modal fade" id="modalDetailBarang<?= $detailRow['barang_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>" aria-hidden="true">
               <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 12px;">
-                  <div class="modal-header" style="background: #1976d2; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                    <h5 class="modal-title" id="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>"><i class="fa fa-eye"></i> Detail Barang</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+                <div class="modal-content">
+                  <div class="modal-header border-bottom">
+                    <div>
+                      <h5 class="modal-title" id="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>" style="font-size: 18px; font-weight: 600;">Detail Data Barang</h5>
+                      <small class="text-muted" style="font-size: 13px;">Informasi lengkap data barang</small>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
-                  <div class="modal-body">
-                    <div class="row">
-                      <div class="col-md-3">
-                        <div class="form-group">
-                          <label><strong>Foto Barang:</strong></label>
+                  <div class="modal-body" style="padding: 20px;">
+                    <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+                      <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Barang</h6>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Foto Barang</p>
                           <?php if (!empty($detailRow['foto'])): ?>
-                            <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">
-                              <img src="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width:180px;max-height:180px;">
+                            <div style="background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; text-align: center;">
+                              <img src="/it-rspi2/staff/unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width: 100%; max-height: 200px; border-radius: 4px;">
                             </div>
                           <?php else: ?>
-                            <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">-</div>
+                            <div style="background: #f5f5f5; border: 1px dashed #ccc; border-radius: 6px; padding: 20px; text-align: center; color: #999;">
+                              -
+                            </div>
                           <?php endif; ?>
                         </div>
+
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Spesifikasi</p>
+                          <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; min-height: 110px;">
+                            <?= !empty($detailRow['spesifikasi']) ? nl2br(htmlspecialchars($detailRow['spesifikasi'])) : '-' ?>
+                          </div>
+                        </div>
                       </div>
-                      <div class="col-md-4">
-                        <div class="form-group">
-                          <label><strong>Nama Barang:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nama_barang']) ?> </div>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Nama Barang</p>
+                          <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['nama_barang']) ?></strong>
                         </div>
-                        <div class="form-group">
-                          <label><strong>Kode Inventaris:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['kode_inventaris']) ?> </div>
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Kode Inventaris</p>
+                          <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['kode_inventaris']) ?></strong>
                         </div>
-                        <div class="form-group">
-                          <label><strong>Jenis Barang:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['jenis_barang']) ?> </div>
+                      </div>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Jenis Barang</p>
+                          <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['jenis_barang']) ?></strong>
                         </div>
-                        <div class="form-group">
-                          <label><strong>Nomor Seri:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nomor_seri']) ?> </div>
-                        </div>
-                        <div class="form-group">
                           <?php if ($detailRow['jenis_barang'] == 'Komputer & Laptop'): ?>
-                          <label><strong>IP Address:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['ip_address']) ?> </div>
+                          <div>
+                            <p style="font-size: 13px; color: #999; margin-bottom: 5px;">IP Address</p>
+                            <strong style="font-size: 15px;"><?= !empty($detailRow['ip_address']) ? htmlspecialchars($detailRow['ip_address']) : '-' ?></strong>
+                          </div>
+                          <?php else: ?>
+                          <div>
+                            <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Nomor Seri</p>
+                            <strong style="font-size: 15px;"><?= !empty($detailRow['nomor_seri']) ? htmlspecialchars($detailRow['nomor_seri']) : '-' ?></strong>
+                          </div>
                           <?php endif; ?>
                         </div>
-                         <div class="form-group">
-                          <label><strong>Jumlah:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['jumlah']) ?> </div>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Nomor Seri</p>
+                          <strong style="font-size: 15px;"><?= !empty($detailRow['nomor_seri']) ? htmlspecialchars($detailRow['nomor_seri']) : '-' ?></strong>
+                        </div>
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Jumlah</p>
+                          <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['jumlah']) ?></strong>
                         </div>
                       </div>
-                      <div class="col-md-4">
-                        <div class="form-group">
-                          <label><strong>Tanggal Terima:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?> </div>
-                        </div>
-                        <div class="form-group">
-                          <label><strong>Lokasi:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;">
+                    </div>
+
+                    <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+                      <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Lokasi</h6>
+
+                      <div style="margin-bottom: 15px;">
+                        <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Riwayat Penyerahan / Lokasi</p>
+                        <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px;">
                             <?php
                             $q_penyerahan = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}'");
                             if (mysqli_num_rows($q_penyerahan) > 0) {
@@ -364,11 +394,64 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
                               echo 'Belum diserahkan';
                             }
                             ?>
-                          </div>
                         </div>
-                        <div class="form-group">
-                          <label><strong>Keterangan:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;">
+                      </div>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Lokasi Saat Ini</p>
+                          <strong style="font-size: 15px;"><?= !empty($detailRow['lokasi_saat_ini']) ? htmlspecialchars($detailRow['lokasi_saat_ini']) : '-' ?></strong>
+                        </div>
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Tanggal Terima</p>
+                          <strong style="font-size: 15px;"><?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?></strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Tambahan</h6>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Kondisi</p>
+                          <?php
+                            $detailKondisi = isset($detailRow['kondisi']) ? strtolower(trim($detailRow['kondisi'])) : '';
+                            switch ($detailKondisi) {
+                              case 'baru':
+                                $detailBadge = 'success';
+                                break;
+                              case 'bekas':
+                                $detailBadge = 'secondary';
+                                break;
+                              case 'rusak':
+                                $detailBadge = 'danger';
+                                break;
+                              default:
+                                if (strpos($detailKondisi, 'perbaikan') !== false) {
+                                  $detailBadge = 'warning';
+                                } else {
+                                  $detailBadge = 'secondary';
+                                }
+                            }
+                          ?>
+                          <span class="badge badge-<?= $detailBadge ?>" style="font-size: 13px; padding: 6px 10px;"><?= htmlspecialchars($detailRow['kondisi']) ?></span>
+                        </div>
+                        <div>
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Status Penyerahan</p>
+                          <?php if ($detailRow['jumlah_penyerahan'] >= $detailRow['jumlah']): ?>
+                            <span class="badge badge-success" style="font-size: 13px; padding: 6px 10px;">Completed</span>
+                          <?php elseif ($detailRow['jumlah_penyerahan'] > 0): ?>
+                            <span class="badge badge-primary" style="font-size: 13px; padding: 6px 10px;">In Progress (<?= $detailRow['jumlah_penyerahan'] ?>/<?= $detailRow['jumlah'] ?>)</span>
+                          <?php else: ?>
+                            <span class="badge badge-secondary" style="font-size: 13px; padding: 6px 10px;">Belum Diserahkan</span>
+                          <?php endif; ?>
+                        </div>
+                      </div>
+
+                      <div style="margin-bottom: 15px;">
+                        <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Keterangan Penyerahan</p>
+                        <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px;">
                             <?php
                             if (mysqli_num_rows($q_penyerahan) > 0) {
                               mysqli_data_seek($q_penyerahan, 0); // Reset pointer
@@ -379,16 +462,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
                               echo '-';
                             }
                             ?>
-                          </div>
-                        </div>
-                        <div class="form-group">
-                          <label><strong>Spesifikasi:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= nl2br(htmlspecialchars($detailRow['spesifikasi'])) ?> </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="modal-footer" style="background: #e3f2fd; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                  <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                   </div>
                 </div>
