@@ -8,7 +8,7 @@
 
 		// Cek apakah data lembur milik staff yang sedang login
 		$id_staff = $_SESSION['id_user']; // Pastikan session ini sudah tersedia
-		$cek      = mysqli_query($config, "SELECT * FROM tb_lembur WHERE id_lembur = '$id_lembur' AND id_staff='$id_staff' AND status_lembur = 'Menunggu'");
+		$cek      = mysqli_query($config, "SELECT * FROM tb_lembur WHERE id_lembur = '$id_lembur' AND id_staff='$id_staff'");
 
 		if (mysqli_num_rows($cek) > 0) {
 			// Hapus kegiatan lembur terlebih dahulu
