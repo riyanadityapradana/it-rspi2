@@ -158,6 +158,10 @@ if ($resultKondisiBarang) {
     border-radius: 6px;
   }
 
+  .dashboard-stats-row {
+    margin-bottom: 1.5rem;
+  }
+
   .dashboard-box-link {
     display: block;
     color: inherit;
@@ -170,13 +174,141 @@ if ($resultKondisiBarang) {
   }
 
   .dashboard-box-link .small-box {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 132px;
+    margin-bottom: 0;
+    border: 0;
+    border-radius: 24px;
+    padding: 1.15rem 1.15rem 1rem;
+    box-shadow: 0 18px 35px rgba(15, 23, 42, 0.15);
+    transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s ease;
+    isolation: isolate;
     cursor: pointer;
+    animation: statsCardEnter 0.65s ease both;
+  }
+
+  .dashboard-stats-row > div:nth-child(1) .small-box { animation-delay: 0.03s; }
+  .dashboard-stats-row > div:nth-child(2) .small-box { animation-delay: 0.08s; }
+  .dashboard-stats-row > div:nth-child(3) .small-box { animation-delay: 0.13s; }
+  .dashboard-stats-row > div:nth-child(4) .small-box { animation-delay: 0.18s; }
+  .dashboard-stats-row > div:nth-child(5) .small-box { animation-delay: 0.23s; }
+  .dashboard-stats-row > div:nth-child(6) .small-box { animation-delay: 0.28s; }
+
+  .dashboard-box-link .small-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.02) 55%);
+    z-index: -1;
+  }
+
+  .dashboard-box-link .small-box::after {
+    content: '';
+    position: absolute;
+    top: -35%;
+    right: -18%;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    filter: blur(2px);
+    transition: transform 0.35s ease;
   }
 
   .dashboard-box-link:hover .small-box {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 24px 45px rgba(15, 23, 42, 0.22);
+    filter: saturate(1.05);
+  }
+
+  .dashboard-box-link:hover .small-box::after {
+    transform: scale(1.18) translate(-8px, 12px);
+  }
+
+  .dashboard-box-link .small-box .inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .dashboard-box-link .small-box .inner h3 {
+    margin: 0 0 0.45rem;
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+  }
+
+  .dashboard-box-link .small-box .inner small {
+    display: block;
+    max-width: 75%;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .dashboard-box-link .small-box .icon {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    z-index: 2;
+    transition: transform 0.28s ease, background 0.28s ease;
+  }
+
+  .dashboard-box-link .small-box .icon i {
+    position: static;
+    font-size: 1.6rem;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .dashboard-box-link:hover .small-box .icon {
+    transform: rotate(-6deg) scale(1.06);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dashboard-box-link .bg-info {
+    background: linear-gradient(135deg, #0891b2, #0f766e) !important;
+  }
+
+  .dashboard-box-link .bg-success {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  }
+
+  .dashboard-box-link .bg-danger {
+    background: linear-gradient(135deg, #ef4444, #be123c) !important;
+  }
+
+  .dashboard-box-link .bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  }
+
+  .dashboard-box-link .bg-warning .inner h3,
+  .dashboard-box-link .bg-warning .inner small,
+  .dashboard-box-link .bg-warning .icon i {
+    color: #1f2937;
+  }
+
+  .dashboard-box-link .bg-warning .icon {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+
+  .dashboard-box-link .bg-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  }
+
+  .dashboard-box-link .bg-secondary {
+    background: linear-gradient(135deg, #6b7280, #374151) !important;
   }
 
   .equal-card {
@@ -237,6 +369,39 @@ if ($resultKondisiBarang) {
     font-size: 1rem;
     min-width: 36px;
   }
+
+  @keyframes statsCardEnter {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .dashboard-box-link .small-box {
+      min-height: 118px;
+      border-radius: 20px;
+    }
+
+    .dashboard-box-link .small-box .inner h3 {
+      font-size: 1.7rem;
+    }
+
+    .dashboard-box-link .small-box .inner small {
+      max-width: 68%;
+      font-size: 0.76rem;
+    }
+
+    .dashboard-box-link .small-box .icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+    }
+  }
 </style>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="fas fa-tachometer-alt me-2"></i> Dashboard</h2>
@@ -245,7 +410,7 @@ if ($resultKondisiBarang) {
         <?php echo date('d F Y'); ?>
     </div>
 </div>
-<div class="row">
+<div class="row dashboard-stats-row">
   <div class="col-lg-2 col-md-4 col-6">
     <a href="dashboard_admin.php?unit=lembur" class="dashboard-box-link">
       <div class="small-box bg-info">
@@ -355,7 +520,7 @@ if ($resultKondisiBarang) {
         <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Butuh Tindakan</h5>
       </div>
       <div class="card-body">
-        <div class="row">
+        <div class="row dashboard-stats-row">
           <?php foreach ($pendingActions as $item): ?>
             <?php $badgeClass = ((int) $item['total'] > 0) ? 'badge-danger' : 'badge-secondary'; ?>
             <div class="col-lg-3 col-md-6 mb-3 d-flex">
@@ -378,7 +543,7 @@ if ($resultKondisiBarang) {
     </div>
   </div>
 </div>
-<div class="row">
+<div class="row dashboard-stats-row">
   <div class="col-md-6">
     <div class="card">
       <div class="card-header">
@@ -562,3 +727,4 @@ document.addEventListener('DOMContentLoaded', function() {
   calendar.render();
 });
 </script> 
+

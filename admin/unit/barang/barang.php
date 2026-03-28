@@ -316,10 +316,28 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
                       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
                         <div>
-                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Foto Barang</p>
-                          <?php if (!empty($detailRow['foto'])): ?>
-                            <div style="background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; text-align: center;">
-                              <img src="/it-rspi2/staff/unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width: 100%; max-height: 200px; border-radius: 4px;">
+                          <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Foto Barang</p>                          <?php if (!empty($detailRow['foto'])): ?>
+                            <div class="detail-image-viewer" data-image-viewer>
+                              <div class="detail-image-frame" data-image-frame>
+                                <div class="detail-image-stage">
+                                  <img src="/it-rspi2/staff/unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" class="detail-image-element" data-image-element>
+                                </div>
+                              </div>
+                              <div class="detail-image-controls">
+                                <small class="text-muted">Double click pada foto untuk zoom cepat.</small>
+                                <div class="detail-image-actions">
+                                  <button type="button" class="btn btn-outline-secondary btn-sm" data-action="zoom-out" title="Zoom Out">
+                                    <i class="fas fa-search-minus"></i>
+                                  </button>
+                                  <button type="button" class="btn btn-outline-secondary btn-sm" data-action="reset" title="Reset Zoom">
+                                    <i class="fas fa-sync-alt"></i>
+                                  </button>
+                                  <button type="button" class="btn btn-outline-secondary btn-sm" data-action="zoom-in" title="Zoom In">
+                                    <i class="fas fa-search-plus"></i>
+                                  </button>
+                                  <span class="badge badge-light detail-image-zoom-level" data-image-zoom-level>100%</span>
+                                </div>
+                              </div>
                             </div>
                           <?php else: ?>
                             <div style="background: #f5f5f5; border: 1px dashed #ccc; border-radius: 6px; padding: 20px; text-align: center; color: #999;">
@@ -480,6 +498,198 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 </div>
 </section>
 
+<style>
+  .detail-image-viewer {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .detail-image-frame {
+    position: relative;
+    overflow: auto;
+    min-height: 220px;
+    max-height: 320px;
+    background: linear-gradient(135deg, #fdfdfd 0%, #f1f3f5 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+  }
+
+  .detail-image-frame.is-zoomed {
+    cursor: grab;
+  }
+
+  .detail-image-frame.is-dragging {
+    cursor: grabbing;
+  }
+
+  .detail-image-stage {
+    display: inline-flex;
+    min-width: 100%;
+    min-height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .detail-image-element {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    transition: width 0.2s ease;
+    cursor: zoom-in;
+    user-select: none;
+    -webkit-user-drag: none;
+    flex-shrink: 0;
+    border-radius: 4px;
+  }
+
+  .detail-image-frame.is-zoomed .detail-image-element {
+    cursor: grab;
+  }
+
+  .detail-image-frame.is-dragging .detail-image-element {
+    cursor: grabbing;
+  }
+
+  .detail-image-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .detail-image-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .detail-image-actions button {
+    min-width: 42px;
+  }
+
+  .detail-image-zoom-level {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+  }
+</style>
+<script>
+function initDetailImageViewer(viewer) {
+  var frame = viewer.querySelector('[data-image-frame]');
+  var img = viewer.querySelector('[data-image-element]');
+  var indicator = viewer.querySelector('[data-image-zoom-level]');
+  var state = {
+    zoom: 1,
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    scrollLeft: 0,
+    scrollTop: 0
+  };
+
+  if (!frame || !img || !indicator) {
+    return;
+  }
+
+  function stopDrag() {
+    state.isDragging = false;
+    frame.classList.remove('is-dragging');
+  }
+
+  function centerFrame() {
+    frame.scrollLeft = Math.max(0, (frame.scrollWidth - frame.clientWidth) / 2);
+    frame.scrollTop = Math.max(0, (frame.scrollHeight - frame.clientHeight) / 2);
+  }
+
+  function setZoom(value) {
+    state.zoom = Math.min(3, Math.max(0.5, value));
+    img.style.width = (state.zoom * 100) + '%';
+    img.style.maxWidth = state.zoom > 1 ? 'none' : '100%';
+    indicator.textContent = Math.round(state.zoom * 100) + '%';
+    frame.classList.toggle('is-zoomed', state.zoom > 1);
+
+    if (state.zoom <= 1) {
+      stopDrag();
+      frame.scrollLeft = 0;
+      frame.scrollTop = 0;
+    } else {
+      centerFrame();
+    }
+  }
+
+  viewer.querySelector('[data-action="zoom-in"]').addEventListener('click', function() {
+    setZoom(state.zoom + 0.25);
+  });
+
+  viewer.querySelector('[data-action="zoom-out"]').addEventListener('click', function() {
+    setZoom(state.zoom - 0.25);
+  });
+
+  viewer.querySelector('[data-action="reset"]').addEventListener('click', function() {
+    setZoom(1);
+  });
+
+  img.addEventListener('dblclick', function() {
+    if (state.zoom > 1) {
+      setZoom(1);
+    } else {
+      setZoom(2);
+    }
+  });
+
+  img.addEventListener('dragstart', function(event) {
+    event.preventDefault();
+  });
+
+  frame.addEventListener('mousedown', function(event) {
+    if (state.zoom <= 1) {
+      return;
+    }
+
+    state.isDragging = true;
+    state.startX = event.clientX;
+    state.startY = event.clientY;
+    state.scrollLeft = frame.scrollLeft;
+    state.scrollTop = frame.scrollTop;
+    frame.classList.add('is-dragging');
+    event.preventDefault();
+  });
+
+  frame.addEventListener('mousemove', function(event) {
+    if (!state.isDragging || state.zoom <= 1) {
+      return;
+    }
+
+    frame.scrollLeft = state.scrollLeft - (event.clientX - state.startX);
+    frame.scrollTop = state.scrollTop - (event.clientY - state.startY);
+  });
+
+  frame.addEventListener('mouseleave', stopDrag);
+  frame.addEventListener('mouseup', stopDrag);
+  document.addEventListener('mouseup', stopDrag);
+
+  setZoom(1);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-image-viewer]').forEach(initDetailImageViewer);
+
+  $('.modal').on('hidden.bs.modal', function() {
+    this.querySelectorAll('[data-image-viewer]').forEach(function(viewer) {
+      var resetButton = viewer.querySelector('[data-action="reset"]');
+      if (resetButton) {
+        resetButton.click();
+      }
+    });
+  });
+});
+</script>
 <!-- Modal Print -->
 
 <div class="modal fade" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel" aria-hidden="true">
@@ -567,3 +777,6 @@ document.addEventListener('DOMContentLoaded', function() {
     filterStatusSelect.addEventListener('change', filterTable);
 });
 </script>
+
+
+

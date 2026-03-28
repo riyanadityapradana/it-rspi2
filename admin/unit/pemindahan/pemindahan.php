@@ -155,11 +155,29 @@ require_once("../config/koneksi.php");
     border-radius: 8px;
   }
 
+  .detail-photo-frame.is-zoomed {
+    cursor: grab;
+  }
+
+  .detail-photo-frame.is-dragging {
+    cursor: grabbing;
+  }
+
   .detail-photo-frame img {
     max-width: 100%;
     transform-origin: center center;
     transition: transform 0.2s ease;
     cursor: zoom-in;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .detail-photo-frame.is-zoomed img {
+    cursor: grab;
+  }
+
+  .detail-photo-frame.is-dragging img {
+    cursor: grabbing;
   }
 
   .detail-photo-placeholder {
@@ -216,6 +234,13 @@ document.getElementById('printType').addEventListener('change', function() {
 });
 
 var currentPhotoZoom = 1;
+var photoPanState = {
+  isDragging: false,
+  startX: 0,
+  startY: 0,
+  scrollLeft: 0,
+  scrollTop: 0
+};
 
 function formatTanggalIndonesia(dateString) {
   if (!dateString) {
@@ -233,8 +258,20 @@ function formatTanggalIndonesia(dateString) {
   return day + '/' + month + '/' + year;
 }
 
+function centerPhotoFrame() {
+  var frame = document.getElementById('detailPhotoFrame');
+
+  if (!frame) {
+    return;
+  }
+
+  frame.scrollLeft = Math.max(0, (frame.scrollWidth - frame.clientWidth) / 2);
+  frame.scrollTop = Math.max(0, (frame.scrollHeight - frame.clientHeight) / 2);
+}
+
 function setPhotoZoom(value) {
   var img = document.getElementById('detailFotoBarang');
+  var frame = document.getElementById('detailPhotoFrame');
   var indicator = document.getElementById('detailZoomLevel');
 
   if (!img || img.style.display === 'none') {
@@ -242,8 +279,21 @@ function setPhotoZoom(value) {
   }
 
   currentPhotoZoom = Math.min(3, Math.max(0.5, value));
-  img.style.transform = 'scale(' + currentPhotoZoom + ')';
+  img.style.width = (currentPhotoZoom * 100) + '%';
+  img.style.maxWidth = currentPhotoZoom > 1 ? 'none' : '100%';
   indicator.textContent = Math.round(currentPhotoZoom * 100) + '%';
+
+  if (frame) {
+    frame.classList.toggle('is-zoomed', currentPhotoZoom > 1);
+
+    if (currentPhotoZoom <= 1) {
+      stopPhotoDrag();
+      frame.scrollLeft = 0;
+      frame.scrollTop = 0;
+    } else {
+      centerPhotoFrame();
+    }
+  }
 }
 
 function zoomInPhoto() {
@@ -258,8 +308,65 @@ function resetPhotoZoom() {
   setPhotoZoom(1);
 }
 
+function stopPhotoDrag() {
+  var frame = document.getElementById('detailPhotoFrame');
+
+  photoPanState.isDragging = false;
+
+  if (frame) {
+    frame.classList.remove('is-dragging');
+  }
+}
+
+function attachPhotoPanHandlers() {
+  var frame = document.getElementById('detailPhotoFrame');
+  var photo = document.getElementById('detailFotoBarang');
+
+  if (!frame || !photo) {
+    return;
+  }
+
+  photo.setAttribute('draggable', 'false');
+
+  frame.addEventListener('mousedown', function(event) {
+    if (currentPhotoZoom <= 1 || photo.style.display === 'none') {
+      return;
+    }
+
+    photoPanState.isDragging = true;
+    photoPanState.startX = event.clientX;
+    photoPanState.startY = event.clientY;
+    photoPanState.scrollLeft = frame.scrollLeft;
+    photoPanState.scrollTop = frame.scrollTop;
+
+    frame.classList.add('is-dragging');
+    event.preventDefault();
+  });
+
+  frame.addEventListener('mousemove', function(event) {
+    if (!photoPanState.isDragging || currentPhotoZoom <= 1) {
+      return;
+    }
+
+    var deltaX = event.clientX - photoPanState.startX;
+    var deltaY = event.clientY - photoPanState.startY;
+
+    frame.scrollLeft = photoPanState.scrollLeft - deltaX;
+    frame.scrollTop = photoPanState.scrollTop - deltaY;
+  });
+
+  frame.addEventListener('mouseleave', stopPhotoDrag);
+  frame.addEventListener('mouseup', stopPhotoDrag);
+  photo.addEventListener('dragstart', function(event) {
+    event.preventDefault();
+  });
+
+  document.addEventListener('mouseup', stopPhotoDrag);
+}
+
 function showBarangPhoto(filename) {
   var img = document.getElementById('detailFotoBarang');
+  var frame = document.getElementById('detailPhotoFrame');
   var emptyState = document.getElementById('detailFotoEmpty');
   var controls = document.getElementById('detailFotoControls');
   var zoomLabel = document.getElementById('detailZoomLevel');
@@ -273,6 +380,8 @@ function showBarangPhoto(filename) {
     img.src = baseUrl + encodeURIComponent(filename);
     img.alt = 'Foto ' + (document.getElementById('detailNamaBarang').textContent || 'Barang');
     img.style.display = 'block';
+    img.style.width = '100%';
+    img.style.maxWidth = '100%';
     emptyState.style.display = 'none';
     controls.style.display = 'flex';
     resetPhotoZoom();
@@ -282,31 +391,36 @@ function showBarangPhoto(filename) {
     emptyState.style.display = 'flex';
     controls.style.display = 'none';
     zoomLabel.textContent = '100%';
+    stopPhotoDrag();
+    if (frame) {
+      frame.classList.remove('is-zoomed');
+      frame.scrollLeft = 0;
+      frame.scrollTop = 0;
+    }
   }
 }
 
-// Fungsi untuk menampilkan detail di modal
 function showDetail(data) {
-	document.getElementById('detailNamaBarang').textContent = data.nama_barang || '-';
-	document.getElementById('detailKodeInventaris').textContent = data.kode_inventaris || '-';
-	document.getElementById('detailLokasiAsal').textContent = data.lokasi_asal_nama || '-';
-	document.getElementById('detailLokasiTujuan').textContent = data.lokasi_tujuan_nama || '-';
-	document.getElementById('detailTanggalMutasi').textContent = formatTanggalIndonesia(data.tanggal_mutasi);
-	document.getElementById('detailStaffMemindahkan').textContent = data.nama_staff || '-';
+  document.getElementById('detailNamaBarang').textContent = data.nama_barang || '-';
+  document.getElementById('detailKodeInventaris').textContent = data.kode_inventaris || '-';
+  document.getElementById('detailLokasiAsal').textContent = data.lokasi_asal_nama || '-';
+  document.getElementById('detailLokasiTujuan').textContent = data.lokasi_tujuan_nama || '-';
+  document.getElementById('detailTanggalMutasi').textContent = formatTanggalIndonesia(data.tanggal_mutasi);
+  document.getElementById('detailStaffMemindahkan').textContent = data.nama_staff || '-';
   showBarangPhoto(data.foto || '');
 }
 
-// Fungsi untuk copy text ke clipboard
 function copyToClipboard(elementId) {
-	const text = document.getElementById(elementId).textContent;
-	navigator.clipboard.writeText(text).then(function() {
-		alert('Data berhasil disalin: ' + text);
-	}).catch(function(err) {
-		alert('Gagal menyalin data');
-	});
+  const text = document.getElementById(elementId).textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    alert('Data berhasil disalin: ' + text);
+  }).catch(function(err) {
+    alert('Gagal menyalin data');
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  attachPhotoPanHandlers();
   var photo = document.getElementById('detailFotoBarang');
 
   if (photo) {
@@ -352,10 +466,12 @@ document.addEventListener('DOMContentLoaded', function() {
             <div>
               <p style="font-size: 13px; color: #999; margin-bottom: 8px;">Foto Barang</p>
               <div class="detail-photo-wrapper">
-                <div class="detail-photo-frame">
-                  <img id="detailFotoBarang" src="" alt="Foto Barang" style="display: none;">
-                  <div id="detailFotoEmpty" class="detail-photo-placeholder">
-                    Foto barang belum tersedia.
+                <div class="detail-photo-frame" id="detailPhotoFrame">
+                  <div class="detail-photo-stage">
+                    <img id="detailFotoBarang" src="" alt="Foto Barang" style="display: none;">
+                    <div id="detailFotoEmpty" class="detail-photo-placeholder">
+                      Foto barang belum tersedia.
+                    </div>
                   </div>
                 </div>
                 <div id="detailFotoControls" class="detail-photo-controls" style="display: none;">
@@ -458,3 +574,8 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
+
+
+
+
+
