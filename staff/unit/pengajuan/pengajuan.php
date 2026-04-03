@@ -9,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
   $nomor_seri = isset($_POST['nomor_seri']) ? trim($_POST['nomor_seri']) : '';
   $ip_address = isset($_POST['ip_address']) ? trim($_POST['ip_address']) : '';
   $jumlah_input_modal = isset($_POST['jumlah_input_modal']) ? (int) $_POST['jumlah_input_modal'] : 1;
-  $harga = isset($_POST['harga']) && $_POST['harga'] !== '' ? (float) $_POST['harga'] : 0;
   $spesifikasi = isset($_POST['spesifikasi']) ? trim($_POST['spesifikasi']) : '';
   $tanggal_terima = isset($_POST['tanggal_terima']) ? trim($_POST['tanggal_terima']) : '';
   $foto = '';
@@ -58,8 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
     }
   }
 
-  $stmt = $config->prepare("INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-  $stmt->bind_param('issssidsss', $pengajuan_id, $nama_barang, $jenis_barang, $nomor_seri, $ip_address, $jumlah_input_modal, $harga, $spesifikasi, $tanggal_terima, $foto);
+  $stmt = $config->prepare("INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, spesifikasi, tanggal_terima, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  $stmt->bind_param('issssisss', $pengajuan_id, $nama_barang, $jenis_barang, $nomor_seri, $ip_address, $jumlah_input_modal, $spesifikasi, $tanggal_terima, $foto);
   $success = $stmt->execute();
   $stmt->close();
 
@@ -229,10 +228,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
                         <label>IP Address</label>
                         <input type="text" class="form-control" name="ip_address" id="ipAddressInput" placeholder="Contoh: 192.168.1.10">
                       </div>
-                    </div>
-                    <div class="form-group">
-                      <label>Harga</label>
-                      <input type="number" step="0.01" class="form-control" name="harga">
                     </div>
                     <div class="form-group">
                       <label>Spesifikasi</label>
@@ -458,4 +453,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
+
+
+
 
