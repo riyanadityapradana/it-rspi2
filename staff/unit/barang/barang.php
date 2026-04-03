@@ -656,99 +656,262 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
             <?php foreach ($q as $detailRow): ?>
             <div class="modal fade" id="modalDetailBarang<?= $detailRow['barang_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>" aria-hidden="true">
               <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 12px;">
-                  <div class="modal-header" style="background: #1976d2; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                    <h5 class="modal-title" id="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>"><i class="fa fa-eye"></i> Detail Barang</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+                <div class="modal-content">
+                  <div class="modal-header border-bottom">
+                    <div>
+                      <h5 class="modal-title" id="modalDetailBarangLabel<?= $detailRow['barang_id'] ?>" style="font-size: 18px; font-weight: 600;">Detail Data Barang</h5>
+                      <small class="text-muted" style="font-size: 13px;">Informasi lengkap data barang dan lokasi</small>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
-                  <div class="modal-body">
-                    <div class="row">
-                      <div class="col-md-3">
-                        <div class="form-group">
-                          <label><strong>Foto Barang:</strong></label>
+                  <div class="modal-body" style="padding: 20px;">
+                    <!-- Informasi Barang Section -->
+                    <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+                      <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Barang</h6>
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Nama Barang</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['nama_barang']) ?></strong>
+                            <button type="button" onclick="copyToClipboard('detailBarangNama<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailBarangNama<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($detailRow['nama_barang']) ?></span>
+                        </div>
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Foto Barang</p>
                           <?php if (!empty($detailRow['foto'])): ?>
-                            <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">
-                              <img src="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width:180px;max-height:180px;" class="zoomable" data-full="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>">
-                            </div>
+                            <img src="unit/barang/foto-barang/<?= htmlspecialchars($detailRow['foto']) ?>" alt="Foto Barang" style="max-width:160px; max-height:160px; border:1px solid #d8d8d8; border-radius:4px;">
                           <?php else: ?>
-                            <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9; text-align:center;">-</div>
+                            <div style="width:160px; height:160px; border: 1px dashed #bbb; display:flex; align-items:center; justify-content:center; color:#777; font-size:13px;">No Image</div>
                           <?php endif; ?>
                         </div>
                       </div>
-                      <div class="col-md-4">
-                        <div class="form-group">
-                          <label><strong>Nama Barang:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nama_barang']) ?> </div>
-                        </div>
-                        <div class="form-group">
-                          <label><strong>Kode Inventaris:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['kode_inventaris']) ?> </div>
-                        </div>
-                        <div class="form-group">
-                          <label><strong>Jenis Barang:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['jenis_barang']) ?> </div>
-                        </div>
-                        <div class="form-group">
-                          <label><strong>Nomor Seri:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['nomor_seri']) ?> </div>
-                        </div>
-                        <div class="form-group">
-                          <?php if ($detailRow['jenis_barang'] == 'Komputer & Laptop'): ?>
-                          <label><strong>IP Address:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['ip_address']) ?> </div>
-                          <?php endif; ?>
-                        </div>
-                         <div class="form-group">
-                          <label><strong>Jumlah:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['jumlah']) ?> </div>
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Kode Inventaris</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['kode_inventaris']) ?></strong>
+                            <button type="button" onclick="copyToClipboard('detailBarangKode<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailBarangKode<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($detailRow['kode_inventaris']) ?></span>
                         </div>
                       </div>
-                      <div class="col-md-4">
-                        <div class="form-group">
-                          <label><strong>Tanggal Terima:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?> </div>
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Jenis Barang</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['jenis_barang']) ?></strong>
+                            <button type="button" onclick="copyToClipboard('detailBarangJenis<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailBarangJenis<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($detailRow['jenis_barang']) ?></span>
                         </div>
-                        <div class="form-group">
-                          <label><strong>Lokasi:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;">
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Nomor Seri</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['nomor_seri']) ?></strong>
+                            <button type="button" onclick="copyToClipboard('detailBarangSeri<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailBarangSeri<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($detailRow['nomor_seri']) ?></span>
+                        </div>
+                      </div>
+
+                      <?php if ($detailRow['jenis_barang'] == 'Komputer & Laptop'): ?>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">IP Address</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['ip_address']) ?></strong>
+                            <button type="button" onclick="copyToClipboard('detailBarangIP<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailBarangIP<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($detailRow['ip_address']) ?></span>
+                        </div>
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Tanggal Terima</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="font-size: 15px;"><?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?></strong>
+                            <button type="button" onclick="copyToClipboard('detailBarangTgl<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailBarangTgl<?= $detailRow['barang_id'] ?>" style="display:none;"><?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?></span>
+                        </div>
+                      </div>
+                      <?php else: ?>
+                      <div style="margin-bottom: 15px;">
+                        <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Tanggal Terima</p>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                          <strong style="font-size: 15px;"><?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?></strong>
+                          <button type="button" onclick="copyToClipboard('detailBarangTgl<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                            <i class="fas fa-copy" style="font-size: 14px;"></i>
+                          </button>
+                        </div>
+                        <span id="detailBarangTgl<?= $detailRow['barang_id'] ?>" style="display:none;"><?= !empty($detailRow['tanggal_terima']) ? date('d-m-Y', strtotime($detailRow['tanggal_terima'])) : '-' ?></span>
+                      </div>
+                      <?php endif; ?>
+
+                      <div style="margin-bottom: 15px;">
+                        <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Jumlah</p>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                          <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['jumlah']) ?></strong>
+                          <button type="button" onclick="copyToClipboard('detailBarangJumlah<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                            <i class="fas fa-copy" style="font-size: 14px;"></i>
+                          </button>
+                        </div>
+                        <span id="detailBarangJumlah<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($detailRow['jumlah']) ?></span>
+                      </div>
+                    </div>
+
+                    <!-- Informasi Lokasi Section -->
+                    <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+                      <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Lokasi</h6>
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Lokasi Awal</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="font-size: 15px;">
+                              <?php
+                              $q_penyerahan_awal = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}' ORDER BY p.penyerahan_id ASC LIMIT 1");
+                              if (mysqli_num_rows($q_penyerahan_awal) > 0) {
+                                $p_awal = mysqli_fetch_assoc($q_penyerahan_awal);
+                                echo htmlspecialchars($p_awal['nama_lokasi']);
+                              } else {
+                                echo '-';
+                              }
+                              ?>
+                            </strong>
+                            <button type="button" onclick="copyToClipboard('detailLokasiAwal<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailLokasiAwal<?= $detailRow['barang_id'] ?>" style="display:none;">
                             <?php
-                            $q_penyerahan = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}'");
-                            if (mysqli_num_rows($q_penyerahan) > 0) {
-                              while ($p = mysqli_fetch_assoc($q_penyerahan)) {
+                            $q_penyerahan_awal = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}' ORDER BY p.penyerahan_id ASC LIMIT 1");
+                            if (mysqli_num_rows($q_penyerahan_awal) > 0) {
+                              $p_awal = mysqli_fetch_assoc($q_penyerahan_awal);
+                              echo htmlspecialchars($p_awal['nama_lokasi']);
+                            }
+                            ?>
+                          </span>
+                        </div>
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Lokasi Terakhir</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="font-size: 15px;">
+                              <?php
+                              if (!empty($detailRow['lokasi_saat_ini'])) {
+                                echo htmlspecialchars($detailRow['lokasi_saat_ini']);
+                              } else {
+                                echo '-';
+                              }
+                              ?>
+                            </strong>
+                            <button type="button" onclick="copyToClipboard('detailLokasiTerakhir<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailLokasiTerakhir<?= $detailRow['barang_id'] ?>" style="display:none;">
+                            <?php echo !empty($detailRow['lokasi_saat_ini']) ? htmlspecialchars($detailRow['lokasi_saat_ini']) : '-'; ?>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style="margin-bottom: 15px;">
+                        <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Semua Lokasi Penyerahan</p>
+                        <div style="display: flex; gap: 10px;">
+                          <div style="flex: 1;">
+                            <?php
+                            $q_penyerahan_all = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}'");
+                            if (mysqli_num_rows($q_penyerahan_all) > 0) {
+                              while ($p = mysqli_fetch_assoc($q_penyerahan_all)) {
                                 $badge_class = $p['kondisi'] == 'baru' ? 'success' : ($p['kondisi'] == 'bekas' ? 'secondary' : ($p['kondisi'] == 'rusak' ? 'danger' : 'warning'));
                                 echo '<span class="badge badge-' . $badge_class . '">' . htmlspecialchars($p['nama_lokasi']) . ' (' . htmlspecialchars($p['kondisi']) . ')</span> ';
                               }
                             } else {
-                              echo 'Belum diserahkan';
+                              echo '<p style="margin: 0; font-size: 14px;">-</p>';
                             }
                             ?>
                           </div>
                         </div>
-                        <div class="form-group">
-                          <label><strong>Keterangan:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;">
+                      </div>
+                    </div>
+
+                    <!-- Informasi Status Section -->
+                    <div>
+                      <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Status</h6>
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Status Barang</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
                             <?php
-                            if (mysqli_num_rows($q_penyerahan) > 0) {
-                              mysqli_data_seek($q_penyerahan, 0); // Reset pointer
-                              while ($p = mysqli_fetch_assoc($q_penyerahan)) {
-                                echo '<strong>' . htmlspecialchars($p['nama_lokasi']) . ':</strong> ' . htmlspecialchars($p['keterangan']) . '<br>';
-                              }
-                            } else {
-                              echo '-';
+                            $kval = isset($detailRow['kondisi']) ? strtolower(trim($detailRow['kondisi'])) : '';
+                            switch ($kval) {
+                              case 'baru':
+                                $badge = 'success';
+                                break;
+                              case 'bekas':
+                                $badge = 'secondary';
+                                break;
+                              case 'rusak':
+                                $badge = 'danger';
+                                break;
+                              default:
+                                if (strpos($kval, 'perbaikan') !== false) {
+                                  $badge = 'warning';
+                                } else {
+                                  $badge = 'secondary';
+                                }
                             }
                             ?>
+                            <span class="badge badge-<?= $badge ?>" style="display: inline-block; padding: 4px 8px; background: #303030; border-radius: 4px; font-size: 13px; color: white;"><?= htmlspecialchars($detailRow['kondisi']) ?></span>
+                            <button type="button" onclick="copyToClipboard('detailStatusBarang<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
                           </div>
+                          <span id="detailStatusBarang<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($detailRow['kondisi']) ?></span>
                         </div>
-                        <div class="form-group">
-                          <label><strong>Spesifikasi:</strong></label>
-                          <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= nl2br(htmlspecialchars($detailRow['spesifikasi'])) ?> </div>
+                        <div>
+                          <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Status Penyerahan</p>
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <?php
+                            if ($detailRow['jumlah_penyerahan'] >= $detailRow['jumlah']) {
+                              $status_penyerahan = 'Completed';
+                              $badge_status = 'badge-success';
+                            } elseif ($detailRow['jumlah_penyerahan'] > 0) {
+                              $status_penyerahan = 'In Progress (' . $detailRow['jumlah_penyerahan'] . '/' . $detailRow['jumlah'] . ')';
+                              $badge_status = 'badge-primary';
+                            } else {
+                              $status_penyerahan = 'Belum Diserahkan';
+                              $badge_status = 'badge-secondary';
+                            }
+                            ?>
+                            <span class="<?= $badge_status ?>" style="display: inline-block; padding: 4px 8px; background: #303030; border-radius: 4px; font-size: 13px; color: white;"><?= $status_penyerahan ?></span>
+                            <button type="button" onclick="copyToClipboard('detailStatusPenyerahan<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                              <i class="fas fa-copy" style="font-size: 14px;"></i>
+                            </button>
+                          </div>
+                          <span id="detailStatusPenyerahan<?= $detailRow['barang_id'] ?>" style="display:none;"><?= $status_penyerahan ?></span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="modal-footer" style="background: #e3f2fd; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                  <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                   </div>
                 </div>
@@ -818,6 +981,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
 </div>
 
 <script>
+// Fungsi untuk copy text ke clipboard
+function copyToClipboard(elementId) {
+	const text = document.getElementById(elementId).textContent;
+	navigator.clipboard.writeText(text).then(function() {
+		alert('Data berhasil disalin: ' + text);
+	}).catch(function(err) {
+		alert('Gagal menyalin data');
+	});
+}
+
 // Filter berdasarkan jenis barang dan status barang
 document.addEventListener('DOMContentLoaded', function() {
   const filterJenisSelect = document.getElementById('filterJenisBarang');
