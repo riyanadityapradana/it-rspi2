@@ -1,34 +1,78 @@
-
 <?php
 require_once("../config/koneksi.php");
+require_once("../config/telegram.php");
 $today = date('Y-m-d');
-// Proses ACC/Tolak
+
 if (isset($_GET['aksi']) && isset($_GET['id'])) {
-  $id_pengajuan = intval($_GET['id']);
-  if ($_GET['aksi'] == 'acc') {
-    $q = mysqli_query($config, "UPDATE tb_pengajuan SET status='disetujui', tanggal_acc=CURDATE() WHERE pengajuan_id='$id_pengajuan' AND status='diajukan'");
-    if ($q && mysqli_affected_rows($config) > 0) {
+  $id_pengajuan = (int) $_GET['id'];
+  $aksi = $_GET['aksi'];
+
+  $stmt = $config->prepare("SELECT p.*, u.nama_lengkap, u.nip FROM tb_pengajuan p LEFT JOIN tb_user u ON p.id_user = u.id_user WHERE p.pengajuan_id = ? LIMIT 1");
+  $stmt->bind_param('i', $id_pengajuan);
+  $stmt->execute();
+  $pengajuan = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if ($aksi === 'acc') {
+    $stmt = $config->prepare("UPDATE tb_pengajuan SET status = 'disetujui', tanggal_acc = CURDATE() WHERE pengajuan_id = ? AND status = 'diajukan'");
+    $stmt->bind_param('i', $id_pengajuan);
+    $stmt->execute();
+    $affected = $stmt->affected_rows;
+    $stmt->close();
+
+    if ($affected > 0) {
+      if ($pengajuan) {
+        $pesan = "VERIFIKASI PENGAJUAN BARANG\n";
+        $pesan .= "Aksi: ACC Pengajuan\n";
+        $pesan .= "ID Pengajuan: " . $pengajuan['pengajuan_id'] . "\n";
+        $pesan .= "Nama Staff: " . ($pengajuan['nama_lengkap'] ?: '-') . "\n";
+        $pesan .= "NIP: " . ($pengajuan['nip'] ?: '-') . "\n";
+        $pesan .= "Nama Barang: " . $pengajuan['nama_barang'] . "\n";
+        $pesan .= "Jumlah: " . $pengajuan['jumlah'] . "\n";
+        $pesan .= "Perkiraan Harga: Rp " . number_format($pengajuan['perkiraan_harga'], 0, ',', '.') . "\n";
+        $pesan .= "Status Baru: Disetujui\n";
+        $pesan .= "Tanggal ACC: " . date('d-m-Y');
+        telegram_send_channel_message($pesan);
+      }
       header('Location: dashboard_admin.php?unit=pengajuan&msg=Pengajuan barang berhasil di-ACC!');
       exit;
-    } else {
-      header('Location: dashboard_admin.php?unit=pengajuan&err=Gagal ACC pengajuan!');
-      exit;
     }
-  } elseif ($_GET['aksi'] == 'tolak') {
-    $q = mysqli_query($config, "UPDATE tb_pengajuan SET status='ditolak', tanggal_acc=CURDATE() WHERE pengajuan_id='$id_pengajuan' AND status='diajukan'" );
-    if ($q && mysqli_affected_rows($config) > 0) {
+
+    header('Location: dashboard_admin.php?unit=pengajuan&err=Gagal ACC pengajuan!');
+    exit;
+  }
+
+  if ($aksi === 'tolak') {
+    $stmt = $config->prepare("UPDATE tb_pengajuan SET status = 'ditolak', tanggal_acc = CURDATE() WHERE pengajuan_id = ? AND status = 'diajukan'");
+    $stmt->bind_param('i', $id_pengajuan);
+    $stmt->execute();
+    $affected = $stmt->affected_rows;
+    $stmt->close();
+
+    if ($affected > 0) {
+      if ($pengajuan) {
+        $pesan = "VERIFIKASI PENGAJUAN BARANG\n";
+        $pesan .= "Aksi: Tolak Pengajuan\n";
+        $pesan .= "ID Pengajuan: " . $pengajuan['pengajuan_id'] . "\n";
+        $pesan .= "Nama Staff: " . ($pengajuan['nama_lengkap'] ?: '-') . "\n";
+        $pesan .= "NIP: " . ($pengajuan['nip'] ?: '-') . "\n";
+        $pesan .= "Nama Barang: " . $pengajuan['nama_barang'] . "\n";
+        $pesan .= "Jumlah: " . $pengajuan['jumlah'] . "\n";
+        $pesan .= "Perkiraan Harga: Rp " . number_format($pengajuan['perkiraan_harga'], 0, ',', '.') . "\n";
+        $pesan .= "Status Baru: Ditolak\n";
+        $pesan .= "Tanggal Keputusan: " . date('d-m-Y');
+        telegram_send_channel_message($pesan);
+      }
       header('Location: dashboard_admin.php?unit=pengajuan&msg=Pengajuan barang berhasil ditolak!');
       exit;
-    } else {
-      header('Location: dashboard_admin.php?unit=pengajuan&err=Gagal menolak pengajuan!');
-      exit;
     }
+
+    header('Location: dashboard_admin.php?unit=pengajuan&err=Gagal menolak pengajuan!');
+    exit;
   }
 }
-// ...existing code...
-// Ambil semua pengajuan barang
-// Ambil semua pengajuan barang dari tabel baru
-$q = mysqli_query($config, "SELECT p.*, u.nama_lengkap FROM tb_pengajuan p LEFT JOIN tb_user u ON p.id_user = u.id_user ORDER BY p.tanggal_pengajuan DESC");
+
+$q = mysqli_query($config, "SELECT p.*, u.nama_lengkap, COALESCE(SUM(b.jumlah), 0) AS jumlah_realisasi, (p.jumlah + COALESCE(SUM(b.jumlah), 0)) AS jumlah_diminta FROM tb_pengajuan p LEFT JOIN tb_user u ON p.id_user = u.id_user LEFT JOIN tb_barang b ON b.pengajuan_id = p.pengajuan_id GROUP BY p.pengajuan_id ORDER BY p.tanggal_pengajuan DESC");
 ?>
 <section class="content-header">
   <div class="container-fluid">
@@ -45,7 +89,6 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap FROM tb_pengajuan p LEFT 
     </div>
   </div><!-- /.container-fluid -->
 </section>
-<!-- Main content -->
 <section class="content">
   <div class="container-fluid">
     <div class="row">
@@ -73,7 +116,7 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap FROM tb_pengajuan p LEFT 
                   <th>Nama Staff</th>
                   <th>Nama Barang</th>
                   <th>Unit</th>
-                  <th>Jumlah</th>
+                  <th>Jumlah Diminta</th>
                   <th>Perkiraan Harga</th>
                   <th>Keterangan</th>
                   <th>Status</th>
@@ -89,7 +132,7 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap FROM tb_pengajuan p LEFT 
                   <td><?= htmlspecialchars($row['nama_lengkap']); ?></td>
                   <td><?= htmlspecialchars($row['nama_barang']); ?></td>
                   <td><?= htmlspecialchars($row['unit']); ?></td>
-                  <td><?= htmlspecialchars($row['jumlah']); ?></td>
+                  <td><?= htmlspecialchars($row['jumlah_diminta']); ?></td>
                   <td><?= htmlspecialchars(number_format($row['perkiraan_harga'],0,',','.')); ?></td>
                   <td><?= htmlspecialchars($row['keterangan']); ?></td>
                   <td>
@@ -114,7 +157,7 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap FROM tb_pengajuan p LEFT 
                     <?php if ($row['status'] == 'diajukan'): ?>
                       <a href="dashboard_admin.php?unit=pengajuan&aksi=acc&id=<?= $row['pengajuan_id'] ?>" class="btn btn-success btn-sm">ACC</a>
                       <a href="dashboard_admin.php?unit=pengajuan&aksi=tolak&id=<?= $row['pengajuan_id'] ?>" class="btn btn-danger btn-sm">Tolak</a>
-                    <?php elseif ($row['status'] == 'disetujui'): ?>
+                    <?php elseif ($row['status'] == 'disetujui' || $row['status'] == 'selesai'): ?>
                       <a href="unit/pengajuan/lap_pemintaan_brg.php?id=<?= $row['pengajuan_id'] ?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-print"></i> Cetak</a>
                     <?php else: ?>
                       <span class="text-muted">-</span>
@@ -129,4 +172,4 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap FROM tb_pengajuan p LEFT 
       </div>
     </div>
   </div>
-</section>  
+</section>

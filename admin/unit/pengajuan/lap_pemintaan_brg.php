@@ -3,7 +3,6 @@ ob_start();
 require_once('../../../config/koneksi.php');
 require_once('../../../library/tcpdf/tcpdf.php');
 
-// Ambil data barang dari database
 $dataBarang = [];
 $unit = '....................................................';
 $tanggal = '....................................................';
@@ -11,29 +10,39 @@ $tanggal = '....................................................';
 if (isset($_GET['dari']) && isset($_GET['sampai'])) {
     $dari = $_GET['dari'];
     $sampai = $_GET['sampai'];
-    $q = mysqli_query($config, "SELECT * FROM tb_pengajuan WHERE DATE(tanggal_pengajuan) BETWEEN '$dari' AND '$sampai' ORDER BY tanggal_pengajuan, pengajuan_id");
-    while ($row = mysqli_fetch_assoc($q)) {
+    $stmt = $config->prepare("SELECT p.pengajuan_id, p.nama_barang, p.unit, p.perkiraan_harga, p.keterangan, p.tanggal_pengajuan, (p.jumlah + COALESCE(SUM(b.jumlah), 0)) AS jumlah_diminta FROM tb_pengajuan p LEFT JOIN tb_barang b ON b.pengajuan_id = p.pengajuan_id WHERE DATE(p.tanggal_pengajuan) BETWEEN ? AND ? GROUP BY p.pengajuan_id ORDER BY p.tanggal_pengajuan, p.pengajuan_id");
+    $stmt->bind_param('ss', $dari, $sampai);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
         $dataBarang[] = [
             'nama' => $row['nama_barang'],
             'unit' => $row['unit'],
-            'jumlah' => $row['jumlah'],
+            'jumlah' => $row['jumlah_diminta'],
             'perkiraan_harga' => $row['perkiraan_harga'],
             'keterangan' => $row['keterangan'],
             'tanggal' => $row['tanggal_pengajuan']
         ];
     }
+    $stmt->close();
+
     if (count($dataBarang) > 0) {
         $unit = $dataBarang[0]['unit'];
         $tanggal = date('Y-m-d', strtotime($dataBarang[0]['tanggal']));
     }
 } elseif (isset($_GET['id'])) {
-    $id = intval($_GET['id']);
-    $q = mysqli_query($config, "SELECT * FROM tb_pengajuan WHERE pengajuan_id = '$id'");
-    if ($row = mysqli_fetch_assoc($q)) {
+    $id = (int) $_GET['id'];
+    $stmt = $config->prepare("SELECT p.pengajuan_id, p.nama_barang, p.unit, p.perkiraan_harga, p.keterangan, p.tanggal_pengajuan, (p.jumlah + COALESCE(SUM(b.jumlah), 0)) AS jumlah_diminta FROM tb_pengajuan p LEFT JOIN tb_barang b ON b.pengajuan_id = p.pengajuan_id WHERE p.pengajuan_id = ? GROUP BY p.pengajuan_id LIMIT 1");
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($row = $result->fetch_assoc()) {
         $dataBarang[] = [
             'nama' => $row['nama_barang'],
             'unit' => $row['unit'],
-            'jumlah' => $row['jumlah'],
+            'jumlah' => $row['jumlah_diminta'],
             'perkiraan_harga' => $row['perkiraan_harga'],
             'keterangan' => $row['keterangan'],
             'tanggal' => $row['tanggal_pengajuan']
@@ -41,13 +50,13 @@ if (isset($_GET['dari']) && isset($_GET['sampai'])) {
         $unit = $row['unit'];
         $tanggal = $row['tanggal_pengajuan'] != '0000-00-00' ? date('d-m-Y', strtotime($row['tanggal_pengajuan'])) : '....................................................';
     }
+    $stmt->close();
 }
-// Tetap 10 baris minimal
+
 while (count($dataBarang) < 10) {
     $dataBarang[] = ['nama' => '', 'unit' => '', 'jumlah' => '', 'perkiraan_harga' => '', 'keterangan' => '', 'tanggal' => ''];
 }
 
-// Mulai PDF
 class MYPDF extends TCPDF {
     public function Header() {
         $this->Image('../../../assets/img/logo.jpg', 8, 5, 32);
@@ -74,15 +83,12 @@ $pdf->SetMargins(15, 50, 15);
 $pdf->AddPage();
 $pdf->SetFont('helvetica', '', 11);
 
-// Judul
 $html = '<h3 style="text-align:center;">SURAT PERMINTAAN BARANG (SPB)</h3>';
 $html .= '<table cellpadding="2" style="margin-bottom:10px;">
 <tr><td width="100">Unit / Bagian</td><td width="10">:</td><td width="200">'.$unit.'</td></tr>
 <tr><td>Tanggal</td><td>:</td><td>'.$tanggal.'</td></tr>
 </table>';
 $html .= '<p>Melalui surat ini, Mohon disediakan alat/barang sebagai berikut :</p>';
-
-// Tabel barang
 
 $html .= '<table border="1" cellpadding="4" style="border-collapse:collapse; margin:auto; font-size:11px;">
 <thead>
@@ -137,4 +143,4 @@ $html .= '<br><br><table style="font-size:10px;">
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->IncludeJS('print();');
 ob_clean();
-$pdf->Output('lap_permintaan_barang.pdf', 'I'); 
+$pdf->Output('lap_permintaan_barang.pdf', 'I');

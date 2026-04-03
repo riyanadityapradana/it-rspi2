@@ -1,5 +1,7 @@
 <?php
+	if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 	require_once("../config/koneksi.php"); // Sesuaikan path ke koneksi
+	require_once("../config/telegram.php");
 
 	// Proses Simpan
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -14,12 +16,30 @@
 
 		if ($insertLembur) {
 			$id_lembur = mysqli_insert_id($config); // Dapatkan id lembur yang baru dibuat
+			$kegiatan_tersimpan = [];
 			// Simpan semua kegiatan
 			foreach ($kegiatan_array as $kegiatan) {
 				if (!empty(trim($kegiatan))) {
+					$kegiatan_bersih = trim($kegiatan);
+					$kegiatan_tersimpan[] = $kegiatan_bersih;
 					mysqli_query($config, "INSERT INTO tb_kegiatan_lembur (id_lembur, kegiatan) VALUES ('$id_lembur', '$kegiatan')");
 				}
 			}
+
+			$nama_staff = isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'Staff IT';
+			$nip_staff = isset($_SESSION['nip']) ? $_SESSION['nip'] : '-';
+			$pesan = "PENGAJUAN LEMBUR BARU\n";
+			$pesan .= "ID Lembur: " . $id_lembur . "\n";
+			$pesan .= "Nama: " . $nama_staff . "\n";
+			$pesan .= "NIP: " . $nip_staff . "\n";
+			$pesan .= "Tanggal: " . date('d-m-Y', strtotime($tanggal_lembur)) . "\n";
+			$pesan .= "Jam: " . $jam_mulai . " - " . $jam_selesai . "\n";
+			$pesan .= "Status: Menunggu\n";
+			if (!empty($kegiatan_tersimpan)) {
+				$pesan .= "Kegiatan:\n- " . implode("\n- ", $kegiatan_tersimpan);
+			}
+			telegram_send_channel_message($pesan);
+
 			header('Location: dashboard_staff.php?unit=lembur&msg=Data Lembur berhasil Diserahkan!');
 			exit;
 		} else {

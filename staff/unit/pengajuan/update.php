@@ -1,15 +1,20 @@
-
 <?php
 require_once("../config/koneksi.php");
 if (!isset($_GET['id'])) {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Pengajuan tidak ditemukan!');
     exit;
 }
-$pengajuan_id = intval($_GET['id']);
+
+$pengajuan_id = (int) $_GET['id'];
 $id_user = $_SESSION['id_user'];
-// Ambil data pengajuan
-$q = mysqli_query($config, "SELECT * FROM tb_pengajuan WHERE pengajuan_id='$pengajuan_id' AND id_user='$id_user'");
-$data = mysqli_fetch_assoc($q);
+
+$stmt = $config->prepare("SELECT * FROM tb_pengajuan WHERE pengajuan_id = ? AND id_user = ? LIMIT 1");
+$stmt->bind_param('ii', $pengajuan_id, $id_user);
+$stmt->execute();
+$result = $stmt->get_result();
+$data = $result->fetch_assoc();
+$stmt->close();
+
 if (!$data) {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Pengajuan tidak ditemukan!');
     exit;
@@ -18,25 +23,31 @@ if ($data['status'] !== 'diajukan') {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Pengajuan tidak bisa diedit!');
     exit;
 }
-// Proses update
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_barang = trim($_POST['nama_barang']);
     $unit = trim($_POST['unit']);
-    $jumlah = intval($_POST['jumlah']);
-    $perkiraan_harga = floatval($_POST['perkiraan_harga']);
+    $jumlah = isset($_POST['jumlah']) ? (int) $_POST['jumlah'] : 0;
+    $perkiraan_harga = isset($_POST['perkiraan_harga']) ? (float) $_POST['perkiraan_harga'] : 0;
     $keterangan = trim($_POST['keterangan']);
-    if (!$nama_barang || !$unit || !$jumlah || !$perkiraan_harga) {
+
+    if ($nama_barang === '' || $unit === '' || $jumlah <= 0 || $perkiraan_harga <= 0) {
         header('Location: dashboard_staff.php?unit=pengajuan&err=Data tidak lengkap!');
         exit;
     }
-    $q = mysqli_query($config, "UPDATE tb_pengajuan SET nama_barang='$nama_barang', unit='$unit', jumlah=$jumlah, perkiraan_harga=$perkiraan_harga, keterangan='$keterangan' WHERE pengajuan_id='$pengajuan_id' AND id_user='$id_user' AND status='diajukan'");
-    if ($q) {
+
+    $stmt = $config->prepare("UPDATE tb_pengajuan SET nama_barang = ?, unit = ?, jumlah = ?, perkiraan_harga = ?, keterangan = ? WHERE pengajuan_id = ? AND id_user = ? AND status = 'diajukan'");
+    $stmt->bind_param('ssidsii', $nama_barang, $unit, $jumlah, $perkiraan_harga, $keterangan, $pengajuan_id, $id_user);
+    $success = $stmt->execute();
+    $stmt->close();
+
+    if ($success) {
         header('Location: dashboard_staff.php?unit=pengajuan&msg=Pengajuan barang berhasil diupdate!');
         exit;
-    } else {
-        header('Location: dashboard_staff.php?unit=pengajuan&err=Gagal update pengajuan!');
-        exit;
     }
+
+    header('Location: dashboard_staff.php?unit=pengajuan&err=Gagal update pengajuan!');
+    exit;
 }
 ?>
 <div class="content-header">

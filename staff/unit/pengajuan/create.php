@@ -1,26 +1,48 @@
-
 <?php
 require_once("../config/koneksi.php");
+require_once("../config/telegram.php");
 $id_user = $_SESSION['id_user'];
-// Proses simpan
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_barang = trim($_POST['nama_barang']);
-  $unit = 'Unit IT';
-    $jumlah = intval($_POST['jumlah']);
-    $perkiraan_harga = floatval($_POST['perkiraan_harga']);
+    $unit = 'Unit IT';
+    $jumlah = isset($_POST['jumlah']) ? (int) $_POST['jumlah'] : 0;
+    $perkiraan_harga = isset($_POST['perkiraan_harga']) ? (float) $_POST['perkiraan_harga'] : 0;
     $keterangan = trim($_POST['keterangan']);
-    if (!$nama_barang || !$unit || !$jumlah || !$perkiraan_harga) {
+
+    if ($nama_barang === '' || $unit === '' || $jumlah <= 0 || $perkiraan_harga <= 0) {
         header('Location: dashboard_staff.php?unit=pengajuan&err=Data tidak lengkap!');
         exit;
     }
-    $q = mysqli_query($config, "INSERT INTO tb_pengajuan (id_user, nama_barang, unit, jumlah, perkiraan_harga, keterangan, status, tanggal_pengajuan) VALUES ('$id_user', '$nama_barang', '$unit', $jumlah, $perkiraan_harga, '$keterangan', 'diajukan', CURDATE())");
-    if ($q) {
+
+    $stmt = $config->prepare("INSERT INTO tb_pengajuan (id_user, nama_barang, unit, jumlah, perkiraan_harga, keterangan, status, tanggal_pengajuan) VALUES (?, ?, ?, ?, ?, ?, 'diajukan', CURDATE())");
+    $stmt->bind_param('issids', $id_user, $nama_barang, $unit, $jumlah, $perkiraan_harga, $keterangan);
+    $success = $stmt->execute();
+
+    if ($success) {
+        $pengajuan_id = $stmt->insert_id;
+        $nama_staff = isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'Staff IT';
+        $nip_staff = isset($_SESSION['nip']) ? $_SESSION['nip'] : '-';
+        $pesan = "PENGAJUAN BARANG BARU\n";
+        $pesan .= "ID Pengajuan: " . $pengajuan_id . "\n";
+        $pesan .= "Nama Staff: " . $nama_staff . "\n";
+        $pesan .= "NIP: " . $nip_staff . "\n";
+        $pesan .= "Unit: " . $unit . "\n";
+        $pesan .= "Nama Barang: " . $nama_barang . "\n";
+        $pesan .= "Jumlah: " . $jumlah . "\n";
+        $pesan .= "Perkiraan Harga: Rp " . number_format($perkiraan_harga, 0, ',', '.') . "\n";
+        $pesan .= "Keterangan: " . ($keterangan !== '' ? $keterangan : '-') . "\n";
+        $pesan .= "Status: Diajukan";
+        telegram_send_channel_message($pesan);
+
+        $stmt->close();
         header('Location: dashboard_staff.php?unit=pengajuan&msg=Pengajuan barang berhasil ditambahkan!');
         exit;
-    } else {
-        header('Location: dashboard_staff.php?unit=pengajuan&err=Gagal menambah pengajuan!');
-        exit;
     }
+
+    $stmt->close();
+    header('Location: dashboard_staff.php?unit=pengajuan&err=Gagal menambah pengajuan!');
+    exit;
 }
 ?>
 <div class="content-header">

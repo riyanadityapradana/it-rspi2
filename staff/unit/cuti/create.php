@@ -1,6 +1,7 @@
 <?php
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 // asumsi: $config (koneksi mysqli) tersedia di scope pemanggil
+require_once("../config/telegram.php");
 if (!isset($_SESSION['id_user'])) {
 		echo '<script>window.location="?unit=login";</script>';
 		exit;
@@ -29,6 +30,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
 
 		$insert = mysqli_query($config, $sql) or die(mysqli_error($config));
 		if ($insert) {
+			$id_cuti = mysqli_insert_id($config);
+			$nama_staff = isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'Staff IT';
+			$pesan = "PENGAJUAN CUTI BARU\n";
+			$pesan .= "ID Cuti: " . $id_cuti . "\n";
+			$pesan .= "Nama: " . $nama_staff . "\n";
+			$pesan .= "NIP: " . ($nip !== '' ? $nip : '-') . "\n";
+			$pesan .= "Jenis Cuti: " . ($jenis_cuti !== '' ? $jenis_cuti : '-') . "\n";
+			$pesan .= "Mulai: " . date('d-m-Y', strtotime($mulai_tanggal)) . "\n";
+			$pesan .= "Sampai: " . date('d-m-Y', strtotime($sampai_tanggal)) . "\n";
+			$pesan .= "Masuk: " . date('d-m-Y', strtotime($masuk_tanggal)) . "\n";
+			$pesan .= "Banyak Hari: " . $banyak_hari . "\n";
+			$pesan .= "Alasan: " . ($alasan !== '' ? $alasan : '-') . "\n";
+			$pesan .= "Status: Menunggu";
+			telegram_send_channel_message($pesan);
 			echo '<script>window.location.href="?unit=cuti&msg=created";</script>';
 			exit;
 		} else {

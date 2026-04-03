@@ -2,40 +2,45 @@
 require_once("../config/koneksi.php");
 $id_staff = $_SESSION['id_user'];
 
-// Proses insert data barang dari modal dengan POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
-  $pengajuan_id   = isset($_POST['pengajuan_id'])   ? mysqli_real_escape_string($config, $_POST['pengajuan_id'])   : '';
-  $nama_barang    = isset($_POST['nama_barang'])    ? mysqli_real_escape_string($config, $_POST['nama_barang'])    : '';
-  $jenis_barang   = isset($_POST['jenis_barang'])   ? mysqli_real_escape_string($config, $_POST['jenis_barang'])   : '';
-  $nomor_seri     = isset($_POST['nomor_seri'])     ? mysqli_real_escape_string($config, $_POST['nomor_seri'])     : '';
-  $ip_address     = isset($_POST['ip_address'])     ? mysqli_real_escape_string($config, $_POST['ip_address'])     : '';
-  $jumlah         = isset($_POST['jumlah'])         ? mysqli_real_escape_string($config, $_POST['jumlah'])         : '';
-  $jumlah_input_modal = isset($_POST['jumlah_input_modal']) ? mysqli_real_escape_string($config, $_POST['jumlah_input_modal']) : '1';
-  $harga          = isset($_POST['harga'])          ? mysqli_real_escape_string($config, $_POST['harga'])          : '';
-  $spesifikasi    = isset($_POST['spesifikasi'])    ? mysqli_real_escape_string($config, $_POST['spesifikasi'])    : '';
-  $tanggal_terima = isset($_POST['tanggal_terima']) ? mysqli_real_escape_string($config, $_POST['tanggal_terima']) : '';
+  $pengajuan_id = isset($_POST['pengajuan_id']) ? (int) $_POST['pengajuan_id'] : 0;
+  $nama_barang = isset($_POST['nama_barang']) ? trim($_POST['nama_barang']) : '';
+  $jenis_barang = isset($_POST['jenis_barang']) ? trim($_POST['jenis_barang']) : '';
+  $nomor_seri = isset($_POST['nomor_seri']) ? trim($_POST['nomor_seri']) : '';
+  $ip_address = isset($_POST['ip_address']) ? trim($_POST['ip_address']) : '';
+  $jumlah_input_modal = isset($_POST['jumlah_input_modal']) ? (int) $_POST['jumlah_input_modal'] : 1;
+  $harga = isset($_POST['harga']) && $_POST['harga'] !== '' ? (float) $_POST['harga'] : 0;
+  $spesifikasi = isset($_POST['spesifikasi']) ? trim($_POST['spesifikasi']) : '';
+  $tanggal_terima = isset($_POST['tanggal_terima']) ? trim($_POST['tanggal_terima']) : '';
   $foto = '';
-  // Ambil jumlah pengajuan dari database
-  $jumlah_pengajuan = 0;
-  $q_jumlah = mysqli_query($config, "SELECT jumlah FROM tb_pengajuan WHERE pengajuan_id='$pengajuan_id'");
-  if ($row_jumlah = mysqli_fetch_assoc($q_jumlah)) {
-    $jumlah_pengajuan = intval($row_jumlah['jumlah']);
+
+  $stmt = $config->prepare("SELECT jumlah, status FROM tb_pengajuan WHERE pengajuan_id = ? AND id_user = ? LIMIT 1");
+  $stmt->bind_param('ii', $pengajuan_id, $id_staff);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  $pengajuan = $result->fetch_assoc();
+  $stmt->close();
+
+  if (!$pengajuan || $pengajuan['status'] !== 'disetujui') {
+    header('Location: dashboard_staff.php?unit=pengajuan&err=Pengajuan tidak valid atau belum disetujui!');
+    exit;
   }
+
+  $jumlah_pengajuan = (int) $pengajuan['jumlah'];
   if ($jumlah_pengajuan <= 0) {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Stok pengajuan sudah habis, silakan tambah pengajuan baru!');
     exit;
   }
 
-  // Validasi jumlah input modal tidak melebihi stok pengajuan
-  $jumlah_input_val = intval($jumlah_input_modal);
-  if ($jumlah_input_val > $jumlah_pengajuan) {
+  if ($jumlah_input_modal < 1 || $jumlah_input_modal > $jumlah_pengajuan) {
     header('Location: dashboard_staff.php?unit=pengajuan&err=Jumlah input melebihi stok tersedia!');
     exit;
   }
+
   if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
     $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
     $allowed = ['jpg','jpeg','png','gif'];
-    if (in_array($ext, $allowed)) {
+    if (in_array($ext, $allowed, true)) {
       $newName = 'barang_' . time() . '_' . rand(1000,9999) . '.' . $ext;
       $uploadDir = realpath(__DIR__ . '/../barang/foto-barang');
       if ($uploadDir && is_writable($uploadDir)) {
@@ -52,28 +57,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['insert_barang'])) {
       error_log('Ekstensi file tidak diizinkan: ' . $ext);
     }
   }
-  // Gunakan jumlah_input_modal sebagai jumlah di field jumlah tb_barang
-  $jumlah_kurangi = intval($jumlah_input_modal);
-  if ($jumlah_kurangi > $jumlah_pengajuan) {
-    header('Location: dashboard_staff.php?unit=pengajuan&err=Jumlah input melebihi stok tersedia!');
+
+  $stmt = $config->prepare("INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  $stmt->bind_param('issssidsss', $pengajuan_id, $nama_barang, $jenis_barang, $nomor_seri, $ip_address, $jumlah_input_modal, $harga, $spesifikasi, $tanggal_terima, $foto);
+  $success = $stmt->execute();
+  $stmt->close();
+
+  if ($success) {
+    $jumlah_baru = $jumlah_pengajuan - $jumlah_input_modal;
+    $status_baru = $jumlah_baru <= 0 ? 'selesai' : 'disetujui';
+    $stmt = $config->prepare("UPDATE tb_pengajuan SET jumlah = ?, status = ? WHERE pengajuan_id = ? AND id_user = ?");
+    $stmt->bind_param('isii', $jumlah_baru, $status_baru, $pengajuan_id, $id_staff);
+    $stmt->execute();
+    $stmt->close();
+
+    header('Location: dashboard_staff.php?unit=barang&msg=Berhasil tambah ' . $jumlah_input_modal . ' barang!');
     exit;
   }
 
-  $sql = "INSERT INTO tb_barang (pengajuan_id, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, harga, spesifikasi, tanggal_terima, foto) VALUES (
-    '$pengajuan_id', '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', '$jumlah_kurangi', '$harga', '$spesifikasi', '$tanggal_terima', '$foto')";
-
-  if (mysqli_query($config, $sql)) {
-    $jumlah_baru = $jumlah_pengajuan - $jumlah_kurangi;
-    mysqli_query($config, "UPDATE tb_pengajuan SET jumlah='$jumlah_baru' WHERE pengajuan_id='$pengajuan_id'");
-    header('Location: dashboard_staff.php?unit=barang&msg=Berhasil tambah ' . $jumlah_kurangi . ' barang!');
-    exit;
-  } else {
-    header('Location: dashboard_staff.php?unit=pengajuan&err=Gagal menambah barang!');
-    exit;
-  }
+  header('Location: dashboard_staff.php?unit=pengajuan&err=Gagal menambah barang!');
+  exit;
 }
-?>
-<!-- Content Header (Page header) -->
+?><!-- Content Header (Page header) -->
 <section class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
@@ -436,11 +441,11 @@ document.addEventListener('DOMContentLoaded', function() {
         var no62 = '62' + no.substring(1);
         var pesan = encodeURIComponent(
             'Halo Qhusnul Arinda Selaku Kepala Ruangan Unit IT, ada pengajuan barang baru yang memerlukan verifikasi:\n\n' +
-            'ðŸ“‹ *Detail Pengajuan:*\n' +
-            'â€¢ ID: ' + currentPengajuanData.id + '\n' +
-            'â€¢ Nama Barang: ' + currentPengajuanData.nama + '\n' +
-            'â€¢ Keterangan: ' + currentPengajuanData.keterangan + '\n' +
-            'â€¢ Jumlah: ' + currentPengajuanData.jumlah + '\n\n' +
+            '?? *Detail Pengajuan:*\n' +
+            '• ID: ' + currentPengajuanData.id + '\n' +
+            '• Nama Barang: ' + currentPengajuanData.nama + '\n' +
+            '• Keterangan: ' + currentPengajuanData.keterangan + '\n' +
+            '• Jumlah: ' + currentPengajuanData.jumlah + '\n\n' +
             'Mohon segera verifikasi pengajuan barang ini di aplikasi IT-RSPI.\n\n' +
             'Terima kasih.'
         );
@@ -453,3 +458,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
