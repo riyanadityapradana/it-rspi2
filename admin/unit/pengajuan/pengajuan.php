@@ -72,7 +72,11 @@ if (isset($_GET['aksi']) && isset($_GET['id'])) {
   }
 }
 
-$q = mysqli_query($config, "SELECT p.*, u.nama_lengkap, COALESCE(SUM(b.jumlah), 0) AS jumlah_realisasi, (p.jumlah + COALESCE(SUM(b.jumlah), 0)) AS jumlah_diminta FROM tb_pengajuan p LEFT JOIN tb_user u ON p.id_user = u.id_user LEFT JOIN tb_barang b ON b.pengajuan_id = p.pengajuan_id GROUP BY p.pengajuan_id ORDER BY p.tanggal_pengajuan DESC");
+$q = mysqli_query($config, "SELECT p.*, u.nama_lengkap, u.nip, u.email, u.no_hp, COALESCE(SUM(b.jumlah), 0) AS jumlah_realisasi, (p.jumlah + COALESCE(SUM(b.jumlah), 0)) AS jumlah_diminta FROM tb_pengajuan p LEFT JOIN tb_user u ON p.id_user = u.id_user LEFT JOIN tb_barang b ON b.pengajuan_id = p.pengajuan_id GROUP BY p.pengajuan_id ORDER BY p.tanggal_pengajuan DESC");
+$pengajuanRows = [];
+while ($pengajuanRow = mysqli_fetch_assoc($q)) {
+  $pengajuanRows[] = $pengajuanRow;
+}
 ?>
 <section class="content-header">
   <div class="container-fluid">
@@ -118,7 +122,7 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap, COALESCE(SUM(b.jumlah), 
                   <th>Unit</th>
                   <th>Jumlah Diminta</th>
                   <th>Perkiraan Harga</th>
-                  <th>Keterangan</th>
+                  <!-- <th>Keterangan</th> -->
                   <th>Status</th>
                   <th>Tanggal Pengajuan</th>
                   <th>Tanggal ACC</th>
@@ -126,7 +130,7 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap, COALESCE(SUM(b.jumlah), 
                 </tr>
               </thead>
               <tbody>
-                <?php $no=1; while($row = mysqli_fetch_assoc($q)): ?>
+                <?php $no=1; foreach($pengajuanRows as $row): ?>
                 <tr>
                   <td><?= $no++; ?></td>
                   <td><?= htmlspecialchars($row['nama_lengkap']); ?></td>
@@ -134,7 +138,7 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap, COALESCE(SUM(b.jumlah), 
                   <td><?= htmlspecialchars($row['unit']); ?></td>
                   <td><?= htmlspecialchars($row['jumlah_diminta']); ?></td>
                   <td><?= htmlspecialchars(number_format($row['perkiraan_harga'],0,',','.')); ?></td>
-                  <td><?= htmlspecialchars($row['keterangan']); ?></td>
+                  <!-- <td><?= htmlspecialchars($row['keterangan']); ?></td> -->
                   <td>
                     <?php
                     $status = $row['status'];
@@ -154,17 +158,20 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap, COALESCE(SUM(b.jumlah), 
                   <td><?= htmlspecialchars($row['tanggal_pengajuan']); ?></td>
                   <td><?= htmlspecialchars($row['tanggal_acc']); ?></td>
                   <td>
+                    <button type="button" class="btn btn-info btn-sm mb-1" data-toggle="modal" data-target="#modalDetailPengajuan<?= $row['pengajuan_id'] ?>">
+                      <i class="fa fa-eye"></i> Detail
+                    </button>
                     <?php if ($row['status'] == 'diajukan'): ?>
-                      <a href="dashboard_admin.php?unit=pengajuan&aksi=acc&id=<?= $row['pengajuan_id'] ?>" class="btn btn-success btn-sm">ACC</a>
-                      <a href="dashboard_admin.php?unit=pengajuan&aksi=tolak&id=<?= $row['pengajuan_id'] ?>" class="btn btn-danger btn-sm">Tolak</a>
+                      <a href="dashboard_admin.php?unit=pengajuan&aksi=acc&id=<?= $row['pengajuan_id'] ?>" class="btn btn-success btn-sm mb-1">ACC</a>
+                      <a href="dashboard_admin.php?unit=pengajuan&aksi=tolak&id=<?= $row['pengajuan_id'] ?>" class="btn btn-danger btn-sm mb-1">Tolak</a>
                     <?php elseif ($row['status'] == 'disetujui' || $row['status'] == 'selesai'): ?>
-                      <a href="unit/pengajuan/lap_pemintaan_brg.php?id=<?= $row['pengajuan_id'] ?>" class="btn btn-info btn-sm" target="_blank"><i class="fa fa-print"></i> Cetak</a>
+                      <a href="unit/pengajuan/lap_pemintaan_brg.php?id=<?= $row['pengajuan_id'] ?>" class="btn btn-primary btn-sm mb-1" target="_blank"><i class="fa fa-print"></i> Cetak</a>
                     <?php else: ?>
-                      <span class="text-muted">-</span>
+                      <span class="text-muted d-block">-</span>
                     <?php endif; ?>
                   </td>
                 </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
               </tbody>
             </table>
           </div>
@@ -173,3 +180,116 @@ $q = mysqli_query($config, "SELECT p.*, u.nama_lengkap, COALESCE(SUM(b.jumlah), 
     </div>
   </div>
 </section>
+
+<?php foreach ($pengajuanRows as $detailRow): ?>
+<div class="modal fade" id="modalDetailPengajuan<?= $detailRow['pengajuan_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="modalDetailPengajuanLabel<?= $detailRow['pengajuan_id'] ?>" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header border-bottom">
+        <div>
+          <h5 class="modal-title" id="modalDetailPengajuanLabel<?= $detailRow['pengajuan_id'] ?>" style="font-size: 18px; font-weight: 600;">Detail Data Pengajuan</h5>
+          <small class="text-muted">ID Pengajuan: <?= htmlspecialchars($detailRow['pengajuan_id']) ?></small>
+        </div>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+          <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Pengaju</h6>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Nama Staff</p>
+              <strong style="font-size: 15px;"><?= !empty($detailRow['nama_lengkap']) ? htmlspecialchars($detailRow['nama_lengkap']) : '-' ?></strong>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">NIP</p>
+              <strong style="font-size: 15px;"><?= !empty($detailRow['nip']) ? htmlspecialchars($detailRow['nip']) : '-' ?></strong>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Email</p>
+              <strong style="font-size: 15px;"><?= !empty($detailRow['email']) ? htmlspecialchars($detailRow['email']) : '-' ?></strong>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">No. HP</p>
+              <strong style="font-size: 15px;"><?= !empty($detailRow['no_hp']) ? htmlspecialchars($detailRow['no_hp']) : '-' ?></strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+          <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Pengajuan</h6>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Nama Barang</p>
+              <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['nama_barang']) ?></strong>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Unit</p>
+              <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['unit']) ?></strong>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Jumlah Diminta</p>
+              <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['jumlah_diminta']) ?></strong>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Jumlah Direalisasi</p>
+              <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['jumlah_realisasi']) ?></strong>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Perkiraan Harga</p>
+              <strong style="font-size: 15px;">Rp <?= htmlspecialchars(number_format($detailRow['perkiraan_harga'], 0, ',', '.')) ?></strong>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Tanggal Pengajuan</p>
+              <strong style="font-size: 15px;"><?= !empty($detailRow['tanggal_pengajuan']) ? htmlspecialchars(date('d-m-Y', strtotime($detailRow['tanggal_pengajuan']))) : '-' ?></strong>
+            </div>
+          </div>
+          <div>
+            <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Keterangan</p>
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 12px 14px; min-height: 52px; max-height: 180px; overflow-y: auto; font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;">
+              <?= !empty($detailRow['keterangan']) ? nl2br(htmlspecialchars($detailRow['keterangan'])) : '-' ?>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Status Verifikasi</h6>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Status Saat Ini</p>
+              <?php
+              $detailStatus = $detailRow['status'];
+              if ($detailStatus == 'diajukan') {
+                $detailBadgeClass = 'warning';
+                $detailStatusLabel = 'Diajukan';
+              } elseif ($detailStatus == 'disetujui') {
+                $detailBadgeClass = 'success';
+                $detailStatusLabel = 'Disetujui';
+              } elseif ($detailStatus == 'ditolak') {
+                $detailBadgeClass = 'danger';
+                $detailStatusLabel = 'Ditolak';
+              } elseif ($detailStatus == 'selesai') {
+                $detailBadgeClass = 'primary';
+                $detailStatusLabel = 'Selesai';
+              } else {
+                $detailBadgeClass = 'secondary';
+                $detailStatusLabel = $detailStatus;
+              }
+              ?>
+              <span class="badge badge-<?= $detailBadgeClass ?>" style="font-size: 13px; padding: 6px 10px;"><?= htmlspecialchars($detailStatusLabel) ?></span>
+            </div>
+            <div>
+              <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Tanggal ACC / Keputusan</p>
+              <strong style="font-size: 15px;"><?= !empty($detailRow['tanggal_acc']) ? htmlspecialchars(date('d-m-Y', strtotime($detailRow['tanggal_acc']))) : '-' ?></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endforeach; ?>
