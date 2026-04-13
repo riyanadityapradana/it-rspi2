@@ -18,7 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $kode_inventaris = trim($_POST['kode_inventaris']);
   $nama_barang = trim($_POST['nama_barang']);
   $jenis_barang = trim($_POST['jenis_barang']);
-  $nomor_seri = trim($_POST['nomor_seri']);
+  $input_nomor_seri = isset($_POST['nomor_seri']) ? trim($_POST['nomor_seri']) : '';
+  if ($input_nomor_seri === '') {
+    $nomor_seri = '(Tidak ada S/N)';
+    $skip_serial_duplicate_check = true;
+  } else {
+    $nomor_seri = $input_nomor_seri;
+    $skip_serial_duplicate_check = false;
+  }
   // Jika jenis barang bukan Komputer & Laptop, ip_address = null
   if ($jenis_barang === 'Komputer & Laptop') {
     $ip_address = trim($_POST['ip_address']);
@@ -39,15 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
     }
   }
-  $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE nomor_seri='$nomor_seri'");
-  if (mysqli_num_rows($cek) > 0) {
-    header('Location: dashboard_staff.php?unit=barang&err=Barang sudah terdaftar!');
-    exit;
-  } else {
-    $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, kode_inventaris, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, spesifikasi, tanggal_terima, foto) VALUES (
+  $nomor_seri_safe = mysqli_real_escape_string($config, $nomor_seri);
+  if (!empty($nomor_seri) && !$skip_serial_duplicate_check) {
+    $cek = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE nomor_seri='$nomor_seri_safe'");
+    if (mysqli_num_rows($cek) > 0) {
+      header('Location: dashboard_staff.php?unit=barang&err=Barang sudah terdaftar!');
+      exit;
+    }
+  }
+  $nomor_seri_value = "'$nomor_seri_safe'";
+  $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, kode_inventaris, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, spesifikasi, tanggal_terima, foto) VALUES (
       " . ($pengajuan_id ? "'$pengajuan_id'," : "NULL,") . "
-      '$kode_inventaris', '$nama_barang', '$jenis_barang', '$nomor_seri', '$ip_address', $jumlah, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "''") . ")");
-    if ($q) {
+      '$kode_inventaris', '$nama_barang', '$jenis_barang', $nomor_seri_value, '$ip_address', $jumlah, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "''") . ")");
+  if ($q) {
       header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
       exit;
     } else {
@@ -55,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit;
     }
   }
-}
+
 // Pilihan jenis barang
 $jenis_list = [
     'Komputer & Laptop',
