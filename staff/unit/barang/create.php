@@ -1,5 +1,6 @@
 <?php
 require_once("../config/koneksi.php");
+require_once(__DIR__ . "/barang_helpers.php");
 // Toastr
 if (!function_exists('toastr_script')) {
 function toastr_script($msg, $type = 'success') {
@@ -17,8 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $pengajuan_id = isset($_POST['pengajuan_id']) ? intval($_POST['pengajuan_id']) : NULL;
   $kode_inventaris = trim($_POST['kode_inventaris']);
   $nama_barang = trim($_POST['nama_barang']);
-  $jenis_barang = trim($_POST['jenis_barang']);
+  $jenis_barang = barang_normalize_jenis($_POST['jenis_barang'] ?? '', '');
   $input_nomor_seri = isset($_POST['nomor_seri']) ? trim($_POST['nomor_seri']) : '';
+  if ($jenis_barang === '') {
+    header('Location: dashboard_staff.php?unit=barang&err=Jenis barang tidak valid!');
+    exit;
+  }
   if ($input_nomor_seri === '') {
     $nomor_seri = '(Tidak ada S/N)';
     $skip_serial_duplicate_check = true;
@@ -67,16 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   }
 
-// Pilihan jenis barang
-$jenis_list = [
-    'Komputer & Laptop',
-    'Komponen Komputer & Laptop',
-    'Printer & Scanner',
-    'Komponen Printer & Scanner',
-    'Komponen Network',
-    'Perangkat Mobile',
-    'Aksesoris Perangkat Mobile'
-];
+$jenis_list = barang_get_jenis_options();
 ?>
 <div class="content-header">
   <div class="container-fluid">

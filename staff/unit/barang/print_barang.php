@@ -3,11 +3,15 @@
 require_once("../../../config/koneksi.php");
 
 // Ambil parameter dari form
-$kondisi = $_GET['kondisi'] ?? 'baik';
+$kondisi = $_GET['kondisi'] ?? 'Baru';
 $lokasi_filter = $_GET['lokasi_filter'] ?? 'unit_it';
 $tahun = $_GET['tahun'] ?? date('Y');
 
-$kondisi_db = strtolower($kondisi) == 'baik' ? 'baru' : (strtolower($kondisi) == 'rusak' ? 'rusak' : $kondisi);
+$allowed_kondisi = ['baru', 'bekas', 'rusak', 'dalam perbaikan'];
+$kondisi_db = strtolower(trim($kondisi));
+if (!in_array($kondisi_db, $allowed_kondisi, true)) {
+    $kondisi_db = 'baru';
+}
 
 // Build WHERE clause
 $where_conditions = ["YEAR(b.tanggal_terima) = '$tahun'"];
@@ -106,8 +110,16 @@ $result = mysqli_query($config, $query);
             color: #388e3c;
             font-weight: bold;
         }
+        .status-bekas {
+            color: #616161;
+            font-weight: bold;
+        }
         .status-rusak {
             color: #d32f2f;
+            font-weight: bold;
+        }
+        .status-perbaikan {
+            color: #f57c00;
             font-weight: bold;
         }
         .footer {
@@ -188,7 +200,18 @@ $result = mysqli_query($config, $query);
                     <td><?= htmlspecialchars($row['jumlah']) ?></td>
                     <td><?= htmlspecialchars($row['spesifikasi']) ?></td>
                     <td><?= !empty($row['tanggal_terima']) ? date('d/m/Y', strtotime($row['tanggal_terima'])) : '-' ?></td>
-                    <td class="<?= $row['kondisi'] == 'baru' ? 'status-baik' : ($row['kondisi'] == 'rusak' ? 'status-rusak' : '') ?>">
+                    <td class="<?php
+                        $kondisi_row = strtolower(trim($row['kondisi']));
+                        if ($kondisi_row === 'baru') {
+                            echo 'status-baik';
+                        } elseif ($kondisi_row === 'bekas') {
+                            echo 'status-bekas';
+                        } elseif ($kondisi_row === 'rusak') {
+                            echo 'status-rusak';
+                        } elseif ($kondisi_row === 'dalam perbaikan') {
+                            echo 'status-perbaikan';
+                        }
+                    ?>">
                         <?= htmlspecialchars(ucwords($row['kondisi'])) ?>
                     </td>
                     <td><?= htmlspecialchars($row['nama_lokasi']) ?></td>

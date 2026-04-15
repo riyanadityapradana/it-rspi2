@@ -1,191 +1,20 @@
 <?php
 require_once("../config/koneksi.php");
+require_once(__DIR__ . "/barang_helpers.php");
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
-// Proses simpan perbaikan barang (action=perbaikan)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'perbaikan') {
-  $barang_id = isset($_POST['barang_id']) ? intval($_POST['barang_id']) : 0;
-  // penyerahan_id removed; we use unit_melapor field instead
-  $tanggal_lapor = isset($_POST['tanggal_lapor']) && $_POST['tanggal_lapor'] !== '' ? mysqli_real_escape_string($config, $_POST['tanggal_lapor']) : date('Y-m-d H:i:s');
-  $deskripsi_kerusakan = isset($_POST['deskripsi_kerusakan']) ? mysqli_real_escape_string($config, trim($_POST['deskripsi_kerusakan'])) : '';
-  $tindakan_perbaikan = isset($_POST['tindakan_perbaikan']) ? mysqli_real_escape_string($config, $_POST['tindakan_perbaikan']) : '';
-  $status_perbaikan = isset($_POST['status_perbaikan']) ? mysqli_real_escape_string($config, $_POST['status_perbaikan']) : 'diajukan';
-  // tanggal_selesai selalu NULL sesuai permintaan
-  $tanggal_selesai = null;
-  $keterangan_perbaikan = isset($_POST['keterangan_perbaikan']) ? mysqli_real_escape_string($config, trim($_POST['keterangan_perbaikan'])) : '';
-  // unit_melapor diambil dari form (berdasarkan lokasi barang default)
-  $unit_melapor = isset($_POST['unit_melapor']) && $_POST['unit_melapor'] !== '' ? intval($_POST['unit_melapor']) : null;
+$jenis_barang_options = barang_get_jenis_options();
+$kondisi_barang_options = barang_get_kondisi_options();
 
-  // Jika tindakan_perbaikan tidak dipilih oleh user, beri default 'service_luar'
-  if ($tindakan_perbaikan === '') {
-    $tindakan_perbaikan = 'service_luar';
-  }
-
-  if ($barang_id <= 0) {
-    header('Location: dashboard_staff.php?unit=barang&err=Data perbaikan tidak lengkap');
-    exit;
-  }
-
-  // Build insert query
-  // tanggal_selesai selalu NULL
-  $tanggal_selesai_sql = "NULL";
-  $unit_sql = $unit_melapor !== null ? "'{$unit_melapor}'" : "NULL";
-
-  // teknisi: jika tindakan = service_sendiri -> isi dengan nama user yang login; jika service_luar -> NULL
-  if ($tindakan_perbaikan === 'service_sendiri') {
-    $teknisi_val = isset($_SESSION['nama_lengkap']) ? mysqli_real_escape_string($config, $_SESSION['nama_lengkap']) : (isset($_SESSION['username']) ? mysqli_real_escape_string($config, $_SESSION['username']) : '');
-    $teknisi_sql = $teknisi_val !== '' ? "'{$teknisi_val}'" : "NULL";
-  } else {
-    $teknisi_sql = "NULL";
-  }
-
-  $ins_sql = "INSERT INTO tb_perbaikan_barang (barang_id, tanggal_lapor, deskripsi_kerusakan, tindakan_perbaikan, status, tanggal_selesai, teknisi, keterangan, unit_melapor) VALUES ('{$barang_id}', '{$tanggal_lapor}', '{$deskripsi_kerusakan}', '{$tindakan_perbaikan}', '{$status_perbaikan}', {$tanggal_selesai_sql}, {$teknisi_sql}, '{$keterangan_perbaikan}', {$unit_sql})";
-
-  mysqli_begin_transaction($config);
-  $ins = mysqli_query($config, $ins_sql);
-  if ($ins) {
-    // Update kondisi di tb_barang sesuai status perbaikan
-    if ($status_perbaikan === 'tidak_dapat_diperbaiki') {
-      $upd = mysqli_query($config, "UPDATE tb_barang SET kondisi='rusak' WHERE barang_id='{$barang_id}'");
-    } elseif ($status_perbaikan === 'selesai') {
-      $upd = mysqli_query($config, "UPDATE tb_barang SET kondisi='baik' WHERE barang_id='{$barang_id}'");
-    } elseif ($status_perbaikan === 'proses' || $status_perbaikan === 'diajukan') {
-      // saat sedang diajukan atau dalam proses, set kondisi menjadi Dalam Perbaikan
-      $upd = mysqli_query($config, "UPDATE tb_barang SET kondisi='Dalam Perbaikan' WHERE barang_id='{$barang_id}'");
-    } else {
-      $upd = true;
-    }
-
-    if ($upd) {
-      mysqli_commit($config);
-      header('Location: dashboard_staff.php?unit=barang&msg=Perbaikan berhasil disimpan');
-      exit;
-    } else {
-      mysqli_rollback($config);
-      header('Location: dashboard_staff.php?unit=barang&err=Gagal update kondisi barang: ' . mysqli_error($config));
-      exit;
-    }
-  } else {
-    mysqli_rollback($config);
-    header('Location: dashboard_staff.php?unit=barang&err=Gagal menyimpan perbaikan: ' . mysqli_error($config));
-    exit;
-  }
+$lokasi_q = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
+$lokasi_list = [];
+while ($row = mysqli_fetch_assoc($lokasi_q)) {
+  $lokasi_list[] = $row;
 }
-// Proses simpan pemindahan barang (action=pindah)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'pindah') {
-  $barang_id = isset($_POST['barang_id']) ? intval($_POST['barang_id']) : 0;
-  $lokasi_asal = isset($_POST['lokasi_asal']) ? intval($_POST['lokasi_asal']) : 0;
-  $lokasi_tujuan = isset($_POST['lokasi_tujuan']) ? intval($_POST['lokasi_tujuan']) : 0;
-  $tanggal_mutasi = isset($_POST['tanggal_mutasi']) ? mysqli_real_escape_string($config, $_POST['tanggal_mutasi']) : date('Y-m-d');
-  $keterangan = isset($_POST['keterangan']) ? mysqli_real_escape_string($config, trim($_POST['keterangan'])) : '';
-  $id_user = isset($_SESSION['id_user']) ? intval($_SESSION['id_user']) : 0;
 
-  if ($barang_id <= 0 || $lokasi_tujuan <= 0) {
-    header('Location: dashboard_staff.php?unit=barang&err=Data pemindahan tidak lengkap');
-    exit;
-  }
+$jenis_filter = barang_normalize_jenis($_GET['jenis'] ?? '', '');
+$kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
 
-  // if user id not available, insert NULL to avoid FK constraint error
-  $id_user_sql = $id_user > 0 ? "'{$id_user}'" : "NULL";
-
-  // gunakan transaksi agar insert mutasi dan update lokasi barang berjalan atomik
-  mysqli_begin_transaction($config);
-  $ins = mysqli_query($config, "INSERT INTO tb_mutasi_barang (barang_id, lokasi_asal, lokasi_tujuan, tanggal_mutasi, id_user, keterangan) VALUES ('{$barang_id}', '{$lokasi_asal}', '{$lokasi_tujuan}', '{$tanggal_mutasi}', {$id_user_sql}, '{$keterangan}')");
-  if ($ins) {
-    $upd = mysqli_query($config, "UPDATE tb_barang SET lokasi_id='{$lokasi_tujuan}' WHERE barang_id='{$barang_id}'");
-    if ($upd) {
-      // Setelah lokasi diupdate, set kondisi menjadi 'Bekas' karena barang dipindahkan
-      $upd_kond = mysqli_query($config, "UPDATE tb_barang SET kondisi='Bekas' WHERE barang_id='{$barang_id}'");
-      if ($upd_kond) {
-        mysqli_commit($config);
-        header('Location: dashboard_staff.php?unit=barang&msg=Pemindahan barang berhasil disimpan');
-        exit;
-      } else {
-        mysqli_rollback($config);
-        header('Location: dashboard_staff.php?unit=barang&err=Gagal update kondisi barang: ' . mysqli_error($config));
-        exit;
-      }
-    } else {
-      mysqli_rollback($config);
-      header('Location: dashboard_staff.php?unit=barang&err=Gagal update lokasi barang: ' . mysqli_error($config));
-      exit;
-    }
-  } else {
-    mysqli_rollback($config);
-    header('Location: dashboard_staff.php?unit=barang&err=Gagal menyimpan pemindahan: ' . mysqli_error($config));
-    exit;
-  }
-}
-// Proses update penyerahan barang
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset($_POST['lokasi_id'])) {
-  $barang_id = intval($_POST['barang_id']);
-  $lokasi_id = intval($_POST['lokasi_id'][0]);
-  $kondisi = trim($_POST['kondisi'][0]);
-  $keterangan = isset($_POST['keterangan_unit'][0]) ? trim($_POST['keterangan_unit'][0]) : '';
-  $unit_index = isset($_POST['unit_index']) ? intval($_POST['unit_index']) : 0;
-
-  // Ambil jumlah dari tb_barang
-  $q_jumlah = mysqli_query($config, "SELECT jumlah FROM tb_barang WHERE barang_id='$barang_id'");
-  $row_jumlah = mysqli_fetch_assoc($q_jumlah);
-  $jumlah = $row_jumlah['jumlah'];
-
-  // Cek jumlah penyerahan sudah ada
-  $q_penyerahan_count = mysqli_query($config, "SELECT COUNT(*) as count FROM tb_penyerahan WHERE barang_id='$barang_id'");
-  $row_count = mysqli_fetch_assoc($q_penyerahan_count);
-  $jumlah_penyerahan_current = $row_count['count'];
-
-  if ($jumlah_penyerahan_current >= $jumlah) {
-    header('Location: dashboard_staff.php?unit=barang&err=Semua unit sudah diserahkan!');
-    exit;
-  }
-
-  // Get existing penyerahan ids
-  $penyerahan_ids = [];
-  $q_ids = mysqli_query($config, "SELECT penyerahan_id FROM tb_penyerahan WHERE barang_id='$barang_id' ORDER BY penyerahan_id ASC");
-  while ($r = mysqli_fetch_assoc($q_ids)) {
-    $penyerahan_ids[] = $r['penyerahan_id'];
-  }
-  $target_id = isset($penyerahan_ids[$unit_index]) ? $penyerahan_ids[$unit_index] : null;
-  if ($target_id) {
-    $query = mysqli_query($config, "UPDATE tb_penyerahan SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE penyerahan_id='$target_id'");
-  } else {
-    $query = mysqli_query($config, "INSERT INTO tb_penyerahan (barang_id, lokasi_id, kondisi, keterangan) VALUES ('$barang_id', '$lokasi_id', '$kondisi', '$keterangan')");
-  }
-  if ($query) {
-    // Setelah berhasil insert/update penyerahan, update kondisi utama di tb_barang
-    $kondisi_for_db = '';
-    $k_lower = strtolower($kondisi);
-    if ($k_lower === 'baru' || $k_lower === 'Baru' || $k_lower === 'BARU') {
-      $kondisi_for_db = 'Baru';
-    } elseif ($k_lower === 'bekas') {
-      $kondisi_for_db = 'Bekas';
-    } elseif ($k_lower === 'rusak') {
-      $kondisi_for_db = 'Rusak';
-    } else {
-      // default: use submitted value (sanitized)
-      $kondisi_for_db = mysqli_real_escape_string($config, $kondisi);
-    }
-    if ($kondisi_for_db !== '') {
-      mysqli_query($config, "UPDATE tb_barang SET kondisi='" . mysqli_real_escape_string($config, $kondisi_for_db) . "' WHERE barang_id='$barang_id'");
-    }
-    // Update lokasi_id di tb_barang sesuai lokasi penyerahan
-    $lokasi_id_int = intval($lokasi_id);
-    if ($lokasi_id_int > 0) {
-      mysqli_query($config, "UPDATE tb_barang SET lokasi_id='{$lokasi_id_int}' WHERE barang_id='{$barang_id}'");
-    }
-    $next_unit = $unit_index + 1;
-    if ($next_unit < $jumlah) {
-      header('Location: dashboard_staff.php?unit=barang&msg=Unit ' . ($unit_index+1) . ' berhasil diserahkan, lanjut unit ' . ($next_unit+1) . '&continue_barang_id=' . $barang_id . '&next_unit=' . $next_unit);
-      exit;
-    } else {
-      header('Location: dashboard_staff.php?unit=barang&msg=Semua unit berhasil diserahkan!');
-      exit;
-    }
-  } else {
-    header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan unit ' . ($unit_index+1) . ': ' . mysqli_error($config));
-    exit;
-  }
-}
 ?>
 <!-- Content Header (Page header) -->
 <section class="content-header">
@@ -219,22 +48,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
               <input type="hidden" name="unit" value="barang">
               <select id="filterJenisBarang" name="jenis" class="form-control form-control-sm" style="display: inline-block; width: auto;" onchange="document.getElementById('filterForm').submit();">
                 <option value="">Semua Jenis Barang</option>
-                <option value="Komputer & Laptop" <?php if (isset($_GET['jenis']) && $_GET['jenis'] === 'Komputer & Laptop') echo 'selected'; ?>>Komputer & Laptop</option>
-              <option value="Komponen Komputer & Laptop">Komponen Komputer & Laptop</option>
-              <option value="Printer & Scanner">Printer & Scanner</option>
-              <option value="Komponen Printer & Scanner">Komponen Printer & Scanner</option>
-              <option value="Kamera & Aksesoris">Kamera & Aksesoris</option>
-              <option value="Komponen Network">Komponen Network</option>
+                <?php foreach ($jenis_barang_options as $jenis_option): ?>
+                  <option value="<?= htmlspecialchars($jenis_option) ?>" <?php if (isset($_GET['jenis']) && $_GET['jenis'] === $jenis_option) echo 'selected'; ?>><?= htmlspecialchars($jenis_option) ?></option>
+                <?php endforeach; ?>
               </select>
             </form>
             <form method="get" id="filterFormKondisi" style="display:inline-block;">
               <input type="hidden" name="unit" value="barang">
               <select id="filterStatusBarang" name="kondisi" class="form-control form-control-sm" style="display: inline-block; width: auto; margin-right: 10px;" onchange="document.getElementById('filterFormKondisi').submit();">
                 <option value="">Semua Status</option>
-                <option value="Baru" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === 'Baru') echo 'selected'; ?>>Baru</option>
-                <option value="Bekas" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === 'Bekas') echo 'selected'; ?>>Bekas</option>
-                <option value="Rusak" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === 'Rusak') echo 'selected'; ?>>Rusak</option>
-                <option value="Dalam Perbaikan" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === 'Dalam Perbaikan') echo 'selected'; ?>>Dalam Perbaikan</option>
+                <?php foreach ($kondisi_barang_options as $kondisi_option): ?>
+                  <option value="<?= htmlspecialchars($kondisi_option) ?>" <?php if (isset($_GET['kondisi']) && $_GET['kondisi'] === $kondisi_option) echo 'selected'; ?>><?= htmlspecialchars($kondisi_option) ?></option>
+                <?php endforeach; ?>
               </select>
             </form>
             <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">
@@ -262,20 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                 <tbody>
                     <?php
                     $no = 1;
-                    // Ambil lokasi
-                    $lokasi_q = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
-                    $lokasi_list = [];
-                    while ($row = mysqli_fetch_assoc($lokasi_q)) {
-                      $lokasi_list[] = $row;
-                    }
                     // Build filters from GET parameters
                     $where = array();
-                    if (!empty($_GET['jenis'])) {
-                      $jenis = mysqli_real_escape_string($config, $_GET['jenis']);
+                    if ($jenis_filter !== '') {
+                      $jenis = mysqli_real_escape_string($config, $jenis_filter);
                       $where[] = "b.jenis_barang = '{$jenis}'";
                     }
-                    if (!empty($_GET['kondisi'])) {
-                      $kondisi = mysqli_real_escape_string($config, $_GET['kondisi']);
+                    if ($kondisi_filter !== '') {
+                      $kondisi = mysqli_real_escape_string($config, $kondisi_filter);
                       $where[] = "LOWER(b.kondisi) = LOWER('{$kondisi}')";
                     }
                     $sql = "SELECT b.barang_id, b.nama_barang, b.kode_inventaris, b.jenis_barang, b.nomor_seri, b.ip_address, b.jumlah, b.spesifikasi, b.kondisi, b.tanggal_terima, b.foto,
@@ -296,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         <td><?= htmlspecialchars($row['nama_barang']); ?>
                           <br><small style="color: #2266e4;">Kode Inventaris :<b><?= htmlspecialchars($row['kode_inventaris']); ?></b></small>
                           <br><small style="color: #2266e4;">S/N : <b><?= htmlspecialchars($row['nomor_seri']); ?></b></small>
-                          <br><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalPindah" onclick="setPindahData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['kode_inventaris']) ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= $row['lokasi_id'] ?>')" responsive>
+                          <br><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalPindah" onclick="setPindahData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['kode_inventaris']) ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= $row['last_penyerahan_lokasi_id'] ?>')" responsive>
                               <i class="fa fa-exchange-alt"></i> Pindah
                             </button>
                             <button type="button" class="btn btn-warning btn-sm" onclick="setPerbaikanData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= $row['lokasi_id'] ?>')" data-toggle="modal" data-target="#modalPerbaikan" responsive>
@@ -337,24 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                         </td>
                         <td>
                           <?php
-                            $kval = isset($row['kondisi']) ? strtolower(trim($row['kondisi'])) : '';
-                            switch ($kval) {
-                              case 'baru':
-                                $badge = 'success';
-                                break;
-                              case 'bekas':
-                                $badge = 'secondary';
-                                break;
-                              case 'rusak':
-                                $badge = 'danger';
-                                break;
-                              default:
-                                if (strpos($kval, 'perbaikan') !== false) {
-                                  $badge = 'warning';
-                                } else {
-                                  $badge = 'secondary';
-                                }
-                            }
+                            $badge = barang_get_badge_class(isset($row['kondisi']) ? $row['kondisi'] : '');
                           ?>
                           <span class="badge badge-<?= $badge ?>"><?= htmlspecialchars($row['kondisi']) ?></span>
                         </td>
@@ -383,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                               <span aria-hidden="true">&times;</span>
                             </button>
                           </div>
-                          <form id="formUpdateLokasi" method="POST" action="">
+                          <form id="formUpdateLokasi" method="POST" action="unit/barang/aksi_penyerahan.php">
                             <div class="modal-body">
                               <input type="hidden" name="barang_id" id="updateBarangId">
                               <input type="hidden" name="unit_index" id="unitIndex">
@@ -455,9 +257,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
-                  <form method="post" action="">
-                    <input type="hidden" name="action" value="perbaikan">
-                    <div class="modal-body">
+                  <form method="post" action="unit/barang/aksi_perbaikan.php">
+                                        <div class="modal-body">
                       <input type="hidden" name="barang_id" id="perbaikanBarangId">
                       <div class="form-group">
                         <label>Nama Barang</label>
@@ -484,8 +285,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       <div class="form-group">
                         <label>Tindakan Perbaikan</label>
                         <select name="tindakan_perbaikan" id="perbaikanTindakan" class="form-control select2bs4" required>
-                          <option value="Service luar">Service luar</option>
-                          <option value="Service sendiri">Service sendiri</option>
+                          <option value="service_luar">Service luar</option>
+                          <option value="service_sendiri">Service sendiri</option>
                         </select>
                       </div>
                       <div class="form-group">
@@ -581,9 +382,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
-                  <form method="post" action="">
-                    <input type="hidden" name="action" value="pindah">
-                    <div class="modal-body">
+                  <form method="post" action="unit/barang/aksi_pindah.php">
+                                        <div class="modal-body">
                       <input type="hidden" name="barang_id" id="pindahBarangId">
                       <div class="form-group">
                         <label>Nama Barang</label>
@@ -862,6 +662,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
                             <?php
                             $kval = isset($detailRow['kondisi']) ? strtolower(trim($detailRow['kondisi'])) : '';
                             switch ($kval) {
+                              case 'baik':
+                                $badge = 'success';
+                                break;
                               case 'baru':
                                 $badge = 'success';
                                 break;
@@ -952,8 +755,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['barang_id']) && isset
           <div class="form-group">
             <label>Pilihan Kondisi Barang</label>
             <select class="form-control" name="kondisi" required>
-              <option value="baik">Baik</option>
-              <option value="rusak">Rusak</option>
+              <option value="Baru">Baru</option>
+              <option value="Bekas">Bekas</option>
+              <option value="Rusak">Rusak</option>
+              <option value="Dalam Perbaikan">Dalam Perbaikan</option>
             </select>
           </div>
           <div class="form-group">

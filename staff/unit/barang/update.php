@@ -1,5 +1,6 @@
 <?php
 require_once("../config/koneksi.php");
+require_once(__DIR__ . "/barang_helpers.php");
 if (!isset($_GET['id'])) {
   header('Location: dashboard_staff.php?unit=barang&err=Barang tidak ditemukan!');
   exit;
@@ -20,23 +21,8 @@ while ($row = mysqli_fetch_assoc($penyerahan_q)) {
 }
 $unit_index = isset($_GET['next_unit']) ? intval($_GET['next_unit']) : 0;
 $all_delivered = count($penyerahan_list) >= $data['jumlah'];
-// Pilihan jenis barang
-$jenis_list = [
-  'Komputer & Laptop',
-  'Komponen Komputer & Laptop',
-  'Printer & Scanner',
-  'Komponen Printer & Scanner',
-  'Komponen Network',
-  'Perangkat Mobile',
-  'Aksesoris Perangkat Mobile'
-];
-// Pilihan kondisi barang
-$kondisi_list = [
-  'Baru',
-  'Bekas',
-  'Rusak',
-  'Dalam Perbaikan'
-];
+$jenis_list = barang_get_jenis_options();
+$kondisi_list = barang_get_kondisi_options();
 // Pilihan lokasi
 $lokasi_q = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
 $lokasi_list = [];
@@ -46,26 +32,48 @@ while ($row = mysqli_fetch_assoc($lokasi_q)) {
 // Proses update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (isset($_POST['penyerahan_id'])) {
-    // Update existing penyerahan
+    mysqli_begin_transaction($config);
+    $hasError = false;
     for ($i = 0; $i < count($_POST['penyerahan_id']); $i++) {
       $penyerahan_id = intval($_POST['penyerahan_id'][$i]);
       $lokasi_id = intval($_POST['lokasi_id'][$i]);
-      $kondisi = trim($_POST['kondisi'][$i]);
+      $kondisi = barang_normalize_kondisi($_POST['kondisi'][$i], trim($_POST['kondisi'][$i]));
       $keterangan = trim($_POST['keterangan_unit'][$i]);
-      mysqli_query($config, "UPDATE tb_penyerahan SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE penyerahan_id='$penyerahan_id'");
+      $ok = mysqli_query($config, "UPDATE tb_penyerahan SET lokasi_id='$lokasi_id', kondisi='$kondisi', keterangan='$keterangan' WHERE penyerahan_id='$penyerahan_id'");
+      if (!$ok) {
+        $hasError = true;
+        break;
+      }
     }
+    if (!$hasError) {
+      $hasError = !barang_sync_snapshot($config, $barang_id);
+    }
+    if ($hasError) {
+      mysqli_rollback($config);
+      header('Location: dashboard_staff.php?unit=barang&err=Gagal update penyerahan: ' . mysqli_error($config));
+      exit;
+    }
+    mysqli_commit($config);
     header('Location: dashboard_staff.php?unit=barang&msg=Penyerahan berhasil diupdate!');
     exit;
   } elseif (isset($_POST['nama_barang'])) {
     // Update barang
     $kode_inventaris = trim($_POST['kode_inventaris']);
     $nama_barang   = trim($_POST['nama_barang']);
-    $jenis_barang  = trim($_POST['jenis_barang']);
+    $jenis_barang  = barang_normalize_jenis($_POST['jenis_barang'] ?? '', '');
     $nomor_seri    = trim($_POST['nomor_seri']);
     $ip_address    = trim($_POST['ip_address']);
     $spesifikasi   = trim($_POST['spesifikasi']);
-    $kondisi       = trim($_POST['kondisi']);
+    $kondisi       = barang_normalize_kondisi($_POST['kondisi'] ?? '', '');
     $tanggal_terima= trim($_POST['tanggal_terima']);
+    if ($jenis_barang === '') {
+      header('Location: dashboard_staff.php?unit=barang&err=Jenis barang tidak valid!');
+      exit;
+    }
+    if ($kondisi === '') {
+      header('Location: dashboard_staff.php?unit=barang&err=Kondisi barang tidak valid!');
+      exit;
+    }
     // Proses upload foto
     $foto_nama = $data['foto'];
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
@@ -92,11 +100,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } else {
     // Insert new penyerahan for current unit
     $lokasi_id = intval($_POST['lokasi_id'][0]);
-    $kondisi = trim($_POST['kondisi'][0]);
+    $kondisi = barang_normalize_kondisi($_POST['kondisi'][0], trim($_POST['kondisi'][0]));
     $keterangan = trim($_POST['keterangan_unit'][0]);
     $current_unit = intval($_POST['unit_index']) + 1;
+    mysqli_begin_transaction($config);
     $query = mysqli_query($config, "INSERT INTO tb_penyerahan (barang_id, lokasi_id, kondisi, keterangan) VALUES ('$barang_id', '$lokasi_id', '$kondisi', '$keterangan')");
-    if ($query) {
+    if ($query && barang_sync_snapshot($config, $barang_id, ['lokasi_id' => $lokasi_id, 'kondisi' => $kondisi])) {
+      mysqli_commit($config);
       $next_unit = $current_unit;
       if ($next_unit < $data['jumlah']) {
         header('Location: dashboard_staff.php?unit=barang&msg=Unit ' . $current_unit . ' berhasil diserahkan, lanjut unit ' . ($next_unit + 1) . '&continue_barang_id=' . $barang_id . '&next_unit=' . $next_unit);
@@ -106,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
       }
     } else {
+      mysqli_rollback($config);
       header('Location: dashboard_staff.php?unit=barang&err=Gagal menyerahkan unit ' . $current_unit . ': ' . mysqli_error($config));
       exit;
     }
@@ -160,10 +171,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                       <div class="form-group">
                         <label>Kondisi:</label>
                         <select name="kondisi[]" class="form-control" required>
-                          <option value="baru" <?= $p['kondisi']=='baru'?'selected':'' ?>>Baru</option>
-                          <option value="bekas" <?= $p['kondisi']=='bekas'?'selected':'' ?>>Bekas</option>
-                          <option value="rusak" <?= $p['kondisi']=='rusak'?'selected':'' ?>>Rusak</option>
-                          <option value="dalam perbaikan" <?= $p['kondisi']=='dalam perbaikan'?'selected':'' ?>>Dalam Perbaikan</option>
+                          <option value="baru" <?= strtolower($p['kondisi'])=='baru'?'selected':'' ?>>Baru</option>
+                          <option value="bekas" <?= strtolower($p['kondisi'])=='bekas'?'selected':'' ?>>Bekas</option>
+                          <option value="rusak" <?= strtolower($p['kondisi'])=='rusak'?'selected':'' ?>>Rusak</option>
+                          <option value="dalam perbaikan" <?= strtolower($p['kondisi'])=='dalam perbaikan'?'selected':'' ?>>Dalam Perbaikan</option>
                         </select>
                       </div>
                     </div>
