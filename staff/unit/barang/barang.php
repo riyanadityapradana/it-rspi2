@@ -257,7 +257,7 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
-                  <form method="post" action="unit/barang/aksi_perbaikan.php">
+                  <form method="post" action="unit/barang/aksi_perbaikan.php" enctype="multipart/form-data">
                                         <div class="modal-body">
                       <input type="hidden" name="barang_id" id="perbaikanBarangId">
                       <div class="form-group">
@@ -288,6 +288,11 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
                           <option value="service_luar">Service luar</option>
                           <option value="service_sendiri">Service sendiri</option>
                         </select>
+                      </div>
+                      <div class="form-group d-none" id="perbaikanBuktiStrukGroup" hidden>
+                        <label>Upload Bukti Struk / Kuitansi</label>
+                        <input type="file" name="bukti_struk" id="perbaikanBuktiStruk" class="form-control" accept="image/*">
+                        <small class="text-muted">Wajib diisi jika tindakan perbaikan service luar. Format gambar, maksimal 2 MB.</small>
                       </div>
                       <div class="form-group">
                         <label>Status Perbaikan</label>
@@ -344,9 +349,11 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
                   var hid = document.getElementById('perbaikanUnitMelaporHidden');
                   if (hid) hid.value = '';
                 }
-                // reset teknisi field visibility
+                // reset field visibility based on selected tindakan
                 var tindakan = document.getElementById('perbaikanTindakan');
-                toggleTeknisiField(tindakan ? tindakan.value : '');
+                var tindakanValue = tindakan ? tindakan.value : '';
+                toggleTeknisiField(tindakanValue);
+                toggleBuktiStrukField(tindakanValue);
                 $('#modalPerbaikan').modal('show');
               }
 
@@ -363,12 +370,52 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
                 }
               }
 
+              function toggleBuktiStrukField(value) {
+                var grp = document.getElementById('perbaikanBuktiStrukGroup');
+                var input = document.getElementById('perbaikanBuktiStruk');
+                if (!grp || !input) return;
+                if (value === 'service_luar') {
+                  grp.style.display = '';
+                  grp.hidden = false;
+                  grp.classList.remove('d-none');
+                  if (window.jQuery) {
+                    window.jQuery(grp).show();
+                  }
+                  input.required = true;
+                } else {
+                  grp.style.display = 'none';
+                  grp.hidden = true;
+                  grp.classList.add('d-none');
+                  if (window.jQuery) {
+                    window.jQuery(grp).hide();
+                  }
+                  input.required = false;
+                  input.value = '';
+                }
+              }
+
+              function syncPerbaikanFields() {
+                var tindakan = document.getElementById('perbaikanTindakan');
+                var tindakanValue = tindakan ? tindakan.value : '';
+                toggleTeknisiField(tindakanValue);
+                toggleBuktiStrukField(tindakanValue);
+              }
+
               document.addEventListener('DOMContentLoaded', function() {
                 var tindakanSel = document.getElementById('perbaikanTindakan');
                 if (tindakanSel) {
+                  syncPerbaikanFields();
                   tindakanSel.addEventListener('change', function() {
-                    toggleTeknisiField(this.value);
+                    syncPerbaikanFields();
                   });
+                  if (window.jQuery) {
+                    window.jQuery(tindakanSel).on('change.select2 select2:select select2:close', function() {
+                      syncPerbaikanFields();
+                    });
+                    window.jQuery('#modalPerbaikan').on('shown.bs.modal', function() {
+                      syncPerbaikanFields();
+                    });
+                  }
                 }
               });
             </script>

@@ -67,6 +67,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
      }
 }
 
+if (!function_exists('normalize_tindakan_perbaikan')) {
+     function normalize_tindakan_perbaikan($tindakan, $teknisi = '', $bukti_struk = '')
+     {
+          $value = trim((string) $tindakan);
+          $normalized = strtolower(str_replace(' ', '_', $value));
+
+          if ($normalized === 'service_luar') {
+               return 'Service luar';
+          }
+          if ($normalized === 'service_sendiri') {
+               return 'Service sendiri';
+          }
+          if (trim((string) $teknisi) !== '') {
+               return 'Service sendiri';
+          }
+          if (trim((string) $bukti_struk) !== '') {
+               return 'Service luar';
+          }
+          return '';
+     }
+}
+
 // Build dynamic WHERE conditions from filters (tindakan, status, tanggal range)
 $conditions = [];
 if (!empty($_GET['tindakan'])) {
@@ -119,7 +141,7 @@ $query = "SELECT
 FROM tb_perbaikan_barang p
 JOIN tb_barang b ON p.barang_id = b.barang_id
 LEFT JOIN tb_lokasi l ON b.lokasi_id = l.lokasi_id
-LEFT JOIN tb_lokasi u ON p.unit_melapor = u.lokasi_id" . $where_sql . " ORDER BY b.barang_id, p.tanggal_lapor DESC";
+LEFT JOIN tb_lokasi u ON p.unit_melapor = u.lokasi_id" . $where_sql . " ORDER BY p.tanggal_lapor DESC";
 
 $res = mysqli_query($config, $query);
 
@@ -243,9 +265,20 @@ $n      = 1;
 									echo $badge;
 								?>
 							</td>
-                                   <td><?= htmlspecialchars($row['tindakan_perbaikan']); ?><br><small style="color:#666;"><?php if (strtolower(str_replace(' ', '_', $row['tindakan_perbaikan'])) === 'service_luar'): ?>
-                                             <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalUploadBukti<?= $row['perbaikan_id'] ?>">Upload Bukti</button>
-                                          <?php endif; ?></small></td>
+                                   <td>
+                                        <?php
+                                             $tindakan_label = normalize_tindakan_perbaikan($row['tindakan_perbaikan'] ?? '', $row['teknisi'] ?? '', $row['bukti_struk'] ?? '');
+                                             $tindakan_normalized = strtolower(str_replace(' ', '_', $tindakan_label));
+                                        ?>
+                                        <?= $tindakan_label !== '' ? htmlspecialchars($tindakan_label) : '-' ; ?>
+                                        <?php if ($tindakan_normalized === 'service_sendiri' && !empty($row['teknisi'])): ?>
+                                             <br><small style="color:#666;"><?= htmlspecialchars($row['teknisi']); ?></small>
+                                        <?php elseif ($tindakan_normalized === 'service_luar'): ?>
+                                             <br><small style="color:#666;">
+                                                  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalUploadBukti<?= $row['perbaikan_id'] ?>">Upload Bukti</button>
+                                             </small>
+                                        <?php endif; ?>
+                                   </td>
 							<td style="text-align:center;">
 								<?php if ($row['status'] == 'tidak_dapat_diperbaiki'): ?>
 									<span style="background: #dc3545; color: #fff; padding: 4px 12px; border-radius: 10px; font-weight: bold;">
@@ -364,7 +397,7 @@ $n      = 1;
                                              </div>
                                              <div class="form-group">
                                                   <label><strong>Tindakan perbaikan:</strong></label>
-                                                  <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars($detailRow['tindakan_perbaikan']) ?> </div>
+                                                  <div class="p-2" style="background:#fff; border-radius:6px; border:1px solid #90caf9;"> <?= htmlspecialchars(normalize_tindakan_perbaikan($detailRow['tindakan_perbaikan'] ?? '', $detailRow['teknisi'] ?? '', $detailRow['bukti_struk'] ?? '')) ?> </div>
                                              </div>
                                              <div class="form-group">
                                                   <label><strong>Teknisi:</strong></label><br>

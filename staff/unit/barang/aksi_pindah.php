@@ -1,5 +1,5 @@
 <?php
-require_once("../config/koneksi.php");
+require_once("../../../config/koneksi.php");
 require_once(__DIR__ . "/barang_helpers.php");
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
