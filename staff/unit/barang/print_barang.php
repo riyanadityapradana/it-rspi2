@@ -55,8 +55,9 @@ $result = mysqli_query($config, $query);
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            background: #ffffff;
             font-size: 13px;
+            color: #000;
         }
         .container {
             max-width: 1100px;
@@ -66,22 +67,83 @@ $result = mysqli_query($config, $query);
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             padding: 32px 28px 24px 28px;
         }
-        .header {
+        .kop-surat {
+            display: table;
+            width: 100%;
+            border-bottom: 3px solid #000;
+            padding-bottom: 12px;
+            margin-bottom: 22px;
+        }
+        .kop-logo,
+        .kop-text {
+            display: table-cell;
+            vertical-align: top;
+        }
+        .kop-logo {
+            width: 170px;
+        }
+        .kop-logo img {
+            width: 140px;
+            height: auto;
+        }
+        .kop-text {
             text-align: center;
-            margin-bottom: 24px;
-            background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
-            color: #fff;
-            border-radius: 12px 12px 0 0;
-            padding: 18px 0 10px 0;
+            padding-right: 60px;
         }
-        .header h1 {
+        .kop-text h1,
+        .kop-text h2,
+        .kop-text p {
             margin: 0;
-            font-size: 22px;
-            letter-spacing: 1px;
         }
-        .header p {
-            margin: 6px 0;
+        .kop-text h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .kop-text h2 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+        .kop-text .sub {
             font-size: 13px;
+            margin-top: 4px;
+        }
+        .kop-text .addr {
+            font-size: 12px;
+            margin-top: 3px;
+            line-height: 1.45;
+        }
+        .report-title {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .report-title h3 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.8px;
+        }
+        .report-title p {
+            margin: 6px 0 0;
+            font-size: 12px;
+        }
+        .filter-info {
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            border: 1px solid #d0d7de;
+        }
+        .filter-badge {
+            display: inline-block;
+            background: #fff;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-right: 8px;
+            border: 1px solid #c7d8ef;
         }
         table {
             width: 100%;
@@ -148,8 +210,8 @@ $result = mysqli_query($config, $query);
             background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
         }
         @media print {
-            body { margin: 0; background: #000000ff; }
-            .container { box-shadow: none; padding: 0; }
+            body { margin: 0; background: #ffffff; }
+            .container { box-shadow: none; padding: 0; margin: 0; max-width: none; }
             .no-print { display: none; }
         }
     </style>
@@ -164,11 +226,28 @@ $result = mysqli_query($config, $query);
         };
     </script>
     <div class="container">
-        <div class="header">
-            <h1 style="color: #000000ff;"><i class="fa fa-print"></i> LAPORAN DATA BARANG</h1>
-            <p style="color: #000000ff;">Periode: <b><?= htmlspecialchars($tahun) ?></b></p>
-            <p style="color: #000000ff;">Filter: <span style="background:#fff; color:#1976d2; padding:2px 8px; border-radius:6px; font-weight:bold;">Kondisi: <?= htmlspecialchars(ucwords($kondisi)) ?></span>,
-            <span style="background:#fff; color:#1976d2; padding:2px 8px; border-radius:6px; font-weight:bold;">Lokasi: <?= $lokasi_filter == 'unit_it' ? 'Unit IT Saja' : 'Semua Unit' ?></span></p>
+        <div class="kop-surat">
+            <div class="kop-logo">
+                <img src="../../../assets/img/logo.jpg" alt="Logo RSPI">
+            </div>
+            <div class="kop-text">
+                <h1>PT. PELITA INSANI MULIA</h1>
+                <h2>RUMAH SAKIT PELITA INSANI MARTAPURA</h2>
+                <p class="sub">Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya</p>
+                <p class="addr">Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan</p>
+                <p class="addr">Fax. (0511) 4722230, Emergency Call (0511) 4722222, Email: rs.pelitainsani@gmail.com</p>
+                <p class="addr">Website: www.pelitainsani.com</p>
+            </div>
+        </div>
+
+        <div class="report-title">
+            <h3>LAPORAN DATA BARANG</h3>
+            <p>Periode Tahun <?= htmlspecialchars($tahun) ?></p>
+        </div>
+
+        <div class="filter-info">
+            <span class="filter-badge">Kondisi: <?= htmlspecialchars(ucwords($kondisi)) ?></span>
+            <span class="filter-badge">Lokasi: <?= $lokasi_filter == 'unit_it' ? 'Unit IT Saja' : 'Semua Unit' ?></span>
         </div>
         <table style="color: #000000ff;">
             <thead>
