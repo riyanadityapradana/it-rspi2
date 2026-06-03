@@ -1,7 +1,9 @@
 <?php
-ob_clean();
 error_reporting(0);
 ini_set('display_errors', 0);
+if (ob_get_level()) {
+    ob_clean();
+}
 require_once('../../../config/koneksi.php');
 require_once('../../../library/tcpdf/tcpdf.php');
 
@@ -82,9 +84,9 @@ function hitung_total_jam_lembur($tanggal, $jamMulai, $jamSelesai) {
 }
 
 function tulis_ttd_qr($pdf, $x, $y, $width, $judul, $nama, $nip, $payloadQr = '') {
-    $barcodeSize = 15;
+    $barcodeSize = 10.6;
     $barcodeX = $x + (($width - $barcodeSize) / 2);
-    $barcodeY = $y + 7;
+    $barcodeY = $y + 5;
     $style = [
         'border' => 0,
         'padding' => 0,
@@ -92,57 +94,82 @@ function tulis_ttd_qr($pdf, $x, $y, $width, $judul, $nama, $nip, $payloadQr = ''
         'bgcolor' => false
     ];
 
-    $pdf->SetFont('helvetica', '', 9);
+    $pdf->SetFont('helvetica', '', 6.4);
     $pdf->SetXY($x, $y);
-    $pdf->MultiCell($width, 5, $judul, 0, 'C');
+    $pdf->MultiCell($width, 3.5, $judul, 0, 'C');
 
     if ($payloadQr !== '') {
         $pdf->write2DBarcode($payloadQr, 'QRCODE,H', $barcodeX, $barcodeY, $barcodeSize, $barcodeSize, $style, 'N');
     }
 
-    $pdf->SetFont('helvetica', 'U', 8);
-    $pdf->SetXY($x, $barcodeY + $barcodeSize + 2);
-    $pdf->MultiCell($width, 4, '(' . $nama . ')', 0, 'C');
+    $pdf->SetFont('helvetica', 'U', 5.7);
+    $pdf->SetXY($x, $barcodeY + $barcodeSize + 1.4);
+    $pdf->MultiCell($width, 2.8, '(' . $nama . ')', 0, 'C');
 
     if ($nip !== '') {
-        $pdf->SetFont('helvetica', '', 7);
-        $pdf->SetXY($x, $barcodeY + $barcodeSize + 6);
-        $pdf->MultiCell($width, 4, 'NIP. ' . $nip, 0, 'C');
+        $pdf->SetFont('helvetica', '', 5);
+        $pdf->SetXY($x, $barcodeY + $barcodeSize + 4.2);
+        $pdf->MultiCell($width, 2.8, 'NIP. ' . $nip, 0, 'C');
     }
 }
 
 // Mulai PDF
 class MYPDF extends TCPDF {
     public function Header() {
-        // Logo dan header - disesuaikan untuk A5
-        $this->Image('../../../assets/img/logo.jpg', 3, 6, 22);
-        $this->SetY(7);
-        $this->SetFont('helvetica', 'B', 10);
-        $this->Cell(0, 6, 'PT. PELITA INSANI MULIA', 0, 1, 'C');
-        $this->SetFont('helvetica', '', 9);
-        $this->Cell(0, 4, 'RUMAH SAKIT PELITA INSANI MARTAPURA', 0, 1, 'C');
-        $this->SetFont('helvetica', '', 8);
-        $this->Cell(0, 4, 'Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya', 0, 1, 'C');
-        $this->Image('../../../assets/img/bintang.png', 110, 16, 16);
-        $this->SetFont('helvetica', '', 7);
-        $this->Cell(0, 4, 'Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan', 0, 1, 'C');
+        // Logo di kiri; blok teks di-center optik sebagai satu grup di sebelah kanan logo
+        $textLeft  = 23;              // mulai tepat setelah logo
+        $textWidth = 97.9 - $textLeft; // sampai margin kanan (~74.9 mm)
+
+        $this->Image('../../../assets/img/logo.jpg', 7.1, 6.3, 15.6);
+
+        $this->SetY(5);
+        $this->SetX($textLeft);
+        $this->SetFont('helvetica', 'B', 7);
+        $this->Cell($textWidth, 4.2, 'PT. PELITA INSANI MULIA', 0, 1, 'C');
+
+        $this->SetX($textLeft);
+        $this->SetFont('helvetica', '', 6.4);
+        $this->Cell($textWidth, 2.8, 'RUMAH SAKIT PELITA INSANI MARTAPURA', 0, 1, 'C');
+
+        // "Terakreditasi ..." + bintang di-center sebagai satu kesatuan
+        $this->SetFont('helvetica', '', 5.7);
+        $akreditasi = 'Terakreditasi KARS Versi SNARS Edisi 1 Tingkat Madya';
+        $bintangW = 9;
+        $gap = 1.5;
+        $akreditasiW = $this->GetStringWidth($akreditasi);
+        $unitW = $akreditasiW + $gap + $bintangW;
+        $unitY = $this->GetY();
+        $unitX = (($textLeft + 97.9) - $unitW) / 2; // center di dalam region teks
+        $this->SetXY($unitX, $unitY);
+        $this->Cell($akreditasiW, 2.8, $akreditasi, 0, 0, 'L');
+        $this->Image('../../../assets/img/bintang.png', $unitX + $akreditasiW + $gap, $unitY - 0.2, $bintangW);
+        $this->Ln(2.8);
+
+        $this->SetX($textLeft);
+        $this->SetFont('helvetica', '', 5);
+        $this->Cell($textWidth, 2.8, 'Jl. Sekumpul No. 66 Martapura - Telp. (0511) 4722210, 4722220, Kalimantan Selatan', 0, 1, 'C');
+
         $html = '<span style="color:black;">Fax. (0511) 4722230, </span><span style="color:red;">Emergency Call (0511) 4722222</span> <span>Email: </span><span style="color:blue;">rs.pelitainsani@gmail.com</span>';
-        $this->writeHTMLCell(0, 4, '', '', $html, 0, 1, false, true, 'C', true);
-        $this->Cell(0, 4, 'Website: www.pelitainsani.com', 0, 1, 'C');
-        $this->Ln(1);
-        $this->Line(10, 33, 138, 33);
-        $this->Ln(5);
+        $this->writeHTMLCell($textWidth, 2.8, $textLeft, '', $html, 0, 1, false, true, 'C', true);
+
+        $this->SetX($textLeft);
+        $this->Cell($textWidth, 2.8, 'Website: www.pelitainsani.com', 0, 1, 'C');
+
+        $this->Ln(0.7);
+        $this->Line(7.1, 23.3, 97.6, 23.3);
+        $this->Ln(3.5);
     }
 }
 
-$pageFormat = [148, 210]; // A5 portrait dalam millimeter
+$pageFormat = [105, 148]; // A6 portrait dalam millimeter
 $pdf = new MYPDF('P', 'mm', $pageFormat, true, 'UTF-8', false);
 $pdf->SetTitle('Surat Perintah Lembur On Call');
-$pdf->SetMargins(10, 37, 10); // Margin disesuaikan untuk A5
-$pdf->SetHeaderMargin(5);
-$pdf->SetAutoPageBreak(true, 10);
+$pdf->setViewerPreferences(['PrintScaling' => 'None']); // jangan di-scale saat dicetak (tetap A6 walau kertas A4)
+$pdf->SetMargins(7.1, 26.2, 7.1); // Margin disesuaikan untuk A6
+$pdf->SetHeaderMargin(3.5);
+$pdf->SetAutoPageBreak(true, 7.1);
 $pdf->AddPage('P', $pageFormat);
-$pdf->SetFont('helvetica', '', 9);
+$pdf->SetFont('helvetica', '', 6.4);
 $totalJamLembur = hitung_total_jam_lembur($dataLembur['tanggal_lembur'], $dataLembur['jam_mulai'], $dataLembur['jam_selesai']);
 
 // Judul
@@ -166,7 +193,7 @@ $html .= '<table width="100%" cellpadding="2">
 <tr><td width="24%">Nama</td><td width="3%">:</td><td width="73%">'.$staff['nama_lengkap'].'</td></tr>
 <tr><td>Jabatan</td><td>:</td><td>'.$staff['role'].'</td></tr>
 <tr><td>Hari / Tanggal</td><td>:</td><td>' . tgl_indo_hari($dataLembur['tanggal_lembur']) . '</td></tr>
-<tr><td>Jam</td><td>:</td><td style="font-size:9px; white-space:nowrap;">' . date('h:i A', strtotime($dataLembur['jam_mulai'])) . ' - ' . date('h:i A', strtotime($dataLembur['jam_selesai'])) . ($totalJamLembur !== '' ? ' (Total: ' . $totalJamLembur . ')' : '') . '</td></tr>
+<tr><td>Jam</td><td>:</td><td style="font-size:6px; white-space:nowrap;">' . date('h:i A', strtotime($dataLembur['jam_mulai'])) . ' - ' . date('h:i A', strtotime($dataLembur['jam_selesai'])) . ($totalJamLembur !== '' ? ' (Total: ' . $totalJamLembur . ')' : '') . '</td></tr>
 </table>';
 
 // Kegiatan
@@ -178,7 +205,7 @@ $html .= '</ol><br>';
 
 // Lokasi dan Tanggal
 $tglCetak = date('d-m-Y');
-$html .= '<p style="text-align:center;">Martapura, '.$tglCetak.'</p><br>';
+$html .= '<p style="text-align:right;">Martapura, '.$tglCetak.'</p><br>';
 
 $pdf->writeHTML($html, true, false, true, false, '');
 
@@ -193,23 +220,22 @@ if (isset($dataLembur['status_lembur']) && $dataLembur['status_lembur'] == 'Dite
     $pimpinanQr = buat_payload_qr_lembur('PEMBERI_TUGAS', $pimpinanNip, $tanggalVerifikasi, $id);
 }
 
-$signatureY = max($pdf->GetY() + 1, 120);
-if ($signatureY + 55 > ($pdf->getPageHeight() - 10)) {
+$signatureY = max($pdf->GetY() + 0.7, 84.9);
+if ($signatureY + 38.9 > ($pdf->getPageHeight() - 7.1)) {
     $pdf->AddPage('P', $pageFormat);
-    $signatureY = 42;
+    $signatureY = 29.7;
 }
 
-$leftX = 10;
-$rightX = 74;
-$colWidth = 64;
+$leftX = 7.1;
+$rightX = 52.3;
+$colWidth = 45.3;
 
 tulis_ttd_qr($pdf, $leftX, $signatureY, $colWidth, 'Penerima Tugas,', $staff['nama_lengkap'], $staffNip, $staffQr);
 tulis_ttd_qr($pdf, $rightX, $signatureY, $colWidth, 'Pemberi Tugas,', $pimpinan['nama_lengkap'], $pimpinanNip, $pimpinanQr);
 
-$pdf->SetFont('helvetica', '', 9);
-$pdf->SetXY(10, $signatureY + 40);
-$pdf->MultiCell(128, 5, "Mengetahui,\n\n\n.......................................", 0, 'C');
+$pdf->SetFont('helvetica', '', 6.4);
+$pdf->SetXY(7.1, $signatureY + 28.3);
+$pdf->MultiCell(90.5, 3.5, "Mengetahui,\n\n\n.......................................", 0, 'C');
 
 if (ob_get_length()) ob_end_clean();
 $pdf->Output('surat_lembur_'.$staff['nama_lengkap'].'.pdf', 'I');
-?>
