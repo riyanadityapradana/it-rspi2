@@ -8,7 +8,7 @@ function toastr_script($msg, $type = 'success') {
 }}
 // ...existing code...
 // Ambil lokasi
-$lokasi_q = mysqli_query($config, "SELECT lokasi_id, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
+$lokasi_q = mysqli_query($config, "SELECT lokasi_id, kode_lokasi, nama_lokasi FROM tb_lokasi ORDER BY nama_lokasi ASC");
 $lokasi_list = [];
 while ($row = mysqli_fetch_assoc($lokasi_q)) {
   $lokasi_list[] = $row;
@@ -94,7 +94,33 @@ $jenis_list = barang_get_jenis_options();
           </div>
           <div class="form-group">
             <label>Kode Inventaris</label>
-            <input type="text" name="kode_inventaris" class="form-control" required maxlength="50" placeholder="Contoh: INV-2026-001">
+            <input type="text" name="kode_inventaris" id="kodeInventarisInput" class="form-control" required maxlength="50" placeholder="Contoh: 003/LOG/FAR/VI/2026">
+            <div class="border rounded p-3 mt-2" style="background:#f8f9fa;">
+              <div class="row align-items-end">
+                <div class="col-md-4">
+                  <label class="mb-1">Referensi Unit</label>
+                  <select id="kodeUnitReference" class="form-control">
+                    <?php foreach ($lokasi_list as $lokasi): ?>
+                      <?php $kode_lokasi = trim($lokasi['kode_lokasi'] ?? '') !== '' ? trim($lokasi['kode_lokasi']) : barang_get_lokasi_kode($lokasi['nama_lokasi']); ?>
+                      <option value="<?= htmlspecialchars($kode_lokasi) ?>"><?= htmlspecialchars($lokasi['nama_lokasi']) ?> (<?= htmlspecialchars($kode_lokasi) ?>)</option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="mb-1">Nomor Terakhir</label>
+                  <input type="text" id="kodeInventarisLast" class="form-control" value="-" readonly>
+                </div>
+                <div class="col-md-4">
+                  <label class="mb-1">Saran Berikutnya</label>
+                  <div class="input-group">
+                    <input type="text" id="kodeInventarisNext" class="form-control" value="-" readonly>
+                    <div class="input-group-append">
+                      <button type="button" id="pakaiKodeInventaris" class="btn btn-outline-primary">Pakai</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="form-group">
             <label>Nama Barang</label>
@@ -133,6 +159,46 @@ $jenis_list = barang_get_jenis_options();
             $(jenisSelect).on('change', toggleIp);
             // Initial check
             setTimeout(toggleIp, 100);
+          });
+          </script>
+          <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            var tanggalInput = document.querySelector('input[name="tanggal_terima"]');
+            var unitReference = document.getElementById('kodeUnitReference');
+            var kodeInput = document.getElementById('kodeInventarisInput');
+            var lastInput = document.getElementById('kodeInventarisLast');
+            var nextInput = document.getElementById('kodeInventarisNext');
+            var pakaiButton = document.getElementById('pakaiKodeInventaris');
+
+            function refreshKodeReference() {
+              var unitKode = unitReference.value;
+              var tanggal = tanggalInput.value || '<?= date('Y-m-d') ?>';
+              lastInput.value = 'Memuat...';
+              nextInput.value = 'Memuat...';
+
+              fetch('unit/barang/ajax_kode_inventaris.php?unit_kode=' + encodeURIComponent(unitKode) + '&tanggal=' + encodeURIComponent(tanggal))
+                .then(function(response) {
+                  return response.json();
+                })
+                .then(function(data) {
+                  lastInput.value = data.last || '-';
+                  nextInput.value = data.next || '-';
+                })
+                .catch(function() {
+                  lastInput.value = 'Gagal memuat';
+                  nextInput.value = '-';
+                });
+            }
+
+            unitReference.addEventListener('change', refreshKodeReference);
+            tanggalInput.addEventListener('change', refreshKodeReference);
+            pakaiButton.addEventListener('click', function() {
+              if (nextInput.value && nextInput.value !== '-' && nextInput.value !== 'Memuat...') {
+                kodeInput.value = nextInput.value;
+              }
+            });
+
+            refreshKodeReference();
           });
           </script>
           <div class="form-group">

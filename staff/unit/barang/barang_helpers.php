@@ -95,6 +95,139 @@ if (!function_exists('barang_get_badge_class')) {
     }
 }
 
+if (!function_exists('barang_get_unit_kode_options')) {
+    function barang_get_unit_kode_options()
+    {
+        return [
+            'TU' => 'TU',
+            'IT' => 'IT',
+            'FAR' => 'Farmasi'
+        ];
+    }
+}
+
+if (!function_exists('barang_get_lokasi_kode')) {
+    function barang_get_lokasi_kode($nama_lokasi)
+    {
+        $nama_lokasi = trim((string) $nama_lokasi);
+        $normalized = strtolower($nama_lokasi);
+
+        if ($normalized === 'it') {
+            return 'IT';
+        }
+        if ($normalized === 'tu') {
+            return 'TU';
+        }
+        if (strpos($normalized, 'farmasi') !== false) {
+            return 'FAR';
+        }
+        if ($normalized === 'lab') {
+            return 'LAB';
+        }
+        if ($normalized === 'igd') {
+            return 'IGD';
+        }
+        if ($normalized === 'hd') {
+            return 'HD';
+        }
+        if ($normalized === 'ponek') {
+            return 'PONEK';
+        }
+
+        $clean = preg_replace('/\([^)]*\)/', '', $nama_lokasi);
+        $clean = preg_replace('/[^A-Za-z0-9\s]/', ' ', $clean);
+        $words = preg_split('/\s+/', trim($clean));
+        $kode = '';
+
+        foreach ($words as $word) {
+            if ($word === '') {
+                continue;
+            }
+            $kode .= strtoupper(substr($word, 0, 1));
+        }
+
+        if ($kode === '') {
+            $kode = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $nama_lokasi), 0, 5));
+        }
+
+        return $kode;
+    }
+}
+
+if (!function_exists('barang_get_roman_month')) {
+    function barang_get_roman_month($month)
+    {
+        $months = [
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII'
+        ];
+
+        $month = intval($month);
+        return isset($months[$month]) ? $months[$month] : '';
+    }
+}
+
+if (!function_exists('barang_get_kode_inventaris_reference')) {
+    function barang_get_kode_inventaris_reference($config, $unit_kode, $tanggal)
+    {
+        $unit_kode = strtoupper(trim((string) $unit_kode));
+        $timestamp = strtotime($tanggal ?: date('Y-m-d'));
+        if ($unit_kode === '' || $timestamp === false) {
+            return [
+                'last' => '-',
+                'next' => '-',
+                'prefix' => '',
+                'last_number' => 0
+            ];
+        }
+
+        $month_roman = barang_get_roman_month(date('n', $timestamp));
+        $year = date('Y', $timestamp);
+        $suffix = '/LOG/' . $unit_kode . '/' . $month_roman . '/' . $year;
+        $suffix_sql = mysqli_real_escape_string($config, $suffix);
+
+        $query = mysqli_query(
+            $config,
+            "SELECT kode_inventaris FROM tb_barang WHERE kode_inventaris LIKE '%{$suffix_sql}'"
+        );
+
+        $last_number = 0;
+        $last_code = '-';
+        if ($query) {
+            while ($row = mysqli_fetch_assoc($query)) {
+                $kode = trim((string) $row['kode_inventaris']);
+                if (preg_match('/^(\d+)\/LOG\/' . preg_quote($unit_kode, '/') . '\/' . preg_quote($month_roman, '/') . '\/' . preg_quote($year, '/') . '$/i', $kode, $matches)) {
+                    $number = intval($matches[1]);
+                    if ($number > $last_number) {
+                        $last_number = $number;
+                        $last_code = $kode;
+                    }
+                }
+            }
+        }
+
+        $next_number = $last_number + 1;
+        $next_code = str_pad($next_number, 3, '0', STR_PAD_LEFT) . $suffix;
+
+        return [
+            'last' => $last_code,
+            'next' => $next_code,
+            'prefix' => $suffix,
+            'last_number' => $last_number
+        ];
+    }
+}
+
 if (!function_exists('barang_sync_snapshot')) {
     function barang_sync_snapshot($config, $barang_id, array $overrides = [])
     {
