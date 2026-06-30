@@ -74,6 +74,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       header('Location: dashboard_staff.php?unit=barang&err=Kondisi barang tidak valid!');
       exit;
     }
+    $kode_inventaris_safe = mysqli_real_escape_string($config, $kode_inventaris);
+    $barang_id_int = intval($barang_id);
+    $cek_kode = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE kode_inventaris='{$kode_inventaris_safe}' AND barang_id <> '{$barang_id_int}' LIMIT 1");
+    if ($cek_kode && mysqli_num_rows($cek_kode) > 0) {
+      header('Location: dashboard_staff.php?unit=barang&err=Kode inventaris sudah digunakan!');
+      exit;
+    }
     // Proses upload foto
     $foto_nama = $data['foto'];
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
@@ -89,7 +96,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         move_uploaded_file($_FILES['foto']['tmp_name'], $tujuan);
       }
     }
-    $q = mysqli_query($config, "UPDATE tb_barang SET kode_inventaris='$kode_inventaris', nama_barang='$nama_barang', jenis_barang='$jenis_barang', nomor_seri='$nomor_seri' , kondisi='$kondisi', ip_address='$ip_address', spesifikasi='$spesifikasi', tanggal_terima='$tanggal_terima', foto=" . ($foto_nama ? "'$foto_nama'" : "''") . " WHERE barang_id='$barang_id'");
+    $nama_barang_safe = mysqli_real_escape_string($config, $nama_barang);
+    $nomor_seri_safe = mysqli_real_escape_string($config, $nomor_seri);
+    $ip_address_safe = mysqli_real_escape_string($config, $ip_address);
+    $spesifikasi_safe = mysqli_real_escape_string($config, $spesifikasi);
+    $tanggal_terima_safe = mysqli_real_escape_string($config, $tanggal_terima);
+    $jenis_barang_safe = mysqli_real_escape_string($config, $jenis_barang);
+    $kondisi_safe = mysqli_real_escape_string($config, $kondisi);
+    $foto_nama_safe = mysqli_real_escape_string($config, $foto_nama);
+    $q = mysqli_query($config, "UPDATE tb_barang SET kode_inventaris='$kode_inventaris_safe', nama_barang='$nama_barang_safe', jenis_barang='$jenis_barang_safe', nomor_seri='$nomor_seri_safe' , kondisi='$kondisi_safe', ip_address='$ip_address_safe', spesifikasi='$spesifikasi_safe', tanggal_terima='$tanggal_terima_safe', foto=" . ($foto_nama ? "'$foto_nama_safe'" : "''") . " WHERE barang_id='$barang_id_int'");
     if ($q) {
       header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil diupdate!');
       exit;

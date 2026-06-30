@@ -20,7 +20,7 @@ if ($tindakan_normalized === 'service_sendiri') {
 } else {
     $tindakan_perbaikan = 'Service luar';
 }
-$status_perbaikan = isset($_POST['status_perbaikan']) ? mysqli_real_escape_string($config, $_POST['status_perbaikan']) : 'diajukan';
+$status_perbaikan = $tindakan_perbaikan === 'Service luar' ? 'diajukan' : 'proses';
 $keterangan_perbaikan = isset($_POST['keterangan_perbaikan']) ? mysqli_real_escape_string($config, trim($_POST['keterangan_perbaikan'])) : '';
 $unit_melapor = isset($_POST['unit_melapor']) && $_POST['unit_melapor'] !== '' ? intval($_POST['unit_melapor']) : null;
 $bukti_struk_sql = "''";
@@ -30,40 +30,53 @@ if ($barang_id <= 0) {
     exit;
 }
 
+$penyerahan_id = 0;
+$penyerahan_q = mysqli_query($config, "SELECT penyerahan_id FROM tb_penyerahan WHERE barang_id='{$barang_id}' ORDER BY penyerahan_id DESC LIMIT 1");
+if ($penyerahan_q && mysqli_num_rows($penyerahan_q) > 0) {
+    $penyerahan = mysqli_fetch_assoc($penyerahan_q);
+    $penyerahan_id = intval($penyerahan['penyerahan_id']);
+}
+
+if ($penyerahan_id <= 0) {
+    header('Location: ../../dashboard_staff.php?unit=barang&err=Barang belum memiliki data penyerahan');
+    exit;
+}
+
 if ($tindakan_perbaikan === 'Service luar') {
-    if (!isset($_FILES['bukti_struk']) || $_FILES['bukti_struk']['error'] !== UPLOAD_ERR_OK) {
-        header('Location: ../../dashboard_staff.php?unit=barang&err=Bukti struk wajib diupload untuk service luar');
+    if (isset($_FILES['bukti_struk']) && $_FILES['bukti_struk']['error'] === UPLOAD_ERR_OK) {
+
+        $file = $_FILES['bukti_struk'];
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $maxSize = 2 * 1024 * 1024;
+
+        if (!in_array($ext, $allowed, true)) {
+            header('Location: ../../dashboard_staff.php?unit=barang&err=Format bukti struk tidak diperbolehkan');
+            exit;
+        }
+
+        if ($file['size'] > $maxSize) {
+            header('Location: ../../dashboard_staff.php?unit=barang&err=Ukuran bukti struk maksimal 2 MB');
+            exit;
+        }
+
+        $target_dir = dirname(__DIR__) . '/perbaikan/bukti_struk/';
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0755, true);
+        }
+
+        $bukti_struk_name = 'barang_' . $barang_id . '_' . time() . '_' . mt_rand(1000, 9999) . '.' . $ext;
+        $target_file = $target_dir . $bukti_struk_name;
+        if (!move_uploaded_file($file['tmp_name'], $target_file)) {
+            header('Location: ../../dashboard_staff.php?unit=barang&err=Gagal mengupload bukti struk');
+            exit;
+        }
+
+        $bukti_struk_sql = "'" . mysqli_real_escape_string($config, $bukti_struk_name) . "'";
+    } elseif (isset($_FILES['bukti_struk']) && $_FILES['bukti_struk']['error'] !== UPLOAD_ERR_NO_FILE) {
+        header('Location: ../../dashboard_staff.php?unit=barang&err=Gagal membaca file bukti struk');
         exit;
     }
-
-    $file = $_FILES['bukti_struk'];
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $maxSize = 2 * 1024 * 1024;
-
-    if (!in_array($ext, $allowed, true)) {
-        header('Location: ../../dashboard_staff.php?unit=barang&err=Format bukti struk tidak diperbolehkan');
-        exit;
-    }
-
-    if ($file['size'] > $maxSize) {
-        header('Location: ../../dashboard_staff.php?unit=barang&err=Ukuran bukti struk maksimal 2 MB');
-        exit;
-    }
-
-    $target_dir = dirname(__DIR__) . '/perbaikan/bukti_struk/';
-    if (!is_dir($target_dir)) {
-        mkdir($target_dir, 0755, true);
-    }
-
-    $bukti_struk_name = 'barang_' . $barang_id . '_' . time() . '_' . mt_rand(1000, 9999) . '.' . $ext;
-    $target_file = $target_dir . $bukti_struk_name;
-    if (!move_uploaded_file($file['tmp_name'], $target_file)) {
-        header('Location: ../../dashboard_staff.php?unit=barang&err=Gagal mengupload bukti struk');
-        exit;
-    }
-
-    $bukti_struk_sql = "'" . mysqli_real_escape_string($config, $bukti_struk_name) . "'";
 }
 
 $unit_sql = $unit_melapor !== null ? "'{$unit_melapor}'" : "NULL";
@@ -74,7 +87,7 @@ if ($tindakan_perbaikan === 'Service sendiri') {
     $teknisi_sql = "NULL";
 }
 
-$ins_sql = "INSERT INTO tb_perbaikan_barang (barang_id, tanggal_lapor, deskripsi_kerusakan, tindakan_perbaikan, status, tanggal_selesai, teknisi, keterangan, unit_melapor, bukti_struk) VALUES ('{$barang_id}', '{$tanggal_lapor}', '{$deskripsi_kerusakan}', '{$tindakan_perbaikan}', '{$status_perbaikan}', NULL, {$teknisi_sql}, '{$keterangan_perbaikan}', {$unit_sql}, {$bukti_struk_sql})";
+$ins_sql = "INSERT INTO tb_perbaikan_barang (barang_id, tanggal_lapor, penyerahan_id, deskripsi_kerusakan, tindakan_perbaikan, status, tanggal_selesai, teknisi, keterangan, unit_melapor, bukti_struk) VALUES ('{$barang_id}', '{$tanggal_lapor}', '{$penyerahan_id}', '{$deskripsi_kerusakan}', '{$tindakan_perbaikan}', '{$status_perbaikan}', NULL, {$teknisi_sql}, '{$keterangan_perbaikan}', {$unit_sql}, {$bukti_struk_sql})";
 
 mysqli_begin_transaction($config);
 $ins = mysqli_query($config, $ins_sql);
