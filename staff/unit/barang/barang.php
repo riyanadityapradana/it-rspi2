@@ -14,6 +14,14 @@ while ($row = mysqli_fetch_assoc($lokasi_q)) {
 
 $jenis_filter = barang_normalize_jenis($_GET['jenis'] ?? '', '');
 $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
+$new_barang_id = isset($_GET['new_barang_id']) ? intval($_GET['new_barang_id']) : 0;
+$new_barang = null;
+if ($new_barang_id > 0) {
+  $new_barang_q = mysqli_query($config, "SELECT barang_id, kode_inventaris, nama_barang FROM tb_barang WHERE barang_id='{$new_barang_id}' LIMIT 1");
+  if ($new_barang_q && mysqli_num_rows($new_barang_q) > 0) {
+    $new_barang = mysqli_fetch_assoc($new_barang_q);
+  }
+}
 
 ?>
 <!-- Content Header (Page header) -->
@@ -71,6 +79,17 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
           </div>
 			</div>
             <div class="card-body">
+                <?php if ($new_barang): ?>
+                  <div class="alert alert-success d-flex align-items-center justify-content-between" style="gap:12px; flex-wrap:wrap;">
+                    <div>
+                      <strong>Barang berhasil ditambahkan.</strong>
+                      <span><?= htmlspecialchars($new_barang['nama_barang']) ?> - <?= htmlspecialchars($new_barang['kode_inventaris']) ?></span>
+                    </div>
+                    <a href="unit/barang/cetak_label.php?id=<?= urlencode($new_barang['barang_id']) ?>&mode=qr" target="_blank" class="btn btn-success btn-sm">
+                      <i class="fas fa-qrcode"></i> Cetak QR Code
+                    </a>
+                  </div>
+                <?php endif; ?>
                 <table id="example2" class="table table-bordered table-striped">
                 <thead style="background:rgb(129, 2, 0, 1); color:white;">
                     <tr>
@@ -121,6 +140,9 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
                             <button type="button" class="btn btn-warning btn-sm" onclick="setPerbaikanData('<?= $row['barang_id'] ?>', '<?= htmlspecialchars($row['nama_barang']) ?>', '<?= $row['lokasi_id'] ?>')" data-toggle="modal" data-target="#modalPerbaikan" responsive>
                               <i class="fa fa-wrench"></i> Perbaikan
                             </button>
+                            <a href="unit/barang/cetak_label.php?id=<?= urlencode($row['barang_id']) ?>&mode=qr" target="_blank" class="btn btn-success btn-sm" responsive>
+                              <i class="fas fa-qrcode"></i> Cetak QR
+                            </a>
                         </td>
                         <td><?= htmlspecialchars($row['jenis_barang']); ?></td>
                         <td>
@@ -292,11 +314,11 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
                       <div class="form-group d-none" id="perbaikanBuktiStrukGroup" hidden>
                         <label>Upload Bukti Struk / Kuitansi</label>
                         <input type="file" name="bukti_struk" id="perbaikanBuktiStruk" class="form-control" accept="image/*">
-                        <small class="text-muted">Wajib diisi jika tindakan perbaikan service luar. Format gambar, maksimal 2 MB.</small>
+                        <small class="text-muted">Opsional untuk service luar, dapat diupload belakangan. Format gambar, maksimal 2 MB.</small>
                       </div>
                       <div class="form-group">
                         <label>Status Perbaikan</label>
-                        <select name="status_perbaikan" class="form-control select2bs4" required>
+                        <select name="status_perbaikan" id="perbaikanStatus" class="form-control select2bs4" required disabled>
                           <option value="diajukan">Diajukan</option>
                           <option value="proses">Proses</option>
                           <option value="tidak_dapat_diperbaiki">Tidak Dapat Diperbaiki</option>
@@ -381,7 +403,7 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
                   if (window.jQuery) {
                     window.jQuery(grp).show();
                   }
-                  input.required = true;
+                  input.required = false;
                 } else {
                   grp.style.display = 'none';
                   grp.hidden = true;
@@ -397,6 +419,15 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
               function syncPerbaikanFields() {
                 var tindakan = document.getElementById('perbaikanTindakan');
                 var tindakanValue = tindakan ? tindakan.value : '';
+                var status = document.getElementById('perbaikanStatus');
+                if (status) {
+                  status.disabled = false;
+                  status.value = tindakanValue === 'service_luar' ? 'diajukan' : 'proses';
+                  if (window.jQuery) {
+                    try { window.jQuery(status).val(status.value).trigger('change'); } catch(e){}
+                  }
+                  status.disabled = true;
+                }
                 toggleTeknisiField(tindakanValue);
                 toggleBuktiStrukField(tindakanValue);
               }

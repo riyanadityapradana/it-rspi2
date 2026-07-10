@@ -24,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: dashboard_staff.php?unit=barang&err=Jenis barang tidak valid!');
     exit;
   }
+  $kode_inventaris_safe = mysqli_real_escape_string($config, $kode_inventaris);
+  $cek_kode = mysqli_query($config, "SELECT 1 FROM tb_barang WHERE kode_inventaris='{$kode_inventaris_safe}' LIMIT 1");
+  if ($cek_kode && mysqli_num_rows($cek_kode) > 0) {
+    header('Location: dashboard_staff.php?unit=barang&err=Kode inventaris sudah digunakan!');
+    exit;
+  }
   if ($input_nomor_seri === '') {
     $nomor_seri = '(Tidak ada S/N)';
     $skip_serial_duplicate_check = true;
@@ -62,9 +68,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $nomor_seri_value = "'$nomor_seri_safe'";
   $q = mysqli_query($config, "INSERT INTO tb_barang (pengajuan_id, kode_inventaris, nama_barang, jenis_barang, nomor_seri, ip_address, jumlah, spesifikasi, tanggal_terima, foto) VALUES (
       " . ($pengajuan_id ? "'$pengajuan_id'," : "NULL,") . "
-      '$kode_inventaris', '$nama_barang', '$jenis_barang', $nomor_seri_value, '$ip_address', $jumlah, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "''") . ")");
+      '$kode_inventaris_safe', '$nama_barang', '$jenis_barang', $nomor_seri_value, '$ip_address', $jumlah, '$spesifikasi', '$tanggal_terima', " . ($foto_nama ? "'$foto_nama'" : "''") . ")");
   if ($q) {
-      header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!');
+      $new_barang_id = mysqli_insert_id($config);
+      header('Location: dashboard_staff.php?unit=barang&msg=Barang berhasil ditambahkan!&new_barang_id=' . urlencode($new_barang_id));
       exit;
     } else {
       header('Location: dashboard_staff.php?unit=barang&err=Gagal menambah barang!');
