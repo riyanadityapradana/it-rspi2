@@ -851,6 +851,7 @@ if ($new_barang_id > 0) {
           <div class="form-group">
             <label>Tahun</label>
             <select class="form-control" name="tahun" required>
+              <option value="all">Semua</option>
               <?php for($y=date('Y')-5;$y<=date('Y');$y++): ?>
                 <option value="<?= $y ?>"><?= $y ?></option>
               <?php endfor; ?>

@@ -6,6 +6,7 @@ require_once("../../../config/koneksi.php");
 $kondisi = $_GET['kondisi'] ?? 'all';
 $lokasi_filter = $_GET['lokasi_filter'] ?? 'unit_it';
 $tahun = $_GET['tahun'] ?? date('Y');
+$tahun_filter = strtolower(trim((string) $tahun));
 
 $allowed_kondisi = ['all', 'baik', 'baru', 'bekas', 'rusak', 'dalam perbaikan'];
 $kondisi_db = strtolower(trim($kondisi));
@@ -14,7 +15,11 @@ if (!in_array($kondisi_db, $allowed_kondisi, true)) {
 }
 
 // Build WHERE clause
-$where_conditions = ["YEAR(b.tanggal_terima) = '$tahun'"];
+$where_conditions = [];
+if ($tahun_filter !== 'all') {
+    $tahun_sql = intval($tahun);
+    $where_conditions[] = "YEAR(b.tanggal_terima) = '{$tahun_sql}'";
+}
 
 // Filter kondisi dari tb_penyerahan
 if ($kondisi_db !== 'all') {
@@ -33,7 +38,7 @@ if ($lokasi_filter == 'unit_it') {
     }
 }
 
-$where = "WHERE " . implode(" AND ", $where_conditions);
+$where = empty($where_conditions) ? "" : "WHERE " . implode(" AND ", $where_conditions);
 
 $query = "SELECT DISTINCT b.barang_id, b.kode_inventaris, b.nama_barang, b.jenis_barang, b.nomor_seri, b.jumlah, b.spesifikasi, b.tanggal_terima, p.kondisi, l.nama_lokasi, p.keterangan 
 FROM tb_barang b 
@@ -244,7 +249,7 @@ $result = mysqli_query($config, $query);
 
         <div class="report-title">
             <h3>LAPORAN DATA BARANG</h3>
-            <p>Periode Tahun <?= htmlspecialchars($tahun) ?></p>
+            <p>Periode Tahun <?= $tahun_filter === 'all' ? 'Semua' : htmlspecialchars($tahun) ?></p>
         </div>
 
         <div class="filter-info">
