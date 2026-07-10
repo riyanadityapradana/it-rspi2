@@ -802,6 +802,8 @@ $kondisi_filter = barang_normalize_kondisi($_GET['kondisi'] ?? '', '');
           <div class="form-group">
             <label>Pilihan Kondisi Barang</label>
             <select class="form-control" name="kondisi" required>
+              <option value="all">Semua Kondisi</option>
+              <option value="Baik">Baik</option>
               <option value="Baru">Baru</option>
               <option value="Bekas">Bekas</option>
               <option value="Rusak">Rusak</option>

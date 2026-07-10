@@ -3,21 +3,23 @@
 require_once("../../../config/koneksi.php");
 
 // Ambil parameter dari form
-$kondisi = $_GET['kondisi'] ?? 'Baru';
+$kondisi = $_GET['kondisi'] ?? 'all';
 $lokasi_filter = $_GET['lokasi_filter'] ?? 'unit_it';
 $tahun = $_GET['tahun'] ?? date('Y');
 
-$allowed_kondisi = ['baru', 'bekas', 'rusak', 'dalam perbaikan'];
+$allowed_kondisi = ['all', 'baik', 'baru', 'bekas', 'rusak', 'dalam perbaikan'];
 $kondisi_db = strtolower(trim($kondisi));
 if (!in_array($kondisi_db, $allowed_kondisi, true)) {
-    $kondisi_db = 'baru';
+    $kondisi_db = 'all';
 }
 
 // Build WHERE clause
 $where_conditions = ["YEAR(b.tanggal_terima) = '$tahun'"];
 
 // Filter kondisi dari tb_penyerahan
-$where_conditions[] = "p.kondisi = '$kondisi_db'";
+if ($kondisi_db !== 'all') {
+    $where_conditions[] = "LOWER(p.kondisi) = '$kondisi_db'";
+}
 
 // Filter lokasi
 if ($lokasi_filter == 'unit_it') {
@@ -246,7 +248,7 @@ $result = mysqli_query($config, $query);
         </div>
 
         <div class="filter-info">
-            <span class="filter-badge">Kondisi: <?= htmlspecialchars(ucwords($kondisi)) ?></span>
+            <span class="filter-badge">Kondisi: <?= $kondisi_db === 'all' ? 'Semua Kondisi' : htmlspecialchars(ucwords($kondisi_db)) ?></span>
             <span class="filter-badge">Lokasi: <?= $lokasi_filter == 'unit_it' ? 'Unit IT Saja' : 'Semua Unit' ?></span>
         </div>
         <table style="color: #000000ff;">
@@ -281,7 +283,7 @@ $result = mysqli_query($config, $query);
                     <td><?= !empty($row['tanggal_terima']) ? date('d/m/Y', strtotime($row['tanggal_terima'])) : '-' ?></td>
                     <td class="<?php
                         $kondisi_row = strtolower(trim($row['kondisi']));
-                        if ($kondisi_row === 'baru') {
+                        if ($kondisi_row === 'baik' || $kondisi_row === 'baru') {
                             echo 'status-baik';
                         } elseif ($kondisi_row === 'bekas') {
                             echo 'status-bekas';
