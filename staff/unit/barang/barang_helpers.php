@@ -194,11 +194,11 @@ if (!function_exists('barang_get_kode_inventaris_reference')) {
         $month_roman = barang_get_roman_month(date('n', $timestamp));
         $year = date('Y', $timestamp);
         $suffix = '/LOG/' . $unit_kode . '/' . $month_roman . '/' . $year;
-        $suffix_sql = mysqli_real_escape_string($config, $suffix);
+        $unit_kode_sql = mysqli_real_escape_string($config, $unit_kode);
 
         $query = mysqli_query(
             $config,
-            "SELECT kode_inventaris FROM tb_barang WHERE kode_inventaris LIKE '%{$suffix_sql}'"
+            "SELECT kode_inventaris FROM tb_barang WHERE kode_inventaris LIKE '%/LOG/{$unit_kode_sql}/%'"
         );
 
         $last_number = 0;
@@ -206,7 +206,7 @@ if (!function_exists('barang_get_kode_inventaris_reference')) {
         if ($query) {
             while ($row = mysqli_fetch_assoc($query)) {
                 $kode = trim((string) $row['kode_inventaris']);
-                if (preg_match('/^(\d+)\/LOG\/' . preg_quote($unit_kode, '/') . '\/' . preg_quote($month_roman, '/') . '\/' . preg_quote($year, '/') . '$/i', $kode, $matches)) {
+                if (preg_match('/^(\d+)\/LOG\/' . preg_quote($unit_kode, '/') . '\/[IVXLCDM]+\/\d{4}$/i', $kode, $matches)) {
                     $number = intval($matches[1]);
                     if ($number > $last_number) {
                         $last_number = $number;
