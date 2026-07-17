@@ -30,6 +30,9 @@ require_once("../config/koneksi.php");
             <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
               <i class="fas fa-print" style="color: white;"> Print</i>
             </button>
+            <a href="unit/pemindahan/export_pemindahan.php" target="_blank" class="btn btn-tool btn-sm" style="background:rgba(23, 162, 184, 1); margin-left: 8px;">
+              <i class="fas fa-file-excel" style="color: white;"> Excel</i>
+            </a>
           </div>
             <div class="card-tools" style="float: right; text-align: right;">
               <a href="#" class="btn btn-tool btn-sm" data-card-widget="collapse" style="background:rgba(69, 77, 85, 1)">

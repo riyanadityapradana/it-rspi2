@@ -54,6 +54,21 @@ if ($res) {
     }
 }
 
+$export_barang_rusak_params = [];
+if ($unit !== '') {
+    $export_barang_rusak_params['unit'] = $unit;
+}
+if ($tanggal_mulai !== '') {
+    $export_barang_rusak_params['tanggal_mulai'] = $tanggal_mulai;
+}
+if ($tanggal_selesai !== '') {
+    $export_barang_rusak_params['tanggal_selesai'] = $tanggal_selesai;
+}
+$export_barang_rusak_url = 'unit/kerusakan/export_barang_rusak.php';
+if (!empty($export_barang_rusak_params)) {
+    $export_barang_rusak_url .= '?' . http_build_query($export_barang_rusak_params);
+}
+
 ?>
 <section class="content-header">
   <div class="container-fluid">
@@ -80,6 +95,9 @@ if ($res) {
           <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
             <i class="fas fa-print" style="color: white;"> Print</i>
           </button>
+          <a href="<?= htmlspecialchars($export_barang_rusak_url) ?>" target="_blank" class="btn btn-tool btn-sm" style="background:rgba(23, 162, 184, 1); margin-left: 8px;">
+            <i class="fas fa-file-excel" style="color: white;"> Excel</i>
+          </a>
         </div>
       </div>
       <div class="card-body">
