@@ -23,6 +23,18 @@ if ($new_barang_id > 0) {
   }
 }
 
+$export_barang_params = [];
+if ($jenis_filter !== '') {
+  $export_barang_params['jenis'] = $jenis_filter;
+}
+if ($kondisi_filter !== '') {
+  $export_barang_params['kondisi'] = $kondisi_filter;
+}
+$export_barang_url = 'unit/barang/export_barang.php';
+if (!empty($export_barang_params)) {
+  $export_barang_url .= '?' . http_build_query($export_barang_params);
+}
+
 ?>
 <!-- Content Header (Page header) -->
 <section class="content-header">
@@ -76,6 +88,9 @@ if ($new_barang_id > 0) {
             <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
               <i class="fas fa-print" style="color: white;"> Print</i>
             </button>
+            <a href="<?= htmlspecialchars($export_barang_url) ?>" target="_blank" class="btn btn-tool btn-sm" style="background:rgba(23, 162, 184, 1); margin-left: 8px;">
+              <i class="fas fa-file-excel" style="color: white;"> Excel</i>
+            </a>
           </div>
 			</div>
             <div class="card-body">

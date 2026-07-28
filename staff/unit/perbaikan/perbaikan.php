@@ -152,6 +152,16 @@ if ($res) {
           $rows[] = $r;
      }
 }
+$export_perbaikan_params = [];
+foreach (['tindakan', 'status', 'tanggal_mulai', 'tanggal_selesai'] as $param) {
+     if (!empty($_GET[$param])) {
+          $export_perbaikan_params[$param] = $_GET[$param];
+     }
+}
+$export_perbaikan_url = 'unit/perbaikan/export_perbaikan.php';
+if (!empty($export_perbaikan_params)) {
+     $export_perbaikan_url .= '?' . http_build_query($export_perbaikan_params);
+}
 $n      = 1;
 ?>
 <section class="content-header">
@@ -186,6 +196,9 @@ $n      = 1;
                          <button type="button" class="btn btn-tool btn-sm" style="background:rgba(40, 167, 69, 1); margin-left: 8px;" data-toggle="modal" data-target="#modalPrint">
                               <i class="fas fa-print" style="color: white;"> Print</i>
                          </button>
+                         <a href="<?= htmlspecialchars($export_perbaikan_url) ?>" target="_blank" class="btn btn-tool btn-sm" style="background:rgba(23, 162, 184, 1); margin-left: 8px;">
+                              <i class="fas fa-file-excel" style="color: white;"> Excel</i>
+                         </a>
                     </div>
 			</div>
 			<div class="card-body">
