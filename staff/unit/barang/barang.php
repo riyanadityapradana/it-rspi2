@@ -548,6 +548,10 @@ if ($new_barang_id > 0) {
                     <!-- Informasi Barang Section -->
                     <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
                       <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Barang</h6>
+                      <?php
+                      $kode_inventaris_detail = trim((string) ($detailRow['kode_inventaris'] ?? ''));
+                      $kode_inventaris_kosong = $kode_inventaris_detail === '' || $kode_inventaris_detail === '-' || strcasecmp($kode_inventaris_detail, 'Tidak ada') === 0 || strcasecmp($kode_inventaris_detail, '(Tidak ada)') === 0;
+                      ?>
                       
                       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
                         <div>
@@ -574,12 +578,18 @@ if ($new_barang_id > 0) {
                         <div>
                           <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Kode Inventaris</p>
                           <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <strong style="font-size: 15px;"><?= htmlspecialchars($detailRow['kode_inventaris']) ?></strong>
-                            <button type="button" onclick="copyToClipboard('detailBarangKode<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
-                              <i class="fas fa-copy" style="font-size: 14px;"></i>
-                            </button>
+                            <?php if ($kode_inventaris_kosong): ?>
+                              <span class="badge badge-secondary" style="font-size: 13px;">Kosong</span>
+                            <?php else: ?>
+                              <strong style="font-size: 15px;"><?= htmlspecialchars($kode_inventaris_detail) ?></strong>
+                              <button type="button" onclick="copyToClipboard('detailBarangKode<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                                <i class="fas fa-copy" style="font-size: 14px;"></i>
+                              </button>
+                            <?php endif; ?>
                           </div>
-                          <span id="detailBarangKode<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($detailRow['kode_inventaris']) ?></span>
+                          <?php if (!$kode_inventaris_kosong): ?>
+                            <span id="detailBarangKode<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($kode_inventaris_detail) ?></span>
+                          <?php endif; ?>
                         </div>
                       </div>
 
@@ -657,6 +667,21 @@ if ($new_barang_id > 0) {
                     <!-- Informasi Lokasi Section -->
                     <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
                       <h6 style="font-weight: 600; margin-bottom: 15px; font-size: 16px;">Informasi Lokasi</h6>
+                      <?php
+                      $p_awal_info = null;
+                      $q_penyerahan_awal = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}' ORDER BY p.penyerahan_id ASC LIMIT 1");
+                      if ($q_penyerahan_awal && mysqli_num_rows($q_penyerahan_awal) > 0) {
+                        $p_awal_info = mysqli_fetch_assoc($q_penyerahan_awal);
+                      }
+                      $keterangan_awal = $p_awal_info ? trim((string) ($p_awal_info['keterangan'] ?? '')) : '';
+
+                      $mutasi_akhir_info = null;
+                      $q_mutasi_akhir = mysqli_query($config, "SELECT m.*, l.nama_lokasi AS lokasi_tujuan_nama FROM tb_mutasi_barang m LEFT JOIN tb_lokasi l ON m.lokasi_tujuan = l.lokasi_id WHERE m.barang_id='{$detailRow['barang_id']}' ORDER BY m.tanggal_mutasi DESC, m.mutasi_id DESC LIMIT 1");
+                      if ($q_mutasi_akhir && mysqli_num_rows($q_mutasi_akhir) > 0) {
+                        $mutasi_akhir_info = mysqli_fetch_assoc($q_mutasi_akhir);
+                      }
+                      $keterangan_akhir = $mutasi_akhir_info ? trim((string) ($mutasi_akhir_info['keterangan'] ?? '')) : '';
+                      ?>
                       
                       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
                         <div>
@@ -664,10 +689,8 @@ if ($new_barang_id > 0) {
                           <div style="display: flex; align-items: center; justify-content: space-between;">
                             <strong style="font-size: 15px;">
                               <?php
-                              $q_penyerahan_awal = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}' ORDER BY p.penyerahan_id ASC LIMIT 1");
-                              if (mysqli_num_rows($q_penyerahan_awal) > 0) {
-                                $p_awal = mysqli_fetch_assoc($q_penyerahan_awal);
-                                echo htmlspecialchars($p_awal['nama_lokasi']);
+                              if ($p_awal_info) {
+                                echo htmlspecialchars($p_awal_info['nama_lokasi']);
                               } else {
                                 echo '-';
                               }
@@ -679,13 +702,21 @@ if ($new_barang_id > 0) {
                           </div>
                           <span id="detailLokasiAwal<?= $detailRow['barang_id'] ?>" style="display:none;">
                             <?php
-                            $q_penyerahan_awal = mysqli_query($config, "SELECT p.*, l.nama_lokasi FROM tb_penyerahan p LEFT JOIN tb_lokasi l ON p.lokasi_id = l.lokasi_id WHERE p.barang_id='{$detailRow['barang_id']}' ORDER BY p.penyerahan_id ASC LIMIT 1");
-                            if (mysqli_num_rows($q_penyerahan_awal) > 0) {
-                              $p_awal = mysqli_fetch_assoc($q_penyerahan_awal);
-                              echo htmlspecialchars($p_awal['nama_lokasi']);
-                            }
+                            echo $p_awal_info ? htmlspecialchars($p_awal_info['nama_lokasi']) : '-';
                             ?>
                           </span>
+                          <p style="font-size: 14px; color: #999; margin: 10px 0 5px;">Keterangan</p>
+                          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; font-size: 14px; line-height: 1.45;">
+                            <span><?= $keterangan_awal !== '' ? nl2br(htmlspecialchars($keterangan_awal)) : '-' ?></span>
+                            <?php if ($keterangan_awal !== ''): ?>
+                              <button type="button" onclick="copyToClipboard('detailKetLokasiAwal<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                                <i class="fas fa-copy" style="font-size: 14px;"></i>
+                              </button>
+                            <?php endif; ?>
+                          </div>
+                          <?php if ($keterangan_awal !== ''): ?>
+                            <span id="detailKetLokasiAwal<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($keterangan_awal) ?></span>
+                          <?php endif; ?>
                         </div>
                         <div>
                           <p style="font-size: 14px; color: #999; margin-bottom: 5px;">Lokasi Terakhir</p>
@@ -706,6 +737,18 @@ if ($new_barang_id > 0) {
                           <span id="detailLokasiTerakhir<?= $detailRow['barang_id'] ?>" style="display:none;">
                             <?php echo !empty($detailRow['lokasi_saat_ini']) ? htmlspecialchars($detailRow['lokasi_saat_ini']) : '-'; ?>
                           </span>
+                          <p style="font-size: 14px; color: #999; margin: 10px 0 5px;">Keterangan</p>
+                          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; font-size: 14px; line-height: 1.45;">
+                            <span><?= $keterangan_akhir !== '' ? nl2br(htmlspecialchars($keterangan_akhir)) : '-' ?></span>
+                            <?php if ($keterangan_akhir !== ''): ?>
+                              <button type="button" onclick="copyToClipboard('detailKetLokasiTerakhir<?= $detailRow['barang_id'] ?>')" title="Salin Data" style="background: none; border: none; cursor: pointer; padding: 0; color: #666;">
+                                <i class="fas fa-copy" style="font-size: 14px;"></i>
+                              </button>
+                            <?php endif; ?>
+                          </div>
+                          <?php if ($keterangan_akhir !== ''): ?>
+                            <span id="detailKetLokasiTerakhir<?= $detailRow['barang_id'] ?>" style="display:none;"><?= htmlspecialchars($keterangan_akhir) ?></span>
+                          <?php endif; ?>
                         </div>
                       </div>
 
