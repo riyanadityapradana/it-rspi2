@@ -1,4 +1,8 @@
-<?php 
+<?php
+if (($_GET['unit'] ?? '') === 'monev') {
+  require_once __DIR__ . '/../staff/unit/monev/page.php';
+  return;
+}
 //Dashboard
 if ($_GET['unit'] == "beranda"){
   require_once("unit/beranda.php");
@@ -63,4 +67,4 @@ else if ($_GET['unit'] == "cuti"){
 else if ($_GET['unit'] == "logbook"){
   require_once("unit/logbook/logbook.php");
 }
-?> 
+?>

@@ -1,5 +1,9 @@
 <?php 
 $unit = isset($_GET['unit']) ? $_GET['unit'] : '';
+if ($unit === 'monev') {
+  require_once __DIR__ . '/unit/monev/page.php';
+  return;
+}
 //Dashboard
 if ($unit == "beranda"){
   require_once("unit/beranda.php");

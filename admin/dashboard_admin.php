@@ -71,6 +71,7 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
             </div>
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <?php require __DIR__ . '/../staff/unit/monev/menu.php'; ?>
                     <li class="nav-item menu-open">
                         <a href="dashboard_admin.php?unit=beranda" class="nav-link active">
                             <i class="nav-icon fas fa-tachometer-alt" style="color: green;"></i>
@@ -183,8 +184,9 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
 
 <script>
     $(function() {
-    $('.select2').select2();
-    $('.select2bs4').select2({ theme: 'bootstrap4' });
+    // Select2 also creates SPAN.select2 containers; initialize only actual form controls.
+    $('select.select2').select2();
+    $('select.select2bs4').select2({ theme: 'bootstrap4' });
     });
 </script>
 <script type="text/javascript">
@@ -233,4 +235,4 @@ toastr.error("<?= addslashes($_GET['err']) ?>");
 </script>
 <?php endif; ?>
 </body>
-</html> 
+</html>
