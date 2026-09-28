@@ -10,6 +10,14 @@ Aturan mengikuti kategori, bukan nomor urut: seed awal proyek memiliki 4 butir R
 
 ## Instalasi
 
+Jika tabel Monev belum ada dan ingin **copy-paste SQL melalui phpMyAdmin**:
+
+1. Buka file [SQL instalasi Monev](../Database/2026-09-22_monev_keamanan.sql), lalu salin seluruh isinya (Ctrl+A, Ctrl+C).
+2. Di phpMyAdmin, pilih database aplikasi IT-RSPI yang digunakan `config/koneksi.php`, bukan database `sik9`. Tabel aplikasi `tb_user` dan `tb_lokasi` harus sudah tersedia.
+3. Buka tab **SQL**, tempel (Ctrl+V), lalu klik **Kirim/Go**. Alternatifnya, gunakan tab **Import** dan pilih file SQL tersebut.
+
+File ini membuat 9 tabel Monev terbaru dan mengisi 10 kriteria contoh jika master kosong. Jika tabel Monev versi lama sudah ada, gunakan migrasi PHP berikut karena `CREATE TABLE IF NOT EXISTS` tidak memperbarui struktur tabel lama.
+
 Jalankan pada database yang dikonfigurasi aplikasi:
 
 ```powershell

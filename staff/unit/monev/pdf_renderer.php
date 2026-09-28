@@ -30,7 +30,22 @@ function mn_pdf_person($names, $id) {
 }
 
 function mn_pdf_field($label, $value) {
-    return '<tr><th width="30%">'.mn_pdf_text($label).'</th><td width="70%">'.nl2br(mn_pdf_text($value === '' || $value === null ? '-' : $value)).'</td></tr>';
+    return '<tr nobr="true"><th width="30%">'.mn_pdf_text($label).'</th><td width="70%">'.nl2br(mn_pdf_text($value === '' || $value === null ? '-' : $value)).'</td></tr>';
+}
+
+function mn_pdf_checklist_caption($bundleNumber, $bundle, $number, $detail) {
+    return 'Bukti checklist butir '.$number
+        ."\nBundle Ke-".$bundleNumber.' - '.$bundle['nama_lokasi']
+        ."\nLokasi/Bukti: ".$detail['lokasi_id_perangkat']
+        .(trim((string)$detail['catatan_bukti'])!=='' ? ' / '.$detail['catatan_bukti'] : '')
+        ."\nHasil: ".$detail['hasil']
+        ."\nKriteria Inspeksi: ".$detail['kategori_snapshot'].' - '.$detail['deskripsi_snapshot'];
+}
+
+function mn_pdf_repair_caption($finding) {
+    return 'Bukti perbaikan '.$finding['no_temuan']
+        ."\nButir checklist: ".$finding['deskripsi_snapshot']
+        ."\nLokasi/ID: ".$finding['lokasi_id_perangkat'];
 }
 
 function mn_pdf_photo_path($fileName) {
@@ -70,6 +85,13 @@ function mn_pdf_render_photo_appendix(TCPDF $pdf, array $photos) {
         $size = getimagesize($photo['path']);
         if (!$size || !$size[0] || !$size[1]) continue;
         $captionHeight = max(6, $pdf->getStringHeight($width, $photo['label']));
+        // Very long notes may occupy several pages: let text flow, then place
+        // the image below its actual endpoint without negative dimensions.
+        if ($captionHeight > $bottom - $top - 40) {
+            if ($pdf->GetY() > $top + 0.1) $newPage();
+            $pdf->MultiCell($width, 0, $photo['label'], 0, 'L', false, 1);
+            $captionHeight = 0;
+        }
         // Fit the entire caption/photo block on a fresh page, preserving aspect ratio.
         $scale = min(70 / $size[0], ($bottom - $top - $captionHeight - 7) / $size[1]);
         $imageWidth = $size[0] * $scale;
@@ -77,7 +99,7 @@ function mn_pdf_render_photo_appendix(TCPDF $pdf, array $photos) {
         $blockHeight = $captionHeight + 2 + $imageHeight + 5;
         if ($pdf->GetY() + $blockHeight > $bottom) $newPage();
         $y = $pdf->GetY();
-        $pdf->MultiCell($width, $captionHeight, $photo['label'], 0, 'L', false, 1, $margins['left'], $y);
+        if ($captionHeight > 0) $pdf->MultiCell($width, $captionHeight, $photo['label'], 0, 'L', false, 1, $margins['left'], $y);
         $imageY = $y + $captionHeight + 2;
         $ext = strtoupper(image_type_to_extension($size[2], false));
         $pdf->Image($photo['path'], $margins['left'], $imageY, $imageWidth, $imageHeight, $ext, '', '', false, 150, '', false, false, 1);
@@ -180,6 +202,11 @@ function mn_build_inspection_pdf(array $report) {
     }
 
     foreach ($report['bundles'] as $bundleIndex=>$bundle) {
+        if ($bundleIndex > 0) {
+            $pdf->writeHTML($html, true, false, true, false, '');
+            $pdf->AddPage();
+            $html=mn_pdf_styles();
+        }
         $details=mn_visible_bundle_details($bundle); $coverage=$bundle;
         $counts=array_fill_keys(['S','TS','TA','BV'],0);
         foreach ($details as $detail) if (isset($counts[$detail['hasil']])) $counts[$detail['hasil']]++;
@@ -196,7 +223,7 @@ function mn_build_inspection_pdf(array $report) {
         $proof = trim((string)$d['lokasi_id_perangkat']);
         if (trim((string)$d['catatan_bukti']) !== '') $proof .= ($proof !== '' ? "\n" : '').trim((string)$d['catatan_bukti']);
         if (!empty($d['path_foto_bukti'])) $proof .= ($proof !== '' ? "\n" : '').'Foto bukti: '.mn_pdf_photo_label($d['path_foto_bukti']);
-        $html .= '<tr>
+        $html .= '<tr nobr="true">
             <td width="7%" class="center">'.($i + 1).'</td>
             <td width="43%"><strong>'.mn_pdf_text($d['kategori_snapshot']).'</strong><br>'.nl2br(mn_pdf_text($d['deskripsi_snapshot'])).'</td>
             <td width="12%" class="center"><strong>'.mn_pdf_text($d['hasil']).'</strong></td>
@@ -237,7 +264,7 @@ function mn_build_inspection_pdf(array $report) {
     } else {
         foreach ($findings as $t) {
             $html .= '<table cellpadding="3">
-                <tr><th width="24%">No. Temuan</th><td width="76%">'.mn_pdf_text($t['no_temuan']).'</td></tr>
+                <thead><tr><th width="30%">No. Temuan</th><td width="70%">'.mn_pdf_text($t['no_temuan']).'</td></tr></thead>
                 '.mn_pdf_field('Waktu ditemukan', mn_pdf_date($t['waktu_ditemukan'], true)).'
                 '.mn_pdf_field('Butir checklist', $t['deskripsi_snapshot']).'
                 '.mn_pdf_field('Unit/Area', $t['nama_lokasi'] ?? '').'
@@ -254,7 +281,7 @@ function mn_build_inspection_pdf(array $report) {
                 '.mn_pdf_field('Hasil pemeriksaan ulang', $t['hasil_pemeriksaan_ulang']).'
                 '.mn_pdf_field('Status perbaikan', $t['status_temuan']).'
                 '.mn_pdf_field('No. laporan insiden/tiket', $t['no_laporan_insiden']).'
-            </table><br>';
+            </table><div style="font-size:8pt; line-height:2;">&#160;</div>';
         }
     }
 
@@ -283,13 +310,15 @@ function mn_build_inspection_pdf(array $report) {
     $pdf->writeHTML($html, true, false, true, false, '');
 
     $photos = [];
-    foreach ($details as $i => $d) {
-        $path = mn_pdf_photo_path($d['path_foto_bukti'] ?? '');
-        if ($path) $photos[] = ['label' => 'Bukti checklist butir '.($i + 1), 'path' => $path];
+    foreach ($report['bundles'] as $bundleIndex=>$bundle) {
+        foreach (mn_visible_bundle_details($bundle) as $i=>$d) {
+            $path = mn_pdf_photo_path($d['path_foto_bukti'] ?? '');
+            if ($path) $photos[] = ['label' => mn_pdf_checklist_caption($bundleIndex+1,$bundle,$i+1,$d), 'path' => $path];
+        }
     }
     foreach ($findings as $t) {
         $path = mn_pdf_photo_path($t['path_bukti_perbaikan'] ?? '');
-        if ($path) $photos[] = ['label' => 'Bukti perbaikan '.$t['no_temuan'], 'path' => $path];
+        if ($path) $photos[] = ['label' => mn_pdf_repair_caption($t), 'path' => $path];
     }
     mn_pdf_render_photo_appendix($pdf, $photos);
 

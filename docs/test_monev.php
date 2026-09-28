@@ -223,6 +223,14 @@ try {
     check(count($report['active_signatures'])===2 && $report['bundles'][0]['signature']['bundle_id']!==$report['bundles'][1]['signature']['bundle_id'],'PDF separates global and partial signatures');
     $pdf=mn_build_inspection_pdf($report);
     check(substr($pdf,0,4)==='%PDF' && strlen($pdf)>5000 && strpos($pdf,'/Subtype /Image')!==false,'two-bundle signed PDF renders');
+    preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s',$pdf,$streams);
+    $bundlePages=[];
+    foreach ($streams[1] as $streamIndex=>$stream) {
+        $decoded=@gzuncompress($stream);
+        if ($decoded===false) $decoded=$stream;
+        foreach ([1,2] as $n) if (strpos($decoded,mb_convert_encoding('Bundle '.$n.' -','UTF-16BE','UTF-8'))!==false) $bundlePages[$n]=$streamIndex;
+    }
+    check(isset($bundlePages[1],$bundlePages[2]) && $bundlePages[1]!==$bundlePages[2],'bundle headings render in different PDF page streams');
     $units=[1=>'IT',2=>'Unit Kedua'];
     ob_start();
     foreach ($report['bundles'] as $bundle) mn_render_bundle($bundle,$bundle['details'],$units,false,false,$report['header']);

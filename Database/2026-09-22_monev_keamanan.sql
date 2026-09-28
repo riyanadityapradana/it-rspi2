@@ -1,4 +1,12 @@
 -- Monev Keamanan Fisik dan Kerahasiaan Data. Jalankan pada database aplikasi.
+-- INSTALASI BARU VIA PHPMYADMIN:
+-- 1. Pilih database IT-RSPI yang digunakan config/koneksi.php (bukan sik9).
+-- 2. Buka tab SQL, salin seluruh isi file ini, lalu klik Kirim/Go.
+-- Prasyarat: tb_user dan tb_lokasi sudah tersedia dari aplikasi IT-RSPI.
+-- Membuat 9 tabel Monev, termasuk bundle, nomor harian, dan tanda tangan.
+-- Master 10 kriteria contoh hanya diisi jika tabel master masih kosong.
+-- CREATE IF NOT EXISTS tidak memperbarui struktur tabel Monev versi lama.
+-- Untuk upgrade tabel lama, gunakan Database/migrate_monev.php.
 CREATE TABLE IF NOT EXISTS inspeksi_nomor_harian (
  tanggal DATE PRIMARY KEY, urutan SMALLINT UNSIGNED NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

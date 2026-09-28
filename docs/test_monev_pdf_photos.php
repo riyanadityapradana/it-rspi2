@@ -38,7 +38,16 @@ try {
         imagefill($image,0,0,imagecolorallocate($image,220,235,245));
         imagepng($image,$file);
         imagedestroy($image);
-        $photos[] = ['path'=>$file, 'label'=>'Bukti checklist butir '.($i+1).($i===2 ? ' '.str_repeat('Keterangan foto panjang untuk pengujian. ',20) : '')];
+        $caption=mn_pdf_checklist_caption(2,['nama_lokasi'=>'Farmasi Ralan'],$i+1,[
+            'lokasi_id_perangkat'=>'Farmasi - PC 01','catatan_bukti'=>$i===2 ? str_repeat('Keterangan foto panjang. ',20) : 'Foto uji',
+            'hasil'=>'S','kategori_snapshot'=>'Komputer','deskripsi_snapshot'=>'Layar terkunci saat ditinggalkan.'
+        ]);
+        photo_check(strpos($caption,'Bundle Ke-2 - Farmasi Ralan')!==false && strpos($caption,'Lokasi/Bukti: Farmasi - PC 01')!==false && strpos($caption,'Hasil: S')!==false && strpos($caption,'Kriteria Inspeksi: Komputer')!==false,'Checklist photo carries bundle and criterion context');
+        if ($i===5) {
+            $caption=mn_pdf_repair_caption(['no_temuan'=>'MNV-26-289','deskripsi_snapshot'=>'Layar terkunci.','lokasi_id_perangkat'=>'Farmasi - PC 02']);
+            photo_check($caption==="Bukti perbaikan MNV-26-289\nButir checklist: Layar terkunci.\nLokasi/ID: Farmasi - PC 02",'Repair caption places criterion and location below title');
+        }
+        $photos[] = ['path'=>$file, 'label'=>$caption];
     }
     $pdf = new MnPhotoLayoutTestPdf('P','mm','A4',true,'UTF-8',false);
     $pdf->setPrintHeader(false);
@@ -60,8 +69,24 @@ try {
             photo_check($caption['top'] >= $previous['y']+$previous['h']+4.9, 'Next caption starts below previous photo');
         }
     }
+    // A note taller than a page must flow without truncation or negative image size.
+    $long=$photos[0]; $long['label'].="\n".str_repeat("Catatan panjang harus tetap tercetak.\n",100);
+    mn_pdf_render_photo_appendix($pdf,[$long]);
+    $last=end($pdf->photos);
+    photo_check($last['w']>0 && $last['h']>0 && $last['y']+$last['h']<=$pdf->getPageHeight()-14,'Multi-page caption keeps image dimensions positive and inside page');
     $bytes = $pdf->Output('', 'S');
     photo_check(substr($bytes,0,4)==='%PDF' && strpos($bytes,'/Subtype /Image')!==false, 'Real PDF contains images');
+    $rowsPdf=new MnInspectionPdf('P','mm','A4',true,'UTF-8',false);
+    $rowsPdf->setPrintHeader(false);
+    $rowsPdf->SetMargins(12,12,12);
+    $rowsPdf->SetAutoPageBreak(true,14);
+    $rowsPdf->SetFont('dejavusans','',8.7);
+    $rowsPdf->AddPage(); $rowsPdf->SetY(263);
+    $rowsPdf->writeHTML(mn_pdf_styles().'<table cellpadding="3">'.mn_pdf_field('Kondisi dan risiko',str_repeat("Catatan baris uji\n",8)).'</table>');
+    photo_check($rowsPdf->getNumPages()===2 && $rowsPdf->GetY()<75,'Finding row moves intact to next page when remaining space is insufficient');
+    $rowsPdf->writeHTML(mn_pdf_styles().'<table cellpadding="3">'.mn_pdf_field('Tindakan',str_repeat("Catatan sangat panjang\n",160)).'</table>');
+    photo_check($rowsPdf->getNumPages()>3,'Oversized finding row can continue across pages');
+    $rowsPdf->Output('','S');
     echo "MONEV_PDF_PHOTOS_OK ($checks checks)\n";
 } finally {
     foreach ($files as $file) if (is_file($file)) unlink($file);
