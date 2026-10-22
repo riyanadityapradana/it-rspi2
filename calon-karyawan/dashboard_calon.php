@@ -21,11 +21,11 @@ $nama 	= $admin['nama_lengkap'];
     <title>Dashboard Calon Karyawan | IT-RSPI</title>
     <link rel="icon" href="../assets/img/icon.png">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <link rel="stylesheet" href="../assets/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="../assets/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="../assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-    <link rel="stylesheet" href="../assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -100,15 +100,15 @@ $nama 	= $admin['nama_lengkap'];
     </div>
   </div>
 </div>
-<script src="../assets/plugins/jquery/jquery.min.js"></script>
-<script src="../assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/dist/plugins/jquery/jquery.min.js"></script>
+<script src="../assets/dist/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/dist/js/adminlte.min.js"></script>
-<script src="../assets/plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="../assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="../assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-<script src="../assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="../assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-<script src="../assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+<script src="../assets/dist/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="../assets/dist/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="../assets/dist/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="../assets/dist/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="../assets/dist/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="../assets/dist/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $('#example1').DataTable({

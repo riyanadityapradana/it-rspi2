@@ -1,5 +1,10 @@
 <?php 
 $unit = isset($_GET['unit']) ? $_GET['unit'] : '';
+if ($unit === 'portal_tiket') {
+  define('PORTAL_TIKET_INTERNAL', true);
+  require_once __DIR__ . '/unit/portal-tiket/page.php';
+  return;
+}
 if ($unit === 'monev') {
   require_once __DIR__ . '/unit/monev/page.php';
   return;

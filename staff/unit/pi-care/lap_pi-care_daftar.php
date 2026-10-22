@@ -261,8 +261,8 @@ $min = $hari > 0 ? min($jumlahPasien) : 0;
     </div>
 
     <!-- Chart.js -->
-    <link rel="stylesheet" href="../../../assets/plugins/chart.js/Chart.min.css">
-    <script src="../../../assets/plugins/chart.js/Chart.min.js"></script>
+    <link rel="stylesheet" href="../../../assets/dist/plugins/chart.js/Chart.min.css">
+    <script src="../../../assets/dist/plugins/chart.js/Chart.min.js"></script>
     <script>
         // Data dari PHP
         var labels = <?php echo json_encode($labels); ?>;

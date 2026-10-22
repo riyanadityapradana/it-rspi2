@@ -16,7 +16,7 @@ const selectors = [0,1].map(() => ({dataset: {employeeSearch: '/it-rspi2/staff/u
 const searchConfigs = [];
 const root = {querySelectorAll(selector) { return selector === '.mn-form' ? [form] : selector === '[data-employee-search]' ? selectors : []; }};
 let requested, redirected;
-vm.runInNewContext(fs.readFileSync(require.resolve('../staff/unit/monev/monev.js'), 'utf8'), {
+vm.runInNewContext(fs.readFileSync(require.resolve('../assets/dist/js/monev.js'), 'utf8'), {
     document: {
         querySelector() { return root; },
         getElementById(id) { return id === 'mn-message' ? message : null; }

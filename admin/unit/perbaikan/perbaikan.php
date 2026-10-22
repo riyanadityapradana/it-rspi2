@@ -247,7 +247,7 @@ $n      = 1;
                                                   <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Foto Bukti Struk</p>
                                                   <?php if (!empty($detailRow['bukti_struk'])): ?>
                                                   <div style="background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; text-align: center;">
-                                                       <img src="/it-rspi2/staff/unit/perbaikan/bukti_struk/<?= htmlspecialchars($detailRow['bukti_struk']) ?>" alt="Bukti Struk" style="max-width: 100%; max-height: 200px; border-radius: 4px;" onerror="this.src='/images/placeholder.png'; this.onerror=null;">
+                                                       <img src="/it-rspi2/staff/unit/perbaikan/bukti_struk/<?= htmlspecialchars($detailRow['bukti_struk']) ?>" alt="Bukti Struk" style="max-width: 100%; max-height: 200px; border-radius: 4px;" onerror="this.src='../assets/dist/img/default-150x150.png'; this.onerror=null;">
                                                   </div>
                                                   <?php else: ?>
                                                   <div style="background: #f5f5f5; border: 1px dashed #ccc; border-radius: 6px; padding: 20px; text-align: center; color: #999;">

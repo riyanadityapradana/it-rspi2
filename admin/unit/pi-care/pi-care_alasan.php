@@ -76,7 +76,7 @@ foreach ($data as $val) {
 <html>
 <head>
     <title>Data Alasan Pembatalan <?= ucfirst($nama_bulan_id) ?></title>
-    <script src="../assets/plugins/chart.js/Chart.min.js"></script>
+    <script src="../assets/dist/plugins/chart.js/Chart.min.js"></script>
     <style>
         .table-bordered th, .table-bordered td { border: 1px solid #dee2e6; }
         .table th, .table td { vertical-align: middle; }

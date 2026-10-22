@@ -15,7 +15,7 @@ for (const id of ['mn-add-bundle','mn-cancel-bundle','mn-local','mn-local-status
 elements['mn-local'].checked = false;
 const windowHandlers = {};
 const root = {dataset: {user: '1'}, querySelectorAll() { return []; }};
-vm.runInNewContext(fs.readFileSync(require.resolve('../staff/unit/monev/monev.js'), 'utf8'), {
+vm.runInNewContext(fs.readFileSync(require.resolve('../assets/dist/js/monev.js'), 'utf8'), {
     document: {querySelector() { return root; }, getElementById(id) { return elements[id] || null; }},
     window: {addEventListener(event, fn) { windowHandlers[event] = fn; }, jQuery() { return {trigger() {}}; }}
 });

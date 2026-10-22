@@ -250,7 +250,7 @@ foreach ($data as $val) {
     </div>
 
     <!-- Chart.js -->
-    <script src="../../../assets/plugins/chart.js/Chart.min.js"></script>
+    <script src="../../../assets/dist/plugins/chart.js/Chart.min.js"></script>
     <script>
         // Data dari PHP
         var labels = <?php echo json_encode($labels); ?>;

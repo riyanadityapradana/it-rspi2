@@ -138,7 +138,7 @@ foreach ($minggu as $i => $range) {
         .modal-content { background: #fff; padding: 24px; border-radius: 8px; min-width: 400px; max-width: 90vw; max-height: 90vh; overflow: auto; position: relative; }
         .modal-close { position: absolute; right: 12px; top: 8px; font-size: 20px; color: #888; cursor: pointer; }
     </style>
-    <script src="../assets/plugins/chart.js/Chart.min.js"></script>
+    <script src="../assets/dist/plugins/chart.js/Chart.min.js"></script>
 </head>
 <body>
 <div class="top-bar">

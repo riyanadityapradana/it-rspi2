@@ -9,7 +9,7 @@ $mutasi_id = intval($_GET['id']);
 $query = mysqli_query($config, "SELECT m.*, b.nama_barang, b.jenis_barang, l1.nama_lokasi AS lokasi_asal_nama, l2.nama_lokasi AS lokasi_tujuan_nama, u.nama_lengkap as nama_staff FROM tb_mutasi_barang m LEFT JOIN tb_barang b ON m.barang_id = b.barang_id LEFT JOIN tb_lokasi l1 ON m.lokasi_asal = l1.lokasi_id LEFT JOIN tb_lokasi l2 ON m.lokasi_tujuan = l2.lokasi_id LEFT JOIN tb_user u ON m.id_user = u.id_user WHERE m.mutasi_id = '$mutasi_id'");
 $data = mysqli_fetch_assoc($query);
 ?>
-<link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../assets/dist/css/bootstrap.min.css">
 <section class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">

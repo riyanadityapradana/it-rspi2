@@ -17,7 +17,7 @@ $now_datetime = date('Y-m-d\TH:i');
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Scan Barang | IT-RSPI</title>
   <link rel="icon" href="../assets/img/icon.png">
-  <link rel="stylesheet" href="../assets/plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="../assets/dist/plugins/fontawesome-free/css/all.min.css">
   <style>
     * { box-sizing: border-box; }
     body {
@@ -285,7 +285,7 @@ $now_datetime = date('Y-m-d\TH:i');
   </main>
 </div>
 
-<script src="html5-qrcode.min.js"></script>
+<script src="../assets/dist/js/html5-qrcode.min.js"></script>
 <script>
 (function() {
   var selectedAction = '';

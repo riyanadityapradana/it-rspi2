@@ -28,7 +28,7 @@ function mn_signature_pad($label) {
     echo '<details class="mn-signature" data-signature-pad><summary>Tanda Tangan Langsung (opsional)</summary><p><small>'.mn_e($label).' dapat menandatangani langsung di layar perangkat bila sedang mendampingi inspeksi.</small></p><canvas width="520" height="180" aria-label="Area tanda tangan langsung"></canvas><input type="hidden" name="signature_data"><p><button type="button" class="btn btn-outline-secondary btn-sm" data-signature-clear>Hapus tanda tangan</button></p></details>';
 }
 ?>
-<link rel="stylesheet" href="<?= mn_e($mnEndpoint) ?>/monev.css">
+<link rel="stylesheet" href="<?= mn_e($mnBase) ?>/assets/dist/css/monev.css">
 <section class="content mn" data-user="<?= (int)$mnUser['id_user'] ?>">
 <div class="mn-heading"><div><h1>Monev Keamanan Fisik dan Kerahasiaan Data</h1><p>Inspeksi Keamanan IT · Checklist, tindak lanjut, dan pengesahan</p></div><a class="btn btn-outline-secondary" href="<?= mn_e($mnUrl) ?>">Daftar inspeksi</a></div>
 <div id="mn-message" role="alert" tabindex="-1" hidden></div>
@@ -186,4 +186,4 @@ function mn_signature_pad($label) {
     echo '<div class="alert alert-danger">'.mn_e($e instanceof DomainException?$e->getMessage():'Modul tidak dapat dimuat. Periksa migrasi dan koneksi database.').'</div>';
 } ?>
 </section>
-<script src="<?= mn_e($mnEndpoint) ?>/monev.js?v=<?= filemtime(__DIR__.'/monev.js') ?>" defer></script>
+<script src="<?= mn_e($mnBase) ?>/assets/dist/js/monev.js?v=<?= filemtime(__DIR__.'/../../../assets/dist/js/monev.js') ?>" defer></script>

@@ -24,15 +24,15 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
 	<!-- Ionicons -->
 	<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="../assets/plugins/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="../assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="../assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-    <link rel="stylesheet" href="../assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
     <!-- Tempusdominus Bootstrap 4 -->
-    <link rel="stylesheet" href="../assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
-    <link rel="stylesheet" href="../assets/plugins/select2/css/select2.min.css">
-    <link rel="stylesheet" href="../assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
-    <link rel="stylesheet" href="../assets/plugins/toastr/toastr.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+    <link rel="stylesheet" href="../assets/dist/plugins/toastr/toastr.css">
     <link rel="stylesheet" href="../assets/dist/css/adminlte.min.css">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -72,8 +72,9 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                     <?php require __DIR__ . '/../staff/unit/monev/menu.php'; ?>
+                    <?php require __DIR__ . '/../staff/unit/portal-tiket/menu.php'; ?>
                     <li class="nav-item menu-open">
-                        <a href="dashboard_admin.php?unit=beranda" class="nav-link active">
+                        <a href="dashboard_admin.php?unit=beranda" class="nav-link<?= ($unit ?? '') === 'portal_tiket' ? '' : ' active' ?>">
                             <i class="nav-icon fas fa-tachometer-alt" style="color: green;"></i>
                             <p>Dashboard</p>
                         </a>
@@ -157,29 +158,29 @@ if (isset($_GET['unit'])){ $unit = $_GET['unit']; }
     toastr.success("<?= addslashes($_GET['msg']) ?>", "Sukses", {positionClass: "toast-top-right"});
   </script>
 <?php endif; ?>
-<script src="../assets/plugins/jquery/jquery.min.js"></script>
+<script src="../assets/dist/plugins/jquery/jquery.min.js"></script>
 <!-- jQuery UI 1.11.4 -->
-<script src="../assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="../assets/dist/plugins/jquery-ui/jquery-ui.min.js"></script>
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
 <script>
   $.widget.bridge('uibutton', $.ui.button)
 </script>
-<script src="../assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/dist/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- Select2 -->
-<script src="../assets/plugins/select2/js/select2.full.min.js"></script>
+<script src="../assets/dist/plugins/select2/js/select2.full.min.js"></script>
 <!-- Bootstrap4 Duallistbox -->
-<script src="../assets/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+<script src="../assets/dist/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
 <!-- InputMask -->
-<script src="../assets/plugins/moment/moment.min.js"></script>
-<script src="../assets/plugins/inputmask/jquery.inputmask.min.js"></script>
+<script src="../assets/dist/plugins/moment/moment.min.js"></script>
+<script src="../assets/dist/plugins/inputmask/jquery.inputmask.min.js"></script>
 
-<script src="../assets/plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="../assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="../assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-<script src="../assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="../assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-<script src="../assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-<script src="../assets/plugins/toastr/toastr.min.js"></script>
+<script src="../assets/dist/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="../assets/dist/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="../assets/dist/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="../assets/dist/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="../assets/dist/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="../assets/dist/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+<script src="../assets/dist/plugins/toastr/toastr.min.js"></script>
 <script src="../assets/dist/js/adminlte.min.js"></script>
 
 <script>

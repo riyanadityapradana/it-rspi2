@@ -71,7 +71,7 @@ Nomor laporan insiden/tiket tersedia sebagai referensi. Checkout ini tidak memil
 ```powershell
 C:\xampp\php\php.exe docs/test_monev.php
 C:\xampp\php\php.exe docs/test_monev_http.php
-node --check staff/unit/monev/monev.js
+node --check assets/dist/js/monev.js
 node docs/test_monev_frontend.cjs
 node docs/test_monev_bundle_frontend.cjs
 ```

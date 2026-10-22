@@ -1,4 +1,9 @@
 <?php
+if (($_GET['unit'] ?? '') === 'portal_tiket') {
+  define('PORTAL_TIKET_INTERNAL', true);
+  require_once __DIR__ . '/../staff/unit/portal-tiket/page.php';
+  return;
+}
 if (($_GET['unit'] ?? '') === 'monev') {
   require_once __DIR__ . '/../staff/unit/monev/page.php';
   return;
