@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/access_helpers.php';
+pt_public_require(true);
 require_once __DIR__.'/uat_helpers.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store'); header('Referrer-Policy: no-referrer'); header('X-Content-Type-Options: nosniff');

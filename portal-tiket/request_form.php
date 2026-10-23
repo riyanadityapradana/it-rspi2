@@ -1,5 +1,7 @@
 <?php
 if (!isset($ptRequestType) || !in_array($ptRequestType, ['Change Request', 'Fitur Baru'], true)) { http_response_code(404); exit; }
+require_once __DIR__ . '/access_helpers.php';
+pt_public_require();
 require_once __DIR__ . '/request_helpers.php';
 require_once __DIR__ . '/layout.php';
 $definition = pt_request_definition($ptRequestType);

@@ -132,8 +132,9 @@ try {
 
     // Form/controller sebenarnya melalui HTTP; stub transport di-load router, bukan input pengguna.
     file_put_contents($tmp . '/router.php', '<?php require __DIR__."/stub.php"; return false;');
+    putenv('PORTAL_SECURITY_PATH=' . $tmp . '/security');
     $base = tg_start($tmp . '/router.php', dirname($project)) . '/it-rspi2/portal-tiket/';
-    $cookie = '';
+    $cookie = cr_public_access_cookie($base, $tmp . '/security');
     $request = function ($url, $fields = null) use (&$cookie) {
         $ch = curl_init($url);
         curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER=>true,CURLOPT_HEADER=>true,CURLOPT_COOKIE=>$cookie,CURLOPT_TIMEOUT=>8]);

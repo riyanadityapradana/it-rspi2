@@ -9,11 +9,12 @@ function itrspi_login_no_cache()
     header('Pragma: no-cache');
 }
 
-function itrspi_login_security_db()
+function itrspi_login_security_db($storage = null)
 {
-    static $db;
-    if ($db === null) {
-        $db = new PDO('sqlite:' . __DIR__ . '/../storage/login-security/attempts.sqlite');
+    static $databases = [];
+    $storage = $storage ?? __DIR__ . '/../storage/login-security/attempts.sqlite';
+    if (!isset($databases[$storage])) {
+        $db = new PDO('sqlite:' . $storage);
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $db->exec('PRAGMA busy_timeout = 5000');
         $db->exec('CREATE TABLE IF NOT EXISTS login_attempts (
@@ -21,8 +22,9 @@ function itrspi_login_security_db()
             blocked_until INTEGER NOT NULL,
             lease TEXT NOT NULL
         )');
+        $databases[$storage] = $db;
     }
-    return $db;
+    return $databases[$storage];
 }
 
 function itrspi_login_ip_key()
@@ -31,20 +33,20 @@ function itrspi_login_ip_key()
     return hash('sha256', isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown');
 }
 
-function itrspi_login_wait()
+function itrspi_login_wait($storage = null)
 {
-    $stmt = itrspi_login_security_db()->prepare('SELECT blocked_until FROM login_attempts WHERE ip_hash = ?');
+    $stmt = itrspi_login_security_db($storage)->prepare('SELECT blocked_until FROM login_attempts WHERE ip_hash = ?');
     $stmt->execute([itrspi_login_ip_key()]);
     return max(0, (int) $stmt->fetchColumn() - time());
 }
 
-function itrspi_login_reserve_attempt()
+function itrspi_login_reserve_attempt($storage = null)
 {
-    $db = itrspi_login_security_db();
+    $db = itrspi_login_security_db($storage);
     // Reservasi atomik mencegah dua sesi/IP yang sama lolos secara bersamaan.
     $db->exec('BEGIN IMMEDIATE');
     try {
-        $remaining = itrspi_login_wait();
+        $remaining = itrspi_login_wait($storage);
         if ($remaining > 0) {
             $db->exec('ROLLBACK');
             return ['wait' => $remaining, 'lease' => null];
@@ -64,10 +66,10 @@ function itrspi_login_reserve_attempt()
     }
 }
 
-function itrspi_login_clear_attempt($lease)
+function itrspi_login_clear_attempt($lease, $storage = null)
 {
     // Jangan hapus reservasi baru jika pemeriksaan sebelumnya berjalan lama.
-    $stmt = itrspi_login_security_db()->prepare('DELETE FROM login_attempts WHERE ip_hash = ? AND lease = ?');
+    $stmt = itrspi_login_security_db($storage)->prepare('DELETE FROM login_attempts WHERE ip_hash = ? AND lease = ?');
     $stmt->execute([itrspi_login_ip_key(), $lease]);
 }
 
@@ -79,13 +81,12 @@ function itrspi_login_csrf_token()
     return $_SESSION['itrspi_login_csrf'];
 }
 
-function itrspi_login_create_captcha()
+function itrspi_login_create_captcha($sessionKey = 'itrspi_login_captchas')
 {
     if (!extension_loaded('gd')) {
         throw new RuntimeException('Ekstensi GD diperlukan untuk CAPTCHA login.');
     }
-    $challenges = isset($_SESSION['itrspi_login_captchas']) && is_array($_SESSION['itrspi_login_captchas'])
-        ? $_SESSION['itrspi_login_captchas'] : [];
+    $challenges = isset($_SESSION[$sessionKey]) && is_array($_SESSION[$sessionKey]) ? $_SESSION[$sessionKey] : [];
     foreach ($challenges as $key => $challenge) {
         if ($challenge['expires'] <= time()) {
             unset($challenges[$key]);
@@ -102,15 +103,15 @@ function itrspi_login_create_captcha()
     }
     $id = bin2hex(random_bytes(16));
     $challenges[$id] = ['code' => $code, 'expires' => time() + ITRSPI_CAPTCHA_TTL];
-    $_SESSION['itrspi_login_captchas'] = $challenges;
+    $_SESSION[$sessionKey] = $challenges;
     return $id;
 }
 
-function itrspi_login_check_captcha($id, $answer)
+function itrspi_login_check_captcha($id, $answer, $sessionKey = 'itrspi_login_captchas')
 {
-    $challenge = isset($_SESSION['itrspi_login_captchas'][$id]) ? $_SESSION['itrspi_login_captchas'][$id] : null;
+    $challenge = isset($_SESSION[$sessionKey][$id]) ? $_SESSION[$sessionKey][$id] : null;
     // Sekali pakai, termasuk bila jawaban atau kredensial salah.
-    unset($_SESSION['itrspi_login_captchas'][$id]);
+    unset($_SESSION[$sessionKey][$id]);
     return $challenge !== null && $challenge['expires'] > time()
         && strlen($answer) === 5 && hash_equals($challenge['code'], strtoupper($answer));
 }
@@ -135,4 +136,33 @@ function itrspi_login_reject($message, $failedLease = null)
     $_SESSION['itrspi_login_error'] = $message;
     header('Location: form_login.php', true, 303);
     exit;
+}
+
+function itrspi_captcha_render($code)
+{
+    $image = imagecreatetruecolor(220, 70);
+    $background = imagecolorallocate($image, 238, 248, 255);
+    imagefill($image, 0, 0, $background);
+    for ($i = 0; $i < 12; $i++) {
+        $noise = imagecolorallocate($image, random_int(140, 200), random_int(180, 220), random_int(210, 245));
+        imageline($image, random_int(0, 219), random_int(0, 69), random_int(0, 219), random_int(0, 69), $noise);
+    }
+    // Perbesar karakter GD lalu putar tiap karakter; tidak bergantung font eksternal.
+    for ($i = 0; $i < 5; $i++) {
+        $glyph = imagecreatetruecolor(28, 42);
+        imagefill($glyph, 0, 0, $background);
+        $small = imagecreatetruecolor(9, 15);
+        imagefill($small, 0, 0, $background);
+        $ink = imagecolorallocate($small, random_int(25, 50), random_int(65, 100), random_int(120, 165));
+        imagestring($small, 5, 0, 0, $code[$i], $ink);
+        imagecopyresized($glyph, $small, 0, 0, 0, 0, 28, 42, 9, 15);
+        $rotated = imagerotate($glyph, random_int(-15, 15), $background);
+        imagecopy($image, $rotated, 13 + $i * 40, random_int(8, 14), 0, 0, imagesx($rotated), imagesy($rotated));
+        imagedestroy($small);
+        imagedestroy($glyph);
+        imagedestroy($rotated);
+    }
+    header('Content-Type: image/png');
+    imagepng($image);
+    imagedestroy($image);
 }

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/access_helpers.php';
+pt_public_require();
 require_once __DIR__ . '/layout.php';
 require_once __DIR__ . '/uat_helpers.php';
 require_once __DIR__ . '/signature_helpers.php';

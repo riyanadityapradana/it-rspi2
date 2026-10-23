@@ -102,12 +102,15 @@ try {
         $preview=__DIR__.'/../../.codex_tmp/uat-confirm-preview';if(!is_dir($preview.'/sessions'))mkdir($preview.'/sessions',0700,true);
         $cookieFile=$preview.'/cookies-'.bin2hex(random_bytes(5)).'.txt';
         $env=getenv();$env['PORTAL_DB_HOST']='localhost';$env['PORTAL_DB_DATABASE']=$schema;$env['PORTAL_PEGAWAI_HOST']='localhost';$env['PORTAL_PEGAWAI_DATABASE']=$schema;$env['PORTAL_PUBLIC_URL']='';
+        $env['PORTAL_SECURITY_PATH']=$preview.'/security';
         $server=proc_open([PHP_BINARY,'-d','session.save_path='.$preview.'/sessions','-d','sys_temp_dir='.$preview,'-d','upload_tmp_dir='.$preview,'-S','127.0.0.1:8106','-t',dirname(__DIR__,2)],[0=>['pipe','r'],1=>['file',$preview.'/http.log','a'],2=>['file',$preview.'/http.log','a']],$pipes,null,$env);
         if(!is_resource($server))throw new RuntimeException('HTTP server unavailable');fclose($pipes[0]);
         for($i=0;$i<40;$i++){if($sock=@fsockopen('127.0.0.1',8106,$errno,$errstr,.1)){fclose($sock);break;}usleep(50000);}
-        $request=function($target,$method='GET',$input=null,$headers=[])use($cookieFile){
+        $publicCookie=cr_public_access_cookie('http://127.0.0.1:8106/it-rspi2/portal-tiket/', $preview.'/security');
+        $request=function($target,$method='GET',$input=null,$headers=[])use($cookieFile,$publicCookie){
             $ch=curl_init('http://127.0.0.1:8106/it-rspi2/portal-tiket/'.$target);
             curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_HEADER=>true,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_COOKIEJAR=>$cookieFile,CURLOPT_COOKIEFILE=>$cookieFile,CURLOPT_TIMEOUT=>10,CURLOPT_CUSTOMREQUEST=>$method]);
+            curl_setopt($ch,CURLOPT_COOKIE,$publicCookie);
             if($method==='HEAD')curl_setopt($ch,CURLOPT_NOBODY,true);
             if($input!==null)curl_setopt($ch,CURLOPT_POSTFIELDS,http_build_query($input));
             if($headers)curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);

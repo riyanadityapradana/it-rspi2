@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/access_helpers.php';
+pt_public_require();
 require_once __DIR__ . '/layout.php';
 portal_header('Portal Tiket IT', 'Pilih layanan untuk kebutuhan perubahan sistem, fitur baru, atau pelacakan tiket IT.', true);
 ?>

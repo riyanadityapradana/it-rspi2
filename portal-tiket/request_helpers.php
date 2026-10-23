@@ -1,21 +1,11 @@
 <?php
 require_once __DIR__ . '/../config/portal_tiket.php';
 require_once __DIR__ . '/notification_helpers.php';
+require_once __DIR__ . '/access_helpers.php';
 
 function pt_session()
 {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        ini_set('session.use_strict_mode', '1');
-        session_name('portal_tiket');
-        session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax',
-            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-            'path' => rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/') . '/']);
-        session_start();
-    }
-    if (empty($_SESSION['pt_csrf'])) $_SESSION['pt_csrf'] = bin2hex(random_bytes(32));
-    header('Cache-Control: no-store');
-    header('X-Content-Type-Options: nosniff');
-    header('Referrer-Policy: same-origin');
+    pt_public_session();
 }
 
 function pt_query($db, $sql, $params = [])

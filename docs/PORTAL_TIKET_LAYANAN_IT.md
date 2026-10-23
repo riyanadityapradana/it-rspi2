@@ -7,6 +7,9 @@ SQL instalasi: [`../Database/2026-10-20_portal_tiket_layanan_it.sql`](../Databas
 
 Portal untuk pegawai di luar unit IT diakses langsung melalui URL
 `/it-rspi2/portal-tiket/`, tanpa membuka halaman login terlebih dahulu.
+Pengunjung terlebih dahulu melewati halaman **Verifikasi Akses Portal** (CAPTCHA)
+sebelum menu atau data portal ditampilkan. Setelah benar, sesi akses berlaku
+hingga **2 jam tanpa aktivitas** dan diperbarui pada permintaan halaman/AJAX portal.
 Contoh lokal: `http://localhost/it-rspi2/portal-tiket/`. Untuk komputer lain,
 gunakan hostname/IP server aplikasi sebagai pengganti `localhost`.
 Tombol Portal Tiket IT pada halaman login utama telah dihapus sesuai permintaan.
@@ -19,10 +22,11 @@ Form Change Request dan Form Fitur Baru sudah mendukung penyimpanan ke database.
 Daftar Tiket sudah menampilkan pencarian, pagination, status, dan rincian
 pengajuan berikut hasil analisis/penyelesaian yang tersedia.
 
-Seluruh halaman dapat dibuka tanpa login atau middleware auth. Landing tidak
-membutuhkan database; daftar dan detail membaca database portal. Kedua formulir permintaan
-memakai sesi publik terpisah untuk CSRF dan reservasi nomor, bukan
-sesi autentikasi. Daftar/detail tidak membuka sesi publik maupun autentikasi.
+Seluruh halaman tetap dapat dibuka tanpa akun/login, dengan penjagaan CAPTCHA
+melalui sesi publik. Landing dan CAPTCHA tidak membutuhkan database bisnis;
+daftar dan detail membaca database portal setelah CAPTCHA lolos. Kedua formulir
+permintaan memakai sesi publik yang sama untuk CSRF dan reservasi nomor,
+terpisah dari sesi autentikasi Staff/Kepala Ruangan.
 Logo mengarah ke portal; daftar menyediakan tombol kembali ke portal, sedangkan
 detail menyediakan kembali ke daftar dengan filter/halaman yang sama.
 Tata letak tiga kolom berlaku mulai lebar 640px (tablet/desktop), dan satu kolom
@@ -34,6 +38,63 @@ Landing terbaru juga diverifikasi di Chrome pada ukuran 1440x900, 768x1024,
 smartphone, tanpa overflow horizontal. Menu dapat diakses lewat keyboard.
 Navigasi daftar/detail tanpa cookie sesi juga diverifikasi; tidak ada redirect
 ke autentikasi.
+
+## CAPTCHA sebelum akses portal publik
+
+`portal-tiket/access_helpers.php` menjaganya sebelum query/render halaman landing,
+Change Request, Fitur Baru, daftar/detail, UAT, dan verifikasi QR. Akses langsung
+ke URL tersebut juga harus lolos. Halaman perantara berada di
+`verifikasi-akses.php`, dengan gambar lokal `captcha.php`, tombol **Ganti kode**,
+input 5 karakter, dan tombol **Verifikasi & Masuk Portal**. Tema mengikuti portal
+dan mendukung layar ponsel. Tidak memerlukan layanan CAPTCHA eksternal.
+
+Pembuatan/pemeriksaan kode, renderer PNG, serta pembatasan IP memakai fungsi
+yang sama dengan login IT (`main_login/login_security.php`). PNG 220×70 memakai
+huruf/angka acak tanpa karakter ambigu, noise dan rotasi karakter. Kode berlaku
+5 menit, tidak peka huruf besar/kecil, sekali pakai termasuk jawaban salah;
+maksimal 5 challenge dipertahankan agar beberapa tab dapat digunakan.
+POST wajib CSRF. Jawaban salah/kedaluwarsa memulai jeda 30 detik per IP,
+ditampilkan sebagai hitung mundur/tombol terkunci, dan diperiksa ulang server
+meskipun POST langsung, ganti browser/sesi, atau memalsukan X-Forwarded-For.
+
+Cookie publik `portal_tiket` memakai HttpOnly, SameSite=Lax, path portal, Secure
+pada HTTPS, strict mode, serta rotasi ID setelah CAPTCHA benar. Direktori sesi
+khusus dan `session.gc_maxlifetime=7200` mencegah pembersihan sesi login lain
+memotong masa akses publik. Status dan waktu aktivitas hanya disimpan server.
+Setelah 7200 detik tanpa permintaan portal, CAPTCHA diwajibkan lagi. Halaman
+CAPTCHA dan gambar/aset tidak memperpanjang akses yang sudah diberikan.
+Sesi dan SQLite limiter berada di `storage/portal-security/`, dilindungi
+`.htaccess` dan diabaikan Git. Direktori dibuat otomatis bila belum tersedia.
+`PORTAL_SECURITY_PATH` dapat menunjuk direktori writable lain, terutama untuk
+fixture terisolasi; default sudah sesuai XAMPP. Sesi/limiter publik terpisah
+dari login IT sehingga kesalahan CAPTCHA portal tidak mengunci login Staff.
+GD, PDO SQLite, dan direktori writable diperlukan; gangguan pengamanan menolak
+akses dengan pesan umum, tanpa melewatkan CAPTCHA atau membuka data portal.
+
+Tujuan kembali diizinkan hanya untuk rute portal. Form ID, filter/pagination,
+atau token magic link ditahan di sesi server dengan penanda acak `lanjut`,
+bukan menerima URL redirect bebas dari browser. Token UAT tidak diteruskan
+sebagai query di halaman perantara; token/expiry UAT tetap diperiksa setelah
+CAPTCHA benar. POST yang sesinya kedaluwarsa **tidak dieksekusi atau diputar ulang**;
+pengguna kembali ke halaman GET tujuan setelah verifikasi dan perlu mengisi
+ulang data yang belum tersimpan. Draft pengajuan dalam sesi tetap dipertahankan.
+
+Endpoint AJAX `pegawai.php` dan `uat-pegawai.php` mengembalikan HTTP 403 JSON
+`captcha_required` serta URL perantara jika sesi akses habis. Kedua dropdown
+mengikuti URL tersebut untuk verifikasi ulang, kemudian kembali ke form/UAT
+semula. Setelah lolos, validasi CSRF, pegawai aktif, token UAT, dan transaksi
+bisnis tetap berlaku. Back/forward cache memuat ulang halaman untuk memeriksa
+sesi server. Dashboard IT dan akses PDF internal tetap menggunakan login IT.
+
+Verifikasi: `C:\xampp\php\php.exe docs/test_portal_access.php` menjalankan **71**
+pemeriksaan HTTP/sesi/database terisolasi, termasuk URL langsung, AJAX/POST,
+cookie/rotasi ID, timeout 2 jam, TTL/sekali pakai/antar sesi, limiter, kondisi
+penyimpanan rusak, dan tujuan redirect. **20** pemeriksaan Chrome memverifikasi
+refresh, countdown, navigasi menu, UAT/AJAX yang kedaluwarsa, serta responsivitas
+1440/390/320 piksel. Regresi login IT (28), daftar/detail publik (70), konfirmasi
+UAT (115), Telegram (150), antrean internal (26), analisis (54), dan PDF (196)
+tetap lolos. Suite HTTP bisnis melewati CAPTCHA produksi dengan membaca jawaban
+dari sesi fixture lokal; tidak ada flag/parameter bypass pada aplikasi.
 
 ## Daftar dan Detail Tiket publik
 

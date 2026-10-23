@@ -10,6 +10,14 @@ Input formulir memakai `$loginUsername` dan `$loginPassword`, terpisah dari `$us
 
 ## Kebutuhan lingkungan
 
+Portal publik menggunakan pembuat/pemeriksa kode, renderer PNG, dan algoritma
+pembatasan yang sama dari `login_security.php`. Parameter opsional mengizinkan
+namespace challenge dan file SQLite terpisah; pemanggilan login lama tetap
+memakai nilai bawaan. Cookie/sesi publik serta SQLite portal berada di
+`storage/portal-security/`, sehingga kegagalan CAPTCHA portal tidak mengunci
+login IT. Rincian alur dan pengujiannya ada di
+[dokumentasi portal](PORTAL_TIKET_LAYANAN_IT.md#captcha-sebelum-akses-portal-publik).
+
 - PHP dengan ekstensi **GD** dan **PDO SQLite**.
 - Izin tulis akun Apache pada `storage/login-security/`.
 - Apache harus menerapkan `.htaccess` pada direktori tersebut (`Require all denied`). Pada server lain, blokir akses HTTP ke direktori ini melalui konfigurasi server.

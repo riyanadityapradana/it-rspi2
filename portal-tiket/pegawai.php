@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/access_helpers.php';
+pt_public_require(true);
 require_once __DIR__ . '/request_helpers.php';
 pt_session();
 header('Content-Type: application/json; charset=utf-8');

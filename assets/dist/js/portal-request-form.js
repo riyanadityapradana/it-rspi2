@@ -31,6 +31,9 @@
         request.then(success);
         request.fail(xhr => {
           if (xhr.statusText === 'abort') return;
+          if (xhr.responseJSON?.captcha_required && xhr.responseJSON.captcha_url) {
+            window.location.assign(xhr.responseJSON.captcha_url); return;
+          }
           employeeStatus.textContent = xhr.responseJSON?.message || 'Pencarian pegawai gagal. Silakan coba lagi.';
           failure(xhr);
         });

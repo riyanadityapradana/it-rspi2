@@ -9,7 +9,8 @@ $db->query("CREATE DATABASE `$schema` CHARACTER SET utf8mb4"); $db->select_db($s
 $checks = 0; $keep = false; $server = null;
 function pp_check($value,$label) { global $checks; if (!$value) throw new RuntimeException($label); ++$checks; }
 function pp_http($path,$method='GET') {
-    $body = file_get_contents('http://127.0.0.1:8101/it-rspi2/portal-tiket/'.$path,false,stream_context_create(['http'=>['method'=>$method,'ignore_errors'=>true,'follow_location'=>0,'timeout'=>5]]));
+    global $publicCookie;
+    $body = file_get_contents('http://127.0.0.1:8101/it-rspi2/portal-tiket/'.$path,false,stream_context_create(['http'=>['method'=>$method,'header'=>'Cookie: '.$publicCookie,"ignore_errors"=>true,'follow_location'=>0,'timeout'=>5]]));
     $headers=$http_response_header ?? []; preg_match('/\s(\d{3})\s/',$headers[0] ?? '',$m);
     return ['status'=>(int)($m[1] ?? 0),'body'=>$body,'headers'=>implode("\n",$headers)];
 }
@@ -65,12 +66,14 @@ try {
     if(in_array('--http',$argv,true)) {
         $preview=__DIR__.'/../../.codex_tmp/portal-public-preview';if(!is_dir($preview))mkdir($preview,0700,true);
         $env=getenv();$env['PORTAL_DB_HOST']='localhost';$env['PORTAL_DB_DATABASE']=$schema;
+        $env['PORTAL_SECURITY_PATH']=$preview.'/security';
         $server=proc_open([PHP_BINARY,'-S','127.0.0.1:8101','-t',dirname(__DIR__,2)],[0=>['pipe','r'],1=>['file',$preview.'/http.log','a'],2=>['file',$preview.'/http.log','a']],$pipes,null,$env);
         if(!is_resource($server))throw new RuntimeException('HTTP server unavailable');fclose($pipes[0]);
         for($i=0;$i<40;$i++){if($sock=@fsockopen('127.0.0.1',8101,$errno,$errstr,.1)){fclose($sock);break;}usleep(50000);}
         $httpStart=$checks;
+        $publicCookie=cr_public_access_cookie('http://127.0.0.1:8101/it-rspi2/portal-tiket/', $preview.'/security');
         $listing=pp_http('daftar-tiket.php');pp_check($listing['status']===200,'Guest list HTTP200');
-        pp_check(!str_contains($listing['headers'],'Set-Cookie:')&&!str_contains($listing['headers'],'Location:'),'No session/auth redirect');
+        pp_check(!str_contains($listing['headers'],'Location:'),'Verified public session has no auth redirect');
         pp_check(stripos($listing['headers'],'Cache-Control: no-store')!==false,'Current status not cached');
         pp_check(str_contains($listing['body'],'Nama Perubahan/Fitur')&&str_contains($listing['body'],'detail-tiket.php?'),'Required columns and detail link');
         pp_check(!str_contains($listing['body'],'PRIVATE_'),'No private data in HTML list');

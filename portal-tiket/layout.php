@@ -43,6 +43,7 @@ function portal_footer()
     </main>
     <footer class="portal-footer">Portal publik IT RSPI &middot; Dapat diakses tanpa login.</footer>
   </div>
+  <script src="../assets/dist/js/portal-session.js" defer></script>
 </body>
 </html>
 <?php

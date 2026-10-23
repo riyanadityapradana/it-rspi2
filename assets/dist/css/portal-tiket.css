@@ -172,4 +172,15 @@ body:has(.portal-uat-dialog[open]) { overflow: hidden; }
   main { padding-top: 30px; }
   .portal-menu, .portal-panel { padding: 22px; }
 }
+.portal-access-panel { max-width: 620px; margin: 0 auto; }
+.portal-access-icon { display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 54px; margin-bottom: 14px; border-radius: 16px; background: rgba(255, 204, 91, .15); color: #ffcc5b; font-size: 1.65rem; }
+.portal-access-panel h2 { margin-top: 0; }
+.portal-access-challenge { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin: 24px 0 20px; }
+.portal-access-challenge .captcha-image { width: 220px; max-width: 100%; height: auto; border-radius: 10px; }
+.portal-access-panel .portal-field input { box-sizing: border-box; width: 100%; font: inherit; }
+#portal-captcha-answer { letter-spacing: .3em; text-transform: uppercase; font-size: 1.25rem; }
+.portal-access-help { font-size: .9rem; opacity: .85; margin-top: 8px; }
+.portal-access-submit { width: 100%; justify-content: center; gap: 8px; }
+.portal-access-panel button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.portal-access-panel button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .portal-menu { transition: none; } .portal-menu:hover { transform: none; } }

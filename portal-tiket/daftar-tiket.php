@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/access_helpers.php';
+pt_public_require();
 require_once __DIR__ . '/layout.php';
 require_once __DIR__ . '/public_helpers.php';
 ptp_readonly();
