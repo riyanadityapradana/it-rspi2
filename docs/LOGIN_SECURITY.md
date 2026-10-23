@@ -6,6 +6,8 @@ CAPTCHA, username/password, atau role yang tidak valid memicu jeda **30 detik** 
 
 Login berhasil merotasi ID sesi, membersihkan CAPTCHA dan reservasi percobaan, menyimpan identitas pengguna yang sama seperti sebelumnya, lalu mengarahkan **Staff** ke dashboard staff dan **Kepala Ruangan** ke dashboard admin. Role lain ditolak sebelum sesi pengguna dibuat. Verifikasi password tetap memakai `password_verify`; spasi pada password dipertahankan. Query username memakai parameter terikat. Pesan username/password salah dibuat sama untuk menghindari pengungkapan keberadaan akun.
 
+Input formulir memakai `$loginUsername` dan `$loginPassword`, terpisah dari `$username`/`$password` koneksi database. Pengujian meniru variabel koneksi tersebut agar pemuatan `koneksi.php` tidak menimpa kredensial formulir.
+
 ## Kebutuhan lingkungan
 
 - PHP dengan ekstensi **GD** dan **PDO SQLite**.

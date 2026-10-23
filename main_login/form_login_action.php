@@ -8,10 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$username = itrspi_login_post_string('username');
+$loginUsername = itrspi_login_post_string('username');
 // Pertahankan password apa adanya, termasuk spasi yang merupakan bagian password.
-$password = isset($_POST['password']) && is_string($_POST['password']) ? $_POST['password'] : '';
-$_SESSION['itrspi_login_old_username'] = substr($username, 0, 255);
+$loginPassword = isset($_POST['password']) && is_string($_POST['password']) ? $_POST['password'] : '';
+$_SESSION['itrspi_login_old_username'] = substr($loginUsername, 0, 255);
 
 $csrf = itrspi_login_post_string('csrf_token');
 if (empty($_SESSION['itrspi_login_csrf']) || !hash_equals($_SESSION['itrspi_login_csrf'], $csrf)) {
@@ -34,22 +34,23 @@ if (!itrspi_login_check_captcha(itrspi_login_post_string('captcha_id'), itrspi_l
     itrspi_login_reject('Kode CAPTCHA salah atau kedaluwarsa. Silakan tunggu 30 detik sebelum mencoba lagi.', $attempt['lease']);
 }
 
-if ($username === '' || $password === '') {
+if ($loginUsername === '' || $loginPassword === '') {
     itrspi_login_reject('Username dan password wajib diisi. Silakan tunggu 30 detik sebelum mencoba lagi.', $attempt['lease']);
 }
-if (strlen($username) > 255 || strlen($password) > 4096) {
+if (strlen($loginUsername) > 255 || strlen($loginPassword) > 4096) {
     itrspi_login_reject('Username atau password tidak valid. Silakan tunggu 30 detik sebelum mencoba lagi.', $attempt['lease']);
 }
 
 // Hubungkan ke database aplikasi hanya setelah pembatasan dan CAPTCHA lolos.
+// koneksi.php mendefinisikan $username/$password milik database; input login memakai nama terpisah.
 require_once __DIR__ . '/../config/koneksi.php';
 $stmt = $config->prepare('SELECT * FROM tb_user WHERE username = ? LIMIT 1');
-$stmt->bind_param('s', $username);
+$stmt->bind_param('s', $loginUsername);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-if (!$user || !password_verify($password, $user['password'])) {
+if (!$user || !password_verify($loginPassword, $user['password'])) {
     itrspi_login_reject('Username atau password tidak valid. Silakan tunggu 30 detik sebelum mencoba lagi.', $attempt['lease']);
 }
 

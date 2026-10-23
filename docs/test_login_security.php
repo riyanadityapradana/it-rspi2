@@ -17,6 +17,9 @@ foreach (['form_login.php', 'form_login_action.php', 'login_security.php', 'capt
 file_put_contents($root . '/config/koneksi.php', <<<'PHP'
 <?php
 file_put_contents(__DIR__ . '/../db-opened', '1', FILE_APPEND);
+// Meniru koneksi.php asli yang mendefinisikan kredensial database pada scope pemanggil.
+$username = 'fixture-db-user';
+$password = 'fixture-db-password';
 class FixtureResult {
     private $user;
     public function __construct($user) { $this->user = $user; }
@@ -187,6 +190,8 @@ try {
     request($newCookie, '/main_login/form_login_action.php', $b);
     check(databaseOpens() === 1 && (int) store()->query('SELECT blocked_until FROM login_attempts')->fetchColumn() > time(),
         'setelah 30 detik boleh mencoba; CAPTCHA huruf kecil diterima dan password salah memulai jeda baru');
+    check(file_get_contents($root . '/bound-username') === 'demo',
+        'username formulir tidak tertimpa variabel username koneksi database');
     $session = json_decode(request($newCookie, '/fixture.php')['body'], true);
     check(empty($session['id_user']), 'password salah tidak membuat sesi login');
     resetWait();
